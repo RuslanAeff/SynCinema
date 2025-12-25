@@ -122,13 +122,27 @@ export const useAudioTracks = () => {
             }
         };
         // Create a blob and trigger download
-        const blob = new Blob([JSON.stringify(fullExport, null, 2)], { type: 'application/json' });
+        const jsonString = JSON.stringify(fullExport, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
+
+        // Create and configure download link
+        const fileName = `SynCinema_Project_${new Date().toISOString().slice(0, 10)}.sync`;
         const a = document.createElement('a');
         a.href = url;
-        a.download = `syncinema_project_${new Date().toISOString().slice(0, 10)}.sync`;
+        a.download = fileName;
+        a.style.display = 'none';
+
+        // Append to body, click, and remove (better browser compatibility)
+        document.body.appendChild(a);
         a.click();
-        URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        // Cleanup
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+        // Show confirmation
+        alert(`Project saved as: ${fileName}`);
     }, [getStoredPrefs, masterVolume]);
 
     const importProject = useCallback((file: File) => {
