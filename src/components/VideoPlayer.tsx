@@ -439,6 +439,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     return (
         <div
             ref={containerRef}
+            data-tour="video-area"
             className={`flex-1 flex flex-col relative bg-black transition-all ${isFullscreen && !showControls ? 'cursor-none' : ''}`}
             onMouseMove={handleUserActivity}
             onClick={handleUserActivity}
@@ -556,7 +557,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                             onClick={togglePlay}
                             className="p-3 bg-white text-black rounded-full hover:bg-gray-200 transition-transform hover:scale-105 active:scale-95"
                         >
-                            {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className="ml-1" />}
+                            {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" />}
                         </button>
                         <button
                             onClick={() => { if (videoRef.current) { videoRef.current.currentTime += 10; setCurrentTime(videoRef.current.currentTime); } }}

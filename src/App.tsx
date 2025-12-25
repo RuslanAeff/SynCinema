@@ -9,6 +9,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { VideoPlayer } from './components/VideoPlayer';
 import { WelcomeScreen } from './components/WelcomeScreen';
+import { OnboardingTour } from './components/OnboardingTour';
 import { useVideoPlayer } from './hooks/useVideoPlayer';
 import { useAudioTracks } from './hooks/useAudioTracks';
 import { useTheme } from './hooks/useTheme';
@@ -66,9 +67,28 @@ function App() {
     return !hasSeenWelcome;
   });
 
+  // Onboarding Tour State
+  const [showTour, setShowTour] = useState(false);
+
   const handleWelcomeComplete = useCallback(() => {
     setShowWelcome(false);
     sessionStorage.setItem('syncinema_welcome_seen', 'true');
+    // Check if user has completed the tour this session
+    const hasCompletedTour = sessionStorage.getItem('syncinema_tour_completed');
+    if (!hasCompletedTour) {
+      // Start tour after a short delay
+      setTimeout(() => setShowTour(true), 500);
+    }
+  }, []);
+
+  const handleTourComplete = useCallback(() => {
+    setShowTour(false);
+    sessionStorage.setItem('syncinema_tour_completed', 'true');
+  }, []);
+
+  const handleTourSkip = useCallback(() => {
+    setShowTour(false);
+    sessionStorage.setItem('syncinema_tour_completed', 'true');
   }, []);
 
   // Allow Enter key to dismiss welcome screen
@@ -138,6 +158,9 @@ function App() {
     >
       {/* Welcome Screen */}
       {showWelcome && <WelcomeScreen onComplete={handleWelcomeComplete} />}
+
+      {/* Onboarding Tour */}
+      {showTour && <OnboardingTour onComplete={handleTourComplete} onSkip={handleTourSkip} />}
 
       {/* Drop Overlay */}
       {isDragging && (

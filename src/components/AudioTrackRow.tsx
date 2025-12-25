@@ -171,7 +171,7 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
         </div>
 
         {/* Device Selection */}
-        <div className="space-y-1">
+        <div data-tour="device-select" className="space-y-1">
           <label className="text-xs font-medium text-gray-400 flex items-center gap-1"><MonitorSpeaker size={12} /> Output Device</label>
           <select
             value={track.deviceId}
@@ -188,7 +188,7 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
 
         {/* Controls Grid */}
         <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1">
+          <div data-tour="offset-control" className="space-y-1">
             <label className="text-xs font-medium text-gray-400 flex items-center gap-1"><Clock size={12} /> Start Offset (s)</label>
             <div className="flex items-center gap-1">
               <button className="w-6 h-8 flex items-center justify-center bg-gray-700 rounded hover:bg-gray-600" onClick={() => onUpdate(track.id, { offset: track.offset - 0.1 })}>-</button>
@@ -253,8 +253,9 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
 
           <input type="range" min="-5" max="5" step="0.05" value={track.offset} onChange={(e) => onUpdate(track.id, { offset: parseFloat(e.target.value) })} className="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-indigo-500" />
 
+
           {/* EQ Controls */}
-          <div className="mt-3 pt-2 border-t border-gray-700/30">
+          <div data-tour="eq-control" className="mt-3 pt-2 border-t border-gray-700/30">
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] font-semibold text-teal-400 uppercase tracking-wider">🎛️ 3-Band EQ</span>
               <span className="text-[9px] text-gray-600">Bass / Vokal / Treble</span>
