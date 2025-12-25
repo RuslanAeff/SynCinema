@@ -11,6 +11,7 @@ import { RotateCcw, AlertCircle, Film, Upload, Sun, Moon, Volume2, VolumeX, Chev
 import { Button } from './Button';
 import { AudioTrackRow } from './AudioTrackRow';
 import { Logo } from './Logo';
+import { InfoButton } from './HelpPanel';
 import { AudioTrack, AudioDevice } from '../types';
 
 interface SidebarProps {
@@ -45,6 +46,9 @@ interface SidebarProps {
     onSeekToMarker: (time: number) => void;
     videoDeviceId: string;
     onVideoDeviceChange: (deviceId: string) => void;
+    isHelpOpen: boolean;
+    onHelpOpen: () => void;
+    onHelpClose: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -78,7 +82,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
     onDeleteMarker,
     onSeekToMarker,
     videoDeviceId,
-    onVideoDeviceChange
+    onVideoDeviceChange,
+    isHelpOpen,
+    onHelpOpen,
+    onHelpClose
 }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const audioInputRef = useRef<HTMLInputElement>(null);
@@ -120,13 +127,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         <Logo size={48} className="drop-shadow-[0_0_15px_rgba(99,102,241,0.6)]" />
                         <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">SynCinema</h1>
                     </div>
-                    <button
-                        onClick={onThemeToggle}
-                        className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                        title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-                    >
-                        {theme === 'dark' ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-indigo-600" />}
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <InfoButton onClick={onHelpOpen} />
+                        <button
+                            onClick={onThemeToggle}
+                            className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                        >
+                            {theme === 'dark' ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-indigo-600" />}
+                        </button>
+                    </div>
                 </div>
                 <p className="text-xs font-bold tracking-wide text-gray-800 dark:text-gray-400 uppercase opacity-100">Multi-output synchronized player</p>
                 <div className="flex gap-2 mt-4">
@@ -403,6 +413,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <span className="text-[9px] text-gray-600">© 2025 • SynCinema v1.0</span>
                 </div>
             </div>
+
         </div>
     );
 };

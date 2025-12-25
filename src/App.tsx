@@ -10,6 +10,7 @@ import { Sidebar } from './components/Sidebar';
 import { VideoPlayer } from './components/VideoPlayer';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { OnboardingTour } from './components/OnboardingTour';
+import { HelpPanel } from './components/HelpPanel';
 import { useVideoPlayer } from './hooks/useVideoPlayer';
 import { useAudioTracks } from './hooks/useAudioTracks';
 import { useTheme } from './hooks/useTheme';
@@ -69,6 +70,9 @@ function App() {
 
   // Onboarding Tour State
   const [showTour, setShowTour] = useState(false);
+
+  // Help Panel State
+  const [showHelp, setShowHelp] = useState(false);
 
   const handleWelcomeComplete = useCallback(() => {
     setShowWelcome(false);
@@ -205,6 +209,9 @@ function App() {
         onSeekToMarker={handleSeek}
         videoDeviceId={videoDeviceId}
         onVideoDeviceChange={setVideoDeviceId}
+        isHelpOpen={showHelp}
+        onHelpOpen={() => setShowHelp(true)}
+        onHelpClose={() => setShowHelp(false)}
       />
 
       <VideoPlayer
@@ -222,6 +229,9 @@ function App() {
         subtitleCues={subtitleCues}
         subtitleOffset={subtitleOffset}
       />
+
+      {/* Help Panel - at App level to overlay everything */}
+      <HelpPanel isOpen={showHelp} onClose={() => setShowHelp(false)} />
     </div>
   );
 }
