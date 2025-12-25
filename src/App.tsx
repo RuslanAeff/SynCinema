@@ -59,16 +59,16 @@ function App() {
   // Theme
   const { theme, toggleTheme } = useTheme();
 
-  // Welcome Screen State
+  // Welcome Screen State (sessionStorage = shows once per browser session)
   const [showWelcome, setShowWelcome] = useState(() => {
-    // Check localStorage to see if user has seen welcome screen
-    const hasSeenWelcome = localStorage.getItem('syncinema_welcome_seen');
+    // Check sessionStorage to see if user has seen welcome screen this session
+    const hasSeenWelcome = sessionStorage.getItem('syncinema_welcome_seen');
     return !hasSeenWelcome;
   });
 
   const handleWelcomeComplete = useCallback(() => {
     setShowWelcome(false);
-    localStorage.setItem('syncinema_welcome_seen', 'true');
+    sessionStorage.setItem('syncinema_welcome_seen', 'true');
   }, []);
 
   // Allow Enter key to dismiss welcome screen
