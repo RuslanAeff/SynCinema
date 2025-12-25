@@ -78,22 +78,22 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onComplete }) => {
 
                 {/* Feature Cards */}
                 <div
-                    className={`grid grid-cols-2 gap-3 mb-10 transition-all duration-700 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                    className={`grid grid-cols-2 gap-4 mb-10 transition-all duration-700 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                         }`}
                 >
                     {features.map((feature, index) => (
                         <div
                             key={index}
-                            className="p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/10 hover:border-indigo-500/30 transition-all duration-300 group"
+                            className="p-5 rounded-xl bg-gray-800/60 border border-gray-700/50 backdrop-blur-sm hover:bg-gray-800/80 hover:border-indigo-500/50 transition-all duration-300 group shadow-lg"
                             style={{ transitionDelay: `${600 + index * 100}ms` }}
                         >
-                            <div className="flex flex-col items-center gap-2 text-center">
-                                <div className="p-2 rounded-lg bg-indigo-600/20 text-indigo-400 group-hover:bg-indigo-600/30 transition-colors">
+                            <div className="flex flex-col items-center gap-3 text-center">
+                                <div className="p-3 rounded-xl bg-indigo-600/30 text-indigo-300 group-hover:bg-indigo-600/50 group-hover:text-indigo-200 transition-colors shadow-inner">
                                     {feature.icon}
                                 </div>
                                 <div>
-                                    <h3 className="text-sm font-semibold text-white">{feature.title}</h3>
-                                    <p className="text-xs text-gray-500">{feature.desc}</p>
+                                    <h3 className="text-sm font-bold text-white mb-1">{feature.title}</h3>
+                                    <p className="text-xs text-gray-300 leading-relaxed">{feature.desc}</p>
                                 </div>
                             </div>
                         </div>
@@ -120,12 +120,12 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onComplete }) => {
                 className={`absolute bottom-6 left-1/2 -translate-x-1/2 text-center transition-all duration-700 delay-1000 ${isVisible ? 'opacity-100' : 'opacity-0'
                     }`}
             >
-                <p className="text-xs text-gray-500 mb-4">
-                    Press <kbd className="px-2 py-1 mx-1 bg-gray-800 rounded text-gray-400 font-mono text-[10px]">Enter</kbd> to continue
+                <p className="text-xs text-gray-400 mb-4">
+                    Press <kbd className="px-2 py-1 mx-1 bg-gray-700 border border-gray-600 rounded text-gray-300 font-mono text-[10px]">Enter</kbd> to continue
                 </p>
-                <div className="flex items-center justify-center gap-3 text-[11px] text-gray-600 tracking-wide">
+                <div className="flex items-center justify-center gap-3 text-[11px] text-gray-400 tracking-wide">
                     <span>Version 1.0.0</span>
-                    <span className="w-1 h-1 rounded-full bg-gray-600"></span>
+                    <span className="w-1 h-1 rounded-full bg-gray-500"></span>
                     <span>Created by Ruslan Aliyev</span>
                 </div>
             </div>
