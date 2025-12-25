@@ -1,0 +1,233 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #0d1117;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #4a5568;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #718096;
+  }
+
+  /* Light Mode Scrollbar */
+  .light ::-webkit-scrollbar-track {
+    background: #e5e7eb;
+  }
+
+  .light ::-webkit-scrollbar-thumb {
+    background: #9ca3af;
+  }
+
+  .light ::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
+  }
+}
+
+@layer utilities {
+  .cursor-none {
+    cursor: none;
+  }
+}
+
+/* Light Theme Overrides */
+.light {
+  --tw-bg-opacity: 1;
+}
+
+.light .bg-gray-950 {
+  background-color: #f9fafb;
+}
+
+.light .bg-gray-900 {
+  background-color: #f3f4f6;
+}
+
+.light .bg-gray-800,
+.light .bg-gray-800\/50,
+.light .bg-gray-800\/30 {
+  background-color: #e5e7eb;
+}
+
+.light .border-gray-800,
+.light .border-gray-700,
+.light .border-gray-700\/50 {
+  border-color: #d1d5db;
+}
+
+.light .text-gray-100 {
+  color: #1f2937;
+}
+
+.light .text-gray-400,
+.light .text-gray-500,
+.light .text-gray-600 {
+  color: #4b5563;
+}
+
+.light .text-white {
+  color: #111827;
+}
+
+.light .shadow-2xl {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+}
+
+/* Light Mode Button Overrides */
+.light .bg-gray-700 {
+  background-color: #d1d5db;
+}
+
+.light .bg-gray-700:hover,
+.light .hover\:bg-gray-600:hover {
+  background-color: #9ca3af;
+}
+
+.light .border-gray-600 {
+  border-color: #9ca3af;
+}
+
+/* Light Mode Input/Select Overrides */
+.light .bg-gray-900 input,
+.light .bg-gray-900 select,
+.light input.bg-gray-900,
+.light select.bg-gray-900 {
+  background-color: #ffffff;
+  border-color: #d1d5db;
+  color: #1f2937;
+}
+
+/* Light Mode Accent Colors */
+.light .text-indigo-400 {
+  color: #4f46e5;
+}
+
+.light .text-indigo-300 {
+  color: #6366f1;
+}
+
+.light .bg-indigo-500\/20 {
+  background-color: rgba(99, 102, 241, 0.15);
+}
+
+.light .bg-indigo-900\/30,
+.light .from-indigo-900\/30 {
+  background-color: rgba(99, 102, 241, 0.1);
+}
+
+.light .border-indigo-500\/30 {
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+/* Light Mode Focus Ring */
+.light .focus\:ring-offset-gray-900:focus {
+  --tw-ring-offset-color: #f3f4f6;
+}
+
+/* Light Mode Video Player Area */
+.light .bg-black {
+  background-color: #1f2937;
+}
+
+/* Light Mode Dashed Border */
+.light .border-dashed {
+  border-color: #9ca3af;
+}
+
+/* Light Mode Gradients */
+.light .bg-gradient-to-r.from-white {
+  --tw-gradient-from: #1f2937;
+}
+
+.light .to-gray-400 {
+  --tw-gradient-to: #4b5563;
+}
+
+/* Light Mode Hover States */
+.light .hover\:bg-gray-800:hover {
+  background-color: #d1d5db;
+}
+
+.light .hover\:text-white:hover {
+  color: #1f2937;
+}
+
+/* Light Mode Secondary Buttons (gray-700) */
+.light button.bg-gray-700,
+.light .bg-gray-700 {
+  background-color: #ffffff !important;
+  color: #374151 !important;
+  border: 1px solid #d1d5db !important;
+}
+
+.light button.bg-gray-700:hover,
+.light .bg-gray-700:hover {
+  background-color: #f3f4f6 !important;
+  color: #1f2937 !important;
+}
+
+/* Light Mode Text Override for Buttons */
+.light button .text-white,
+.light button.text-white {
+  color: #374151 !important;
+}
+
+/* Light Mode Select/Dropdown */
+.light select {
+  background-color: #ffffff !important;
+  color: #1f2937 !important;
+  border-color: #d1d5db !important;
+}
+
+/* Light Mode Input Fields */
+.light input[type="number"],
+.light input[type="text"],
+.light input[type="range"] {
+  background-color: #ffffff;
+}
+
+/* Light Mode Track Cards */
+.light .bg-gray-800\/50 {
+  background-color: #ffffff !important;
+  border-color: #e5e7eb !important;
+}
+
+/* Light Mode Designer Footer */
+.light .from-gray-900 {
+  --tw-gradient-from: #f3f4f6;
+}
+
+.light .to-gray-900\/80 {
+  --tw-gradient-to: rgba(243, 244, 246, 0.8);
+}
+
+.light .via-indigo-500\/30 {
+  --tw-gradient-via: rgba(99, 102, 241, 0.2);
+}
+
+.light .from-indigo-400 {
+  --tw-gradient-from: #4f46e5;
+}
+
+.light .via-purple-400 {
+  --tw-gradient-via: #7c3aed;
+}
+
+.light .to-pink-400 {
+  --tw-gradient-to: #db2777;
+}
+
+.light .border-gray-800\/50 {
+  border-color: rgba(209, 213, 219, 0.5);
+}

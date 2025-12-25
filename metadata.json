@@ -1,0 +1,7 @@
+{
+  "name": "SyncCinema - Multi-Output Video Player",
+  "description": "A specialized video player that allows synchronization of multiple external audio tracks with specific hardware output routing (e.g., speakers vs. headphones) and precise offset controls.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
