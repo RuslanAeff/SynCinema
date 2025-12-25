@@ -92,8 +92,8 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onComplete }) => {
                                     {feature.icon}
                                 </div>
                                 <div>
-                                    <h3 className="text-sm font-bold text-white">{feature.title}</h3>
-                                    <p className="text-[11px] text-gray-300 leading-snug mt-0.5">{feature.desc}</p>
+                                    <h3 className="text-sm font-bold" style={{ color: '#ffffff' }}>{feature.title}</h3>
+                                    <p className="text-[11px] leading-snug mt-0.5" style={{ color: '#d1d5db' }}>{feature.desc}</p>
                                 </div>
                             </div>
                         </div>
