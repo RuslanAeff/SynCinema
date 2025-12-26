@@ -50,6 +50,7 @@ interface SidebarProps {
     onHelpOpen: () => void;
     onHelpClose: () => void;
     onUrlLoaderOpen: () => void;
+    onAudioUrlLoad: (url: string, filename: string) => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -87,7 +88,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     isHelpOpen,
     onHelpOpen,
     onHelpClose,
-    onUrlLoaderOpen
+    onUrlLoaderOpen,
+    onAudioUrlLoad
 }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const audioInputRef = useRef<HTMLInputElement>(null);
@@ -98,6 +100,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     const [isMarkersCollapsed, setIsMarkersCollapsed] = useState(false);
     const [isAudioTracksCollapsed, setIsAudioTracksCollapsed] = useState(false);
     const [isMasterVolumeCollapsed, setIsMasterVolumeCollapsed] = useState(false);
+    const [showAudioUrlInput, setShowAudioUrlInput] = useState(false);
+    const [audioUrlInput, setAudioUrlInput] = useState('');
 
     const handleSubtitleLoad = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -338,12 +342,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             🎵 Audio Tracks
                             <span className="text-xs font-normal text-gray-500 dark:text-gray-500">({audioTracks.length})</span>
                         </h2>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5">
                             <span
                                 onClick={(e) => { e.stopPropagation(); audioInputRef.current?.click(); }}
-                                className="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-1 rounded transition-colors flex items-center gap-1 shadow-sm"
+                                className="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-1 rounded transition-colors flex items-center gap-1 shadow-sm cursor-pointer"
+                                title="Add from file"
                             >
-                                <Upload size={12} /> Add
+                                <Upload size={12} />
+                            </span>
+                            <span
+                                onClick={(e) => { e.stopPropagation(); setShowAudioUrlInput(!showAudioUrlInput); setIsAudioTracksCollapsed(false); }}
+                                className="text-xs bg-purple-600 hover:bg-purple-700 text-white px-2 py-1 rounded transition-colors flex items-center gap-1 shadow-sm cursor-pointer"
+                                title="Add from URL"
+                            >
+                                <Link size={12} />
                             </span>
                             <ChevronDown
                                 size={16}
@@ -357,6 +369,51 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <div
                         className={`transition-all duration-300 ease-in-out overflow-hidden ${isAudioTracksCollapsed ? 'max-h-0 opacity-0' : 'max-h-[2000px] opacity-100'}`}
                     >
+                        {/* Audio URL Input */}
+                        {showAudioUrlInput && (
+                            <div className="p-3 m-3 rounded-lg bg-gradient-to-r from-purple-900/30 to-pink-900/30 border border-purple-500/30">
+                                <div className="flex flex-col gap-2">
+                                    <label className="text-xs font-semibold text-purple-300 uppercase tracking-wider flex items-center gap-1">
+                                        <Link size={12} /> Audio URL
+                                    </label>
+                                    <input
+                                        type="url"
+                                        value={audioUrlInput}
+                                        onChange={(e) => setAudioUrlInput(e.target.value)}
+                                        placeholder="https://example.com/audio.mp3"
+                                        className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                    />
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => {
+                                                if (audioUrlInput.trim()) {
+                                                    // Extract filename from URL or use default
+                                                    const urlParts = audioUrlInput.split('/');
+                                                    const filename = urlParts[urlParts.length - 1]?.split('?')[0] || 'audio_track.mp3';
+                                                    onAudioUrlLoad(audioUrlInput, filename);
+                                                    setAudioUrlInput('');
+                                                    setShowAudioUrlInput(false);
+                                                }
+                                            }}
+                                            disabled={!audioUrlInput.trim()}
+                                            className="flex-1 py-2 px-3 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white text-xs font-medium rounded-lg transition-colors"
+                                        >
+                                            Add Audio Track
+                                        </button>
+                                        <button
+                                            onClick={() => { setShowAudioUrlInput(false); setAudioUrlInput(''); }}
+                                            className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs rounded-lg transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                    <p className="text-[10px] text-purple-400/70">
+                                        Supports: Dropbox, Google Drive (&lt;50MB), direct MP3/WAV links
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Master Volume - Collapsible */}
                         <div className="p-3 m-3 rounded-lg bg-gradient-to-r from-indigo-900/30 to-purple-900/30 border border-indigo-500/30 overflow-hidden">
                             <button
@@ -421,7 +478,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <div className="h-px flex-1 bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent"></div>
                 </div>
                 <div className="text-center mt-1">
-                    <span className="text-[9px] text-gray-600">© 2025 • SynCinema v1.0</span>
+                    <span className="text-[9px] text-gray-600">© 2025 • SynCinema v2.0</span>
                 </div>
             </div>
         </div>

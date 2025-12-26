@@ -5,9 +5,10 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { VideoPlayer } from './components/VideoPlayer';
+import { YouTubePlayer } from './components/YouTubePlayer';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { OnboardingTour } from './components/OnboardingTour';
 import { HelpPanel } from './components/HelpPanel';
@@ -80,6 +81,9 @@ function App() {
   // URL Loader Modal State
   const [showUrlLoader, setShowUrlLoader] = useState(false);
 
+  // YouTube Video State
+  const [youtubeVideoId, setYoutubeVideoId] = useState<string | null>(null);
+
   const handleWelcomeComplete = useCallback(() => {
     setShowWelcome(false);
     sessionStorage.setItem('syncinema_welcome_seen', 'true');
@@ -117,20 +121,37 @@ function App() {
 
   // Drag and Drop State
   const [isDragging, setIsDragging] = useState(false);
+  const dragCounter = useRef(0);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
-    setIsDragging(true);
+    // Only show drop overlay if files are being dragged (not UI elements like sliders)
+    if (e.dataTransfer.types.includes('Files')) {
+      setIsDragging(true);
+    }
+  }, []);
+
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    if (e.dataTransfer.types.includes('Files')) {
+      dragCounter.current++;
+      setIsDragging(true);
+    }
   }, []);
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
-    setIsDragging(false);
+    // Use counter to handle nested elements
+    dragCounter.current--;
+    if (dragCounter.current === 0) {
+      setIsDragging(false);
+    }
   }, []);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
+    dragCounter.current = 0; // Reset counter on drop
 
     const files = e.dataTransfer.files;
     if (!files.length) return;
@@ -162,6 +183,7 @@ function App() {
   return (
     <div
       className={`flex h-screen bg-gray-950 text-gray-100 font-sans relative transition-all ${isDragging ? 'ring-4 ring-inset ring-indigo-500' : ''}`}
+      onDragEnter={handleDragEnter}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -219,23 +241,36 @@ function App() {
         onHelpOpen={() => setShowHelp(true)}
         onHelpClose={() => setShowHelp(false)}
         onUrlLoaderOpen={() => setShowUrlLoader(true)}
+        onAudioUrlLoad={addAudioFromUrl}
       />
 
-      <VideoPlayer
-        videoFile={videoFile}
-        videoObjectUrl={videoObjectUrl}
-        isPlaying={isPlaying}
-        currentTime={currentTime}
-        duration={duration}
-        videoRef={videoRef}
-        togglePlay={togglePlay}
-        handleSeek={handleSeek}
-        setIsPlaying={setIsPlaying}
-        setCurrentTime={setCurrentTime}
-        setDuration={setDuration}
-        subtitleCues={subtitleCues}
-        subtitleOffset={subtitleOffset}
-      />
+      {/* Video Player - Show YouTube or regular player based on source */}
+      {youtubeVideoId ? (
+        <YouTubePlayer
+          videoId={youtubeVideoId}
+          isPlaying={isPlaying}
+          onPlayingChange={setIsPlaying}
+          onTimeUpdate={setCurrentTime}
+          onDurationChange={setDuration}
+          currentTime={currentTime}
+        />
+      ) : (
+        <VideoPlayer
+          videoFile={videoFile}
+          videoObjectUrl={videoObjectUrl}
+          isPlaying={isPlaying}
+          currentTime={currentTime}
+          duration={duration}
+          videoRef={videoRef}
+          togglePlay={togglePlay}
+          handleSeek={handleSeek}
+          setIsPlaying={setIsPlaying}
+          setCurrentTime={setCurrentTime}
+          setDuration={setDuration}
+          subtitleCues={subtitleCues}
+          subtitleOffset={subtitleOffset}
+        />
+      )}
 
       {/* Help Panel - at App level to overlay everything */}
       <HelpPanel isOpen={showHelp} onClose={() => setShowHelp(false)} />
@@ -245,7 +280,19 @@ function App() {
         isOpen={showUrlLoader}
         onClose={() => setShowUrlLoader(false)}
         onVideoUrlLoad={(url, filename) => {
-          loadVideoFromUrl(url, filename);
+          // Check if it's a YouTube URL (starts with youtube:)
+          if (url.startsWith('youtube:')) {
+            const videoId = url.replace('youtube:', '');
+            setYoutubeVideoId(videoId);
+            // Clear regular video if any
+            if (videoFile) {
+              loadVideoFromUrl('', '');
+            }
+          } else {
+            // Regular video URL
+            setYoutubeVideoId(null);
+            loadVideoFromUrl(url, filename);
+          }
           setShowUrlLoader(false);
         }}
         onAudioUrlLoad={addAudioFromUrl}

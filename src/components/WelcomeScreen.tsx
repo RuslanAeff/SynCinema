@@ -123,7 +123,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onComplete }) => {
                         Press <kbd className="px-2 py-0.5 mx-1 bg-gray-700 border border-gray-600 rounded text-gray-300 font-mono text-[10px]">Enter</kbd> to continue
                     </p>
                     <div className="flex items-center justify-center gap-3 text-[11px] text-gray-500 tracking-wide">
-                        <span>Version 1.0.0</span>
+                        <span>Version 2.0.0</span>
                         <span className="w-1 h-1 rounded-full bg-gray-500"></span>
                         <span>Created by Ruslan Aliyev</span>
                     </div>

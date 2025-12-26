@@ -188,19 +188,21 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     const handleUserActivity = useCallback(() => {
         setShowControls(true);
         if (controlsTimeoutRef.current) window.clearTimeout(controlsTimeoutRef.current);
-        if (isPlaying) {
-            controlsTimeoutRef.current = window.setTimeout(() => setShowControls(false), 5000);
+        // Auto-hide controls after 3 seconds in fullscreen, 5 seconds otherwise
+        if (isPlaying || isFullscreen) {
+            const timeout = isFullscreen ? 3000 : 5000;
+            controlsTimeoutRef.current = window.setTimeout(() => setShowControls(false), timeout);
         }
-    }, [isPlaying]);
+    }, [isPlaying, isFullscreen]);
 
     useEffect(() => {
-        if (isPlaying) handleUserActivity();
+        if (isPlaying || isFullscreen) handleUserActivity();
         else {
             setShowControls(true);
             if (controlsTimeoutRef.current) window.clearTimeout(controlsTimeoutRef.current);
         }
         return () => { if (controlsTimeoutRef.current) window.clearTimeout(controlsTimeoutRef.current); };
-    }, [isPlaying, handleUserActivity]);
+    }, [isPlaying, isFullscreen, handleUserActivity]);
 
     useEffect(() => {
         const handleFullscreenChange = () => {
@@ -440,7 +442,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         <div
             ref={containerRef}
             data-tour="video-area"
-            className={`flex-1 flex flex-col relative bg-black transition-all ${isFullscreen && !showControls ? 'cursor-none' : ''}`}
+            className={`flex-1 flex flex-col relative bg-gray-100 dark:bg-black transition-all ${isFullscreen && !showControls ? 'cursor-none' : ''}`}
             onMouseMove={handleUserActivity}
             onClick={handleUserActivity}
         >
@@ -483,8 +485,17 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 )}
             </div>
 
-            {/* Controls Bar */}
-            <div className={`h-24 bg-gray-900 border-t border-gray-800 p-4 flex flex-col justify-center gap-2 relative z-50 transition-all duration-500 ease-in-out ${isFullscreen && !showControls ? 'opacity-0 translate-y-full' : 'opacity-100 translate-y-0'}`}>
+            {/* Controls Bar - Overlay in fullscreen */}
+            <div
+                className={`
+                    h-24 bg-gray-900 border-t border-gray-800 p-4 flex flex-col justify-center gap-2 relative z-50 transition-all duration-500 ease-in-out
+                    ${isFullscreen
+                        ? `absolute bottom-0 left-0 right-0 ${!showControls ? 'opacity-0 translate-y-full pointer-events-none' : 'opacity-100 translate-y-0'}`
+                        : ''
+                    }
+                `}
+                onMouseEnter={handleUserActivity}
+            >
                 {/* Progress Bar with Preview */}
                 <div className="flex items-center gap-4">
                     <span className="text-xs font-mono text-gray-400 w-12 text-right">{formatTime(currentTime)}</span>

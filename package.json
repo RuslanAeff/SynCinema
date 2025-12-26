@@ -1,7 +1,7 @@
 {
   "name": "syncinema",
   "private": true,
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Professional multi-output synchronized video player with EQ, compressor, and subtitle support",
   "author": "Ruslan Aliyev",
   "license": "MIT",
@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
+    "@types/youtube": "^0.1.2",
     "@vercel/node": "^5.5.16",
     "@vitejs/plugin-react": "^5.0.0",
     "autoprefixer": "^10.4.18",
