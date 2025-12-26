@@ -544,8 +544,13 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
                     <span className="text-xs font-mono text-gray-400 w-12">{formatTime(duration)}</span>
                 </div>
-                <div className="flex items-center justify-between px-4">
-                    <div className="w-24"></div>
+                <div className="flex items-center justify-center px-4">
+                    {/* Left side buttons - hidden but takes space for centering */}
+                    <div className="flex-1 flex justify-start">
+                        {/* Empty space for balance */}
+                    </div>
+
+                    {/* Center controls - Play/Pause and Skip */}
                     <div className="flex items-center gap-6">
                         <button
                             onClick={() => { if (videoRef.current) { videoRef.current.currentTime -= 10; setCurrentTime(videoRef.current.currentTime); } }}
@@ -566,7 +571,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                             <RotateCcw size={20} className="-scale-x-100" /><span className="sr-only">+10s</span>
                         </button>
                     </div>
-                    <div className="flex items-center gap-4 w-auto">
+
+                    {/* Right side buttons - Volume, Fullscreen, Detach */}
+                    <div className="flex-1 flex items-center justify-end gap-4">
                         <div className="flex items-center gap-2 group relative">
                             <Volume2 size={20} className="text-gray-600 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
                             <input

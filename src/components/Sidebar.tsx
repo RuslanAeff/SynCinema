@@ -7,7 +7,7 @@
  */
 
 import React, { useRef, useState } from 'react';
-import { RotateCcw, AlertCircle, Film, Upload, Sun, Moon, Volume2, VolumeX, ChevronDown } from 'lucide-react';
+import { RotateCcw, AlertCircle, Film, Upload, Sun, Moon, Volume2, VolumeX, ChevronDown, Link } from 'lucide-react';
 import { Button } from './Button';
 import { AudioTrackRow } from './AudioTrackRow';
 import { Logo } from './Logo';
@@ -49,6 +49,7 @@ interface SidebarProps {
     isHelpOpen: boolean;
     onHelpOpen: () => void;
     onHelpClose: () => void;
+    onUrlLoaderOpen: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -85,7 +86,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     onVideoDeviceChange,
     isHelpOpen,
     onHelpOpen,
-    onHelpClose
+    onHelpClose,
+    onUrlLoaderOpen
 }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const audioInputRef = useRef<HTMLInputElement>(null);
@@ -161,13 +163,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     {videoFile ? (
                         <div className="flex items-center justify-between bg-gray-800 p-3 rounded-lg">
                             <span className="text-sm truncate max-w-[200px]">{videoFile.name}</span>
-                            <button onClick={() => fileInputRef.current?.click()} className="text-xs text-indigo-400 hover:text-indigo-300">Change</button>
+                            <div className="flex items-center gap-2">
+                                <button onClick={onUrlLoaderOpen} className="text-xs text-purple-400 hover:text-purple-300">URL</button>
+                                <button onClick={() => fileInputRef.current?.click()} className="text-xs text-indigo-400 hover:text-indigo-300">Change</button>
+                            </div>
                         </div>
                     ) : (
-                        <button onClick={() => fileInputRef.current?.click()} className="w-full py-8 flex flex-col items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors rounded-lg border-2 border-transparent hover:border-indigo-500/30">
-                            <Upload size={24} className="mb-2" />
-                            <span className="text-sm">Select Video File</span>
-                        </button>
+                        <div className="flex gap-2">
+                            <button onClick={() => fileInputRef.current?.click()} className="flex-1 py-6 flex flex-col items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors rounded-lg border-2 border-transparent hover:border-indigo-500/30">
+                                <Upload size={20} className="mb-1" />
+                                <span className="text-xs">Select File</span>
+                            </button>
+                            <button onClick={onUrlLoaderOpen} className="flex-1 py-6 flex flex-col items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors rounded-lg border-2 border-transparent hover:border-purple-500/30">
+                                <Link size={20} className="mb-1" />
+                                <span className="text-xs">Load URL</span>
+                            </button>
+                        </div>
                     )}
                     <input type="file" accept="video/*, .mkv" className="hidden" ref={fileInputRef} onChange={handleVideoChange} />
 
@@ -413,7 +424,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <span className="text-[9px] text-gray-600">© 2025 • SynCinema v1.0</span>
                 </div>
             </div>
-
         </div>
     );
 };

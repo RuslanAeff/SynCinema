@@ -11,6 +11,7 @@ import { VideoPlayer } from './components/VideoPlayer';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { OnboardingTour } from './components/OnboardingTour';
 import { HelpPanel } from './components/HelpPanel';
+import { UrlLoaderModal } from './components/UrlLoaderModal';
 import { useVideoPlayer } from './hooks/useVideoPlayer';
 import { useAudioTracks } from './hooks/useAudioTracks';
 import { useTheme } from './hooks/useTheme';
@@ -41,7 +42,8 @@ function App() {
     setVideoDeviceId,
     markers,
     addMarker,
-    deleteMarker
+    deleteMarker,
+    loadVideoFromUrl
   } = useVideoPlayer();
 
   const {
@@ -50,6 +52,7 @@ function App() {
     permissionsGranted,
     refreshDevices,
     addAudioTracks,
+    addAudioFromUrl,
     updateAudioTrack,
     deleteAudioTrack,
     exportProject,
@@ -73,6 +76,9 @@ function App() {
 
   // Help Panel State
   const [showHelp, setShowHelp] = useState(false);
+
+  // URL Loader Modal State
+  const [showUrlLoader, setShowUrlLoader] = useState(false);
 
   const handleWelcomeComplete = useCallback(() => {
     setShowWelcome(false);
@@ -212,6 +218,7 @@ function App() {
         isHelpOpen={showHelp}
         onHelpOpen={() => setShowHelp(true)}
         onHelpClose={() => setShowHelp(false)}
+        onUrlLoaderOpen={() => setShowUrlLoader(true)}
       />
 
       <VideoPlayer
@@ -232,6 +239,17 @@ function App() {
 
       {/* Help Panel - at App level to overlay everything */}
       <HelpPanel isOpen={showHelp} onClose={() => setShowHelp(false)} />
+
+      {/* URL Loader Modal - at App level to overlay everything */}
+      <UrlLoaderModal
+        isOpen={showUrlLoader}
+        onClose={() => setShowUrlLoader(false)}
+        onVideoUrlLoad={(url, filename) => {
+          loadVideoFromUrl(url, filename);
+          setShowUrlLoader(false);
+        }}
+        onAudioUrlLoad={addAudioFromUrl}
+      />
     </div>
   );
 }

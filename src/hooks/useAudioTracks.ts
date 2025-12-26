@@ -75,6 +75,29 @@ export const useAudioTracks = () => {
         setAudioTracks(prev => [...prev, ...newTracks]);
     }, [getStoredPrefs]);
 
+    // Add audio track from URL (Google Drive, direct links, etc.)
+    const addAudioFromUrl = useCallback((url: string, filename: string) => {
+        const prefs = getStoredPrefs();
+        const saved = prefs[filename] || {};
+
+        const newTrack: AudioTrack = {
+            id: crypto.randomUUID(),
+            name: filename,
+            file: new File([], filename, { type: 'audio/mpeg' }), // Fake file for display
+            objectUrl: url, // Use the URL directly
+            offset: saved.offset || 0,
+            playbackRate: saved.playbackRate || 1.0,
+            deviceId: saved.deviceId || '',
+            volume: 1,
+            isMuted: false,
+            eq: saved.eq || { low: 0, mid: 0, high: 0 },
+            useCompressor: saved.useCompressor || false
+        };
+
+        setAudioTracks(prev => [...prev, newTrack]);
+        console.log('[Audio] Loading from URL:', url);
+    }, [getStoredPrefs]);
+
     const updateAudioTrack = useCallback((id: string, updates: Partial<AudioTrack>) => {
         setAudioTracks(prev => prev.map(t => {
             if (t.id === id) {
@@ -204,6 +227,7 @@ export const useAudioTracks = () => {
         setMasterVolume,
         refreshDevices,
         addAudioTracks,
+        addAudioFromUrl,
         updateAudioTrack,
         deleteAudioTrack,
         exportProject,

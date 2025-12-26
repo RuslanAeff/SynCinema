@@ -54,12 +54,28 @@ export const useVideoPlayer = () => {
     }, [videoDeviceId]);
 
     const loadVideo = useCallback((file: File) => {
-        if (videoObjectUrl) URL.revokeObjectURL(videoObjectUrl);
+        if (videoObjectUrl && !videoObjectUrl.startsWith('http')) {
+            URL.revokeObjectURL(videoObjectUrl);
+        }
         const url = URL.createObjectURL(file);
         setVideoFile(file);
         setVideoObjectUrl(url);
         setIsPlaying(false);
         setCurrentTime(0);
+    }, [videoObjectUrl]);
+
+    // Load video from URL (Google Drive, direct links, etc.)
+    const loadVideoFromUrl = useCallback((url: string, filename: string) => {
+        if (videoObjectUrl && !videoObjectUrl.startsWith('http')) {
+            URL.revokeObjectURL(videoObjectUrl);
+        }
+        // Create a fake File object for display purposes
+        const fakeFile = new File([], filename, { type: 'video/mp4' });
+        setVideoFile(fakeFile);
+        setVideoObjectUrl(url);
+        setIsPlaying(false);
+        setCurrentTime(0);
+        console.log('[Video] Loading from URL:', url);
     }, [videoObjectUrl]);
 
     const togglePlay = useCallback(() => {
@@ -155,6 +171,7 @@ export const useVideoPlayer = () => {
         videoDeviceId,
         markers,
         loadVideo,
+        loadVideoFromUrl,
         loadSubtitles,
         setSubtitleOffset,
         setVideoVolume,
