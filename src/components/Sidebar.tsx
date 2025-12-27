@@ -478,7 +478,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <div className="h-px flex-1 bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent"></div>
                 </div>
                 <div className="text-center mt-1">
-                    <span className="text-[9px] text-gray-600">© 2025 • SynCinema v2.0</span>
+                    <span className="text-[9px] text-gray-600">© 2025 • SynCinema v2.0.1</span>
                 </div>
             </div>
         </div>

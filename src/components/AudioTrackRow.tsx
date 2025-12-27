@@ -311,15 +311,15 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
         </div>
 
         {/* Offset & Speed Controls */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 flex-wrap">
           {/* Offset */}
-          <div className="flex-1 flex items-center gap-2">
-            <Clock size={14} className="text-gray-500" />
-            <span className="text-xs text-gray-500">Offset:</span>
-            <div className="flex items-center bg-gray-900/50 dark:bg-gray-900/50 rounded-lg overflow-hidden">
+          <div className="flex items-center gap-1.5">
+            <Clock size={12} className="text-gray-500 flex-shrink-0" />
+            <span className="text-[11px] text-gray-500">Offset:</span>
+            <div className="flex items-center bg-gray-900/50 rounded-lg overflow-hidden">
               <button
                 onClick={() => onUpdate(track.id, { offset: Number((track.offset - 0.1).toFixed(1)) })}
-                className="px-2 py-1 text-gray-400 hover:bg-gray-700 hover:text-white transition-colors"
+                className="px-1.5 py-1 text-gray-400 hover:bg-gray-700 hover:text-white transition-colors text-sm"
               >
                 −
               </button>
@@ -328,12 +328,12 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
                 step="0.1"
                 value={track.offset}
                 onChange={(e) => onUpdate(track.id, { offset: parseFloat(e.target.value) || 0 })}
-                className="w-14 py-1 text-xs font-mono text-white text-center bg-transparent border-none outline-none focus:ring-0"
+                className="w-10 py-1 text-[11px] font-mono text-white text-center bg-transparent border-none outline-none"
               />
-              <span className="text-xs text-gray-500 pr-1">s</span>
+              <span className="text-[10px] text-gray-500">s</span>
               <button
                 onClick={() => onUpdate(track.id, { offset: Number((track.offset + 0.1).toFixed(1)) })}
-                className="px-2 py-1 text-gray-400 hover:bg-gray-700 hover:text-white transition-colors"
+                className="px-1.5 py-1 text-gray-400 hover:bg-gray-700 hover:text-white transition-colors text-sm"
               >
                 +
               </button>
@@ -341,13 +341,13 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
           </div>
 
           {/* Speed */}
-          <div className="flex-1 flex items-center gap-2">
-            <Gauge size={14} className="text-gray-500" />
-            <span className="text-xs text-gray-500">Speed:</span>
-            <div className="flex items-center bg-gray-900/50 dark:bg-gray-900/50 rounded-lg overflow-hidden">
+          <div className="flex items-center gap-1.5">
+            <Gauge size={12} className="text-gray-500 flex-shrink-0" />
+            <span className="text-[11px] text-gray-500">Speed:</span>
+            <div className="flex items-center bg-gray-900/50 rounded-lg overflow-hidden">
               <button
                 onClick={() => onUpdate(track.id, { playbackRate: Number((track.playbackRate - 0.1).toFixed(1)) })}
-                className="px-2 py-1 text-gray-400 hover:bg-gray-700 hover:text-white transition-colors"
+                className="px-1.5 py-1 text-gray-400 hover:bg-gray-700 hover:text-white transition-colors text-sm"
               >
                 −
               </button>
@@ -358,12 +358,12 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
                 max="2.0"
                 value={track.playbackRate}
                 onChange={(e) => onUpdate(track.id, { playbackRate: parseFloat(e.target.value) || 1 })}
-                className="w-12 py-1 text-xs font-mono text-white text-center bg-transparent border-none outline-none focus:ring-0"
+                className="w-8 py-1 text-[11px] font-mono text-white text-center bg-transparent border-none outline-none"
               />
-              <span className="text-xs text-gray-500 pr-1">x</span>
+              <span className="text-[10px] text-gray-500">x</span>
               <button
                 onClick={() => onUpdate(track.id, { playbackRate: Number((track.playbackRate + 0.1).toFixed(1)) })}
-                className="px-2 py-1 text-gray-400 hover:bg-gray-700 hover:text-white transition-colors"
+                className="px-1.5 py-1 text-gray-400 hover:bg-gray-700 hover:text-white transition-colors text-sm"
               >
                 +
               </button>
