@@ -30,7 +30,9 @@ import {
     Info,
     Link,
     Youtube,
-    AlertTriangle
+    AlertTriangle,
+    Smartphone,
+    Monitor
 } from 'lucide-react';
 
 interface HelpPanelProps {
@@ -258,6 +260,33 @@ const helpSections: HelpSection[] = [
             {
                 name: '❌ Not Supported',
                 description: 'Netflix, Vimeo, Disney+, Amazon Prime and similar streaming services are NOT supported due to DRM (Digital Rights Management) protection. These platforms encrypt their content.',
+            }
+        ]
+    },
+    {
+        id: 'platform',
+        title: 'Platform Requirements',
+        icon: <Monitor size={20} />,
+        items: [
+            {
+                name: '✅ Desktop / Laptop',
+                icon: <Monitor size={16} />,
+                iconColor: 'bg-green-500/20 text-green-600 dark:bg-green-500/20 dark:text-green-400',
+                description: 'SynCinema is designed for desktop use. Full support for Chrome, Firefox, Edge, and other Chromium-based browsers. All features including multi-device audio routing work perfectly.',
+            },
+            {
+                name: '⚠️ Mobile Devices (Android/iOS)',
+                icon: <Smartphone size={16} />,
+                iconColor: 'bg-amber-500/20 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400',
+                description: 'Basic video playback works, but the main feature (routing audio to different devices) does NOT work on mobile. This is due to browser API limitations on iOS Safari and Android Chrome.',
+            },
+            {
+                name: '📱 Why Mobile Doesn\'t Support Audio Routing',
+                description: 'Mobile browsers don\'t support the "setSinkId" Web Audio API that allows selecting audio output devices. Additionally, mobile devices typically have only one audio output at a time (speaker or headphones), making multi-output routing impractical.',
+            },
+            {
+                name: '💡 What Works on Mobile',
+                description: '• Video playback (local files, YouTube, URLs)\n• Adding audio tracks\n• Offset/sync adjustments\n• EQ and volume controls\n• Single audio output only',
             }
         ]
     }
