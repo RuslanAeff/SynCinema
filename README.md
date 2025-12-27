@@ -4,7 +4,7 @@
 
 ### Multi-Output Synchronized Player
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
 [![Live Demo](https://img.shields.io/badge/Demo-Live-green.svg)](https://syncinema.vercel.app)
 
 **Watch movies with multiple audio tracks on different speakers simultaneously.**
@@ -91,7 +91,14 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## 📄 License
 
-This project is licensed under the **GNU General Public License v3.0** - see the [LICENSE](LICENSE) file for details.
+This project is licensed under a **Proprietary License**.
+
+- ✅ Source code viewing for educational purposes
+- ✅ Personal, non-commercial use
+- ❌ Commercial use without permission
+- ❌ Modifications without permission
+
+See the [LICENSE](LICENSE) file for full details.
 
 ---
 

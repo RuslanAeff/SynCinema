@@ -4,7 +4,7 @@
   "version": "2.0.1",
   "description": "Professional multi-output synchronized video player with EQ, compressor, and subtitle support",
   "author": "Ruslan Aliyev",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "type": "module",
   "scripts": {
     "dev": "vite",

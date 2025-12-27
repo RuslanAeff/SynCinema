@@ -6,7 +6,7 @@
  * 
  *  @author     Ruslan Aliyev
  *  @version    2.0.1
- *  @license    MIT
+ *  @license    Proprietary - All Rights Reserved
  *  @created    2025
  * 
  *  Description: Professional multi-audio synchronized video player with
