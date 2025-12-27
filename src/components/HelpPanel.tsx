@@ -353,11 +353,11 @@ export const HelpPanel: React.FC<HelpPanelProps> = ({ isOpen, onClose }) => {
                                 key={section.id}
                                 onClick={() => setSelectedSection(section.id)}
                                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${selectedSection === section.id
-                                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
-                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
+                                    ? 'bg-indigo-100 dark:bg-indigo-600 text-indigo-700 dark:text-white border border-indigo-200 dark:border-transparent shadow-sm'
+                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white border border-transparent'
                                     }`}
                             >
-                                {section.icon}
+                                <span className={selectedSection === section.id ? 'text-indigo-600 dark:text-white' : ''}>{section.icon}</span>
                                 <span className="text-sm font-medium">{section.title}</span>
                                 {selectedSection === section.id && (
                                     <ChevronRight size={16} className="ml-auto" />
