@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AudioTrack, AudioDevice, ExtendedMediaElement } from '../types';
-import { Trash2, Volume2, Clock, MonitorSpeaker, Gauge } from 'lucide-react';
-import { Waveform } from './Waveform';
+import { Trash2, Volume2, VolumeX, Clock, Gauge, ChevronDown, ChevronUp, Headphones, Check, RotateCcw } from 'lucide-react';
 import { AudioGraphManager } from './AudioGraphManager';
 
 interface AudioTrackRowProps {
@@ -28,7 +27,21 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
   const audioRef = useRef<ExtendedMediaElement>(null);
   const [driftWarning, setDriftWarning] = useState(false);
   const [isSwitchingDevice, setIsSwitchingDevice] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isDeviceDropdownOpen, setIsDeviceDropdownOpen] = useState(false);
+  const deviceDropdownRef = useRef<HTMLDivElement>(null);
   const warningTimeoutRef = useRef<number>(0);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (deviceDropdownRef.current && !deviceDropdownRef.current.contains(event.target as Node)) {
+        setIsDeviceDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Initialize audio source
   useEffect(() => {
@@ -38,7 +51,6 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
   }, [track.objectUrl]);
 
   // Handle Play/Pause
-  // We skip this effect if we are currently switching devices to prevent conflict
   useEffect(() => {
     if (!audioRef.current || isSwitchingDevice) return;
 
@@ -59,18 +71,24 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
     }
   }, [track.playbackRate]);
 
-  // Handle Synchronization
+  // Handle Synchronization - throttled to prevent audio crackling
+  const lastSyncRef = useRef<number>(0);
+
   useEffect(() => {
-    // If we are switching devices, DO NOT force sync, let the hardware settle first.
     if (!audioRef.current || isSwitchingDevice) return;
+
+    // Throttle sync checks to every 500ms to prevent audio crackling
+    const now = Date.now();
+    if (now - lastSyncRef.current < 500) return;
 
     const audioTime = audioRef.current.currentTime;
     const targetTime = Math.max(0, videoCurrentTime - track.offset);
     const diff = Math.abs(audioTime - targetTime);
 
+    // Only sync if drift is significant (> syncThreshold, default 0.3s)
     if (diff > syncThreshold) {
+      lastSyncRef.current = now;
       audioRef.current.currentTime = targetTime;
-
       setDriftWarning(true);
 
       if (warningTimeoutRef.current) {
@@ -92,13 +110,10 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
     };
   }, []);
 
-  // Device Switching Lock State (used when AudioGraphManager switches devices)
+  // Device Switching Lock State
   useEffect(() => {
-    // Device switching is now handled by AudioGraphManager via AudioContext.setSinkId
-    // This effect only handles the UI state and playback sync after device change
     if (track.deviceId) {
       setIsSwitchingDevice(true);
-      // Give AudioGraphManager time to switch, then sync playback
       const timer = setTimeout(async () => {
         if (audioRef.current && isVideoPlaying) {
           const targetTime = Math.max(0, videoCurrentTime - track.offset);
@@ -113,10 +128,9 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
       }, 500);
       return () => clearTimeout(timer);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [track.deviceId]);
 
-  // Handle Volume (track volume * masterVolume)
+  // Handle Volume
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = track.volume * masterVolume;
@@ -124,15 +138,25 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
     }
   }, [track.volume, track.isMuted, masterVolume]);
 
+  // Get selected device name
+  const getDeviceName = () => {
+    if (!track.deviceId) return 'Default Output';
+    const device = availableDevices.find(d => d.deviceId === track.deviceId);
+    if (device?.label) {
+      // Truncate long names
+      return device.label.length > 20 ? device.label.slice(0, 18) + '...' : device.label;
+    }
+    return 'Unknown Device';
+  };
+
   return (
     <div
-      className={`relative p-4 rounded-xl bg-gray-800/50 border backdrop-blur-sm transition-colors duration-300 ${driftWarning
-        ? 'border-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.15)] bg-yellow-500/5'
-        : 'border-gray-700'
+      className={`relative rounded-xl bg-gray-800/60 dark:bg-gray-800/60 border backdrop-blur-sm transition-all duration-300 overflow-hidden ${driftWarning
+        ? 'border-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.15)]'
+        : 'border-gray-700/50 dark:border-gray-700/50 hover:border-gray-600'
         }`}
     >
       <audio ref={audioRef} className="hidden" crossOrigin="anonymous" />
-      {/* Web Audio Graph Manager */}
       <AudioGraphManager
         audioElement={audioRef.current}
         eqSettings={track.eq}
@@ -140,156 +164,368 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
         useCompressor={track.useCompressor}
       />
 
-      <div className="flex flex-col gap-4">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg transition-colors ${driftWarning ? 'bg-yellow-500/20 text-yellow-400' : 'bg-indigo-500/20 text-indigo-400'}`}>
-              <Volume2 size={20} />
-            </div>
-            <div>
-              <h3 className="font-semibold text-white truncate max-w-[150px] md:max-w-[200px]" title={track.name}>{track.name}</h3>
-              <p className="text-xs text-gray-400">External Audio Track</p>
-            </div>
+      {/* Main Content */}
+      <div className="p-4">
+        {/* Header Row */}
+        <div className="flex items-center gap-3 mb-3">
+          {/* Icon */}
+          <div className={`p-2.5 rounded-xl transition-colors ${driftWarning
+            ? 'bg-yellow-500/20 text-yellow-400'
+            : 'bg-indigo-500/20 text-indigo-400'
+            }`}>
+            <Volume2 size={20} />
           </div>
 
-          {/* Simple Volume Bar Indicator */}
-          <div className="flex items-center gap-2">
-            <div className="flex gap-0.5 h-3 items-end">
-              {[0.2, 0.4, 0.6, 0.8, 1.0].map((t, i) => (
-                <div
-                  key={i}
-                  className={`w-1 rounded-sm transition-colors ${(track.volume * masterVolume) >= t ? (t > 0.8 ? 'bg-yellow-500' : 'bg-green-500') : 'bg-gray-700'}`}
-                  style={{ height: `${(i + 1) * 20}%` }}
-                />
-              ))}
-            </div>
-            <button onClick={() => onDelete(track.id)} className="p-2 hover:bg-red-500/20 text-gray-400 hover:text-red-400 rounded-lg transition-colors">
-              <Trash2 size={18} />
-            </button>
-          </div>
-        </div>
-
-        {/* Device Selection */}
-        <div data-tour="device-select" className="space-y-1">
-          <label className="text-xs font-medium text-gray-400 flex items-center gap-1"><MonitorSpeaker size={12} /> Output Device</label>
-          <select
-            value={track.deviceId}
-            onChange={(e) => onUpdate(track.id, { deviceId: e.target.value })}
-            disabled={isSwitchingDevice}
-            className={`w-full bg-gray-900 border border-gray-700 text-gray-300 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2 transition-opacity ${isSwitchingDevice ? 'opacity-50 cursor-wait' : ''}`}
-          >
-            <option value="">Default System Output</option>
-            {availableDevices.map(device => (
-              <option key={device.deviceId} value={device.deviceId}>{device.label || `Unknown Device (${device.deviceId.slice(0, 5)}...)`}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Controls Grid */}
-        <div className="grid grid-cols-2 gap-4">
-          <div data-tour="offset-control" className="space-y-1">
-            <label className="text-xs font-medium text-gray-400 flex items-center gap-1"><Clock size={12} /> Start Offset (s)</label>
-            <div className="flex items-center gap-1">
-              <button className="w-6 h-8 flex items-center justify-center bg-gray-700 rounded hover:bg-gray-600" onClick={() => onUpdate(track.id, { offset: track.offset - 0.1 })}>-</button>
-              <input type="number" step="0.1" value={track.offset} onChange={(e) => onUpdate(track.id, { offset: parseFloat(e.target.value) || 0 })} className="flex-1 text-center bg-gray-900 border-gray-700 rounded-lg text-xs p-1.5 focus:ring-indigo-500 focus:border-indigo-500" />
-              <button className="w-6 h-8 flex items-center justify-center bg-gray-700 rounded hover:bg-gray-600" onClick={() => onUpdate(track.id, { offset: track.offset + 0.1 })}>+</button>
-            </div>
-          </div>
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-gray-400 flex items-center gap-1" title="Drift Correction (FPS Fix)"><Gauge size={12} /> Speed (x)</label>
-            <div className="flex items-center gap-1">
-              <button className="w-6 h-8 flex items-center justify-center bg-gray-700 rounded hover:bg-gray-600" onClick={() => onUpdate(track.id, { playbackRate: Number((track.playbackRate - 0.001).toFixed(4)) })}>-</button>
-              <input type="number" step="0.001" min="0.5" max="2.0" value={track.playbackRate} onChange={(e) => onUpdate(track.id, { playbackRate: parseFloat(e.target.value) || 1 })} className="flex-1 text-center bg-gray-900 border-gray-700 rounded-lg text-xs p-1.5 focus:ring-indigo-500 focus:border-indigo-500" />
-              <button className="w-6 h-8 flex items-center justify-center bg-gray-700 rounded hover:bg-gray-600" onClick={() => onUpdate(track.id, { playbackRate: Number((track.playbackRate + 0.001).toFixed(4)) })}>+</button>
-            </div>
-          </div>
-        </div>
-
-        {/* Volume Control */}
-        <div className="space-y-1">
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-medium text-gray-400 flex items-center gap-1">
-              <Volume2 size={12} /> Volume
-            </label>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono text-indigo-400">{Math.round(track.volume * 100)}%</span>
+          {/* Info */}
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-gray-900 dark:text-white truncate" title={track.name}>
+              {track.name}
+            </h3>
+            {/* Device Selector - Custom Dropdown */}
+            <div className="relative mt-1" ref={deviceDropdownRef}>
               <button
-                onClick={() => onUpdate(track.id, { isMuted: !track.isMuted })}
-                className={`text-[10px] px-2 py-0.5 rounded ${track.isMuted ? 'bg-red-500/20 text-red-400' : 'bg-gray-700 text-gray-400 hover:bg-gray-600'}`}
+                onClick={() => setIsDeviceDropdownOpen(!isDeviceDropdownOpen)}
+                disabled={isSwitchingDevice}
+                className={`flex items-center gap-1.5 text-xs px-2 py-1 rounded-lg transition-all ${isSwitchingDevice
+                  ? 'opacity-50 cursor-wait'
+                  : 'hover:bg-gray-700/50 cursor-pointer'
+                  } ${isDeviceDropdownOpen
+                    ? 'bg-gray-700/50 text-indigo-400'
+                    : 'text-gray-400'
+                  }`}
               >
-                {track.isMuted ? 'Muted' : 'Mute'}
+                <Headphones size={12} />
+                <span className="truncate max-w-[180px]">
+                  {track.deviceId
+                    ? (availableDevices.find(d => d.deviceId === track.deviceId)?.label || 'Unknown Device').slice(0, 25) + ((availableDevices.find(d => d.deviceId === track.deviceId)?.label || '').length > 25 ? '...' : '')
+                    : 'Default Output'
+                  }
+                </span>
+                <ChevronDown size={12} className={`transition-transform ${isDeviceDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
+
+              {/* Dropdown Menu */}
+              {isDeviceDropdownOpen && (
+                <div className="absolute top-full left-0 mt-1 w-72 py-1 bg-gray-800 border border-gray-700 rounded-xl shadow-xl z-50 max-h-64 overflow-y-auto">
+                  {/* Default Option */}
+                  <button
+                    onClick={() => {
+                      onUpdate(track.id, { deviceId: '' });
+                      setIsDeviceDropdownOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-3 px-3 py-2 text-left transition-colors ${!track.deviceId
+                      ? 'bg-indigo-500/20 text-indigo-400'
+                      : 'text-gray-300 hover:bg-gray-700/50'
+                      }`}
+                  >
+                    <div className={`w-5 h-5 rounded-full flex items-center justify-center ${!track.deviceId ? 'bg-indigo-500' : 'bg-gray-700'
+                      }`}>
+                      {!track.deviceId && <Check size={12} className="text-white" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium">Default Output</div>
+                      <div className="text-[10px] text-gray-500">System default audio device</div>
+                    </div>
+                  </button>
+
+                  {/* Divider */}
+                  {availableDevices.length > 0 && (
+                    <div className="border-t border-gray-700 my-1" />
+                  )}
+
+                  {/* Device Options */}
+                  {availableDevices.map(device => (
+                    <button
+                      key={device.deviceId}
+                      onClick={() => {
+                        onUpdate(track.id, { deviceId: device.deviceId });
+                        setIsDeviceDropdownOpen(false);
+                      }}
+                      className={`w-full flex items-center gap-3 px-3 py-2 text-left transition-colors ${track.deviceId === device.deviceId
+                        ? 'bg-indigo-500/20 text-indigo-400'
+                        : 'text-gray-300 hover:bg-gray-700/50'
+                        }`}
+                    >
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${track.deviceId === device.deviceId ? 'bg-indigo-500' : 'bg-gray-700'
+                        }`}>
+                        {track.deviceId === device.deviceId && <Check size={12} className="text-white" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium truncate">
+                          {device.label || 'Unknown Device'}
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.01"
-            value={track.volume}
-            onChange={(e) => onUpdate(track.id, { volume: parseFloat(e.target.value) })}
-            className={`w-full h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-indigo-500 ${track.isMuted ? 'opacity-50' : ''}`}
-          />
+
+          {/* Delete Button */}
+          <button
+            onClick={() => onDelete(track.id)}
+            className="p-2 hover:bg-red-500/20 text-gray-400 hover:text-red-400 rounded-lg transition-colors"
+          >
+            <Trash2 size={18} />
+          </button>
         </div>
 
-        {/* Waveform Visualization */}
-        <div className="pt-2 border-t border-gray-700/50">
-          <div className="flex justify-between text-xs text-gray-500 mb-1">
-            <span>Waveform Sync</span>
-            <span className="text-indigo-400 font-mono">{track.offset.toFixed(2)}s</span>
-          </div>
+        {/* Volume Slider */}
+        <div className="flex items-center gap-3 mb-3">
+          <button
+            onClick={() => onUpdate(track.id, { isMuted: !track.isMuted })}
+            className={`p-1.5 rounded-lg transition-colors ${track.isMuted
+              ? 'bg-red-500/20 text-red-400'
+              : 'text-gray-400 hover:text-indigo-400'
+              }`}
+          >
+            {track.isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+          </button>
 
-          <div className="bg-gray-900/50 rounded-lg p-2 mb-2 border border-gray-700/50">
-            <Waveform
-              url={track.objectUrl}
-              currentTime={videoCurrentTime}
-              offset={track.offset}
-              isPlaying={isVideoPlaying}
-              onSeek={(time) => { }} // We don't need seek here yet as it's complex to map back to offset
-              height={30}
+          <div className="flex-1 relative">
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value={track.isMuted ? 0 : track.volume}
+              onChange={(e) => {
+                const val = parseFloat(e.target.value);
+                onUpdate(track.id, { volume: val });
+                if (val > 0 && track.isMuted) {
+                  onUpdate(track.id, { isMuted: false });
+                }
+              }}
+              className={`w-full h-2 rounded-lg appearance-none cursor-pointer accent-indigo-500 ${track.isMuted ? 'opacity-40' : ''
+                }`}
+              style={{
+                background: `linear-gradient(to right, #6366f1 0%, #6366f1 ${(track.isMuted ? 0 : track.volume) * 100}%, rgba(107,114,128,0.3) ${(track.isMuted ? 0 : track.volume) * 100}%, rgba(107,114,128,0.3) 100%)`
+              }}
             />
           </div>
 
-          <input type="range" min="-5" max="5" step="0.05" value={track.offset} onChange={(e) => onUpdate(track.id, { offset: parseFloat(e.target.value) })} className="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-indigo-500" />
+          <span className="text-sm font-mono text-indigo-400 w-12 text-right">
+            {Math.round(track.volume * 100)}%
+          </span>
+        </div>
 
+        {/* Offset & Speed Controls */}
+        <div className="flex items-center gap-4">
+          {/* Offset */}
+          <div className="flex-1 flex items-center gap-2">
+            <Clock size={14} className="text-gray-500" />
+            <span className="text-xs text-gray-500">Offset:</span>
+            <div className="flex items-center bg-gray-900/50 dark:bg-gray-900/50 rounded-lg overflow-hidden">
+              <button
+                onClick={() => onUpdate(track.id, { offset: Number((track.offset - 0.1).toFixed(1)) })}
+                className="px-2 py-1 text-gray-400 hover:bg-gray-700 hover:text-white transition-colors"
+              >
+                −
+              </button>
+              <input
+                type="number"
+                step="0.1"
+                value={track.offset}
+                onChange={(e) => onUpdate(track.id, { offset: parseFloat(e.target.value) || 0 })}
+                className="w-14 py-1 text-xs font-mono text-white text-center bg-transparent border-none outline-none focus:ring-0"
+              />
+              <span className="text-xs text-gray-500 pr-1">s</span>
+              <button
+                onClick={() => onUpdate(track.id, { offset: Number((track.offset + 0.1).toFixed(1)) })}
+                className="px-2 py-1 text-gray-400 hover:bg-gray-700 hover:text-white transition-colors"
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          {/* Speed */}
+          <div className="flex-1 flex items-center gap-2">
+            <Gauge size={14} className="text-gray-500" />
+            <span className="text-xs text-gray-500">Speed:</span>
+            <div className="flex items-center bg-gray-900/50 dark:bg-gray-900/50 rounded-lg overflow-hidden">
+              <button
+                onClick={() => onUpdate(track.id, { playbackRate: Number((track.playbackRate - 0.1).toFixed(1)) })}
+                className="px-2 py-1 text-gray-400 hover:bg-gray-700 hover:text-white transition-colors"
+              >
+                −
+              </button>
+              <input
+                type="number"
+                step="0.1"
+                min="0.5"
+                max="2.0"
+                value={track.playbackRate}
+                onChange={(e) => onUpdate(track.id, { playbackRate: parseFloat(e.target.value) || 1 })}
+                className="w-12 py-1 text-xs font-mono text-white text-center bg-transparent border-none outline-none focus:ring-0"
+              />
+              <span className="text-xs text-gray-500 pr-1">x</span>
+              <button
+                onClick={() => onUpdate(track.id, { playbackRate: Number((track.playbackRate + 0.1).toFixed(1)) })}
+                className="px-2 py-1 text-gray-400 hover:bg-gray-700 hover:text-white transition-colors"
+              >
+                +
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Expand/Collapse Toggle */}
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="w-full mt-3 pt-3 border-t border-gray-700/30 flex items-center justify-center gap-2 text-xs text-gray-500 hover:text-indigo-400 transition-colors"
+        >
+          {isExpanded ? (
+            <>
+              <ChevronUp size={14} />
+              <span>Hide Advanced</span>
+            </>
+          ) : (
+            <>
+              <ChevronDown size={14} />
+              <span>Show Advanced</span>
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* Advanced Section (Collapsible) */}
+      <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[400px] opacity-100' : 'max-h-0 opacity-0'
+        }`}>
+        <div className="px-4 pb-4 pt-2 border-t border-gray-700/30 space-y-4">
+
+          {/* Offset Adjustment */}
+          <div>
+            <div className="flex items-center justify-between text-xs mb-3">
+              <span className="text-gray-500">Offset Adjustment</span>
+              {track.offset !== 0 && (
+                <button
+                  onClick={() => onUpdate(track.id, { offset: 0 })}
+                  className="flex items-center gap-1 text-[10px] text-gray-500 hover:text-indigo-400 transition-colors"
+                >
+                  <RotateCcw size={10} />
+                  Reset
+                </button>
+              )}
+            </div>
+
+            {/* Visual Offset Slider */}
+            <div className="relative bg-gray-900/50 rounded-xl p-4 border border-gray-700/30">
+              {/* Scale markers */}
+              <div className="flex justify-between text-[9px] text-gray-600 mb-2">
+                <span>-5s</span>
+                <span>-2.5s</span>
+                <span className="text-indigo-400">0</span>
+                <span>+2.5s</span>
+                <span>+5s</span>
+              </div>
+
+              {/* Track with center indicator */}
+              <div className="relative h-8 bg-gray-800 rounded-lg overflow-hidden">
+                {/* Center line (zero point) */}
+                <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-indigo-500/50 -translate-x-1/2" />
+
+                {/* Offset indicator bar */}
+                <div
+                  className={`absolute top-1 bottom-1 rounded transition-all duration-150 ${track.offset >= 0
+                    ? 'bg-gradient-to-r from-indigo-500 to-indigo-400'
+                    : 'bg-gradient-to-l from-indigo-500 to-indigo-400'
+                    }`}
+                  style={{
+                    left: track.offset >= 0 ? '50%' : `${50 + (track.offset / 5) * 50}%`,
+                    width: `${Math.abs(track.offset) / 5 * 50}%`,
+                  }}
+                />
+
+                {/* Current position marker */}
+                <div
+                  className="absolute top-0 bottom-0 w-1 bg-white rounded shadow-[0_0_10px_rgba(255,255,255,0.5)] transition-all duration-150"
+                  style={{ left: `${50 + (track.offset / 5) * 50}%`, transform: 'translateX(-50%)' }}
+                />
+              </div>
+
+              {/* Slider input */}
+              <input
+                type="range"
+                min="-5"
+                max="5"
+                step="0.1"
+                value={track.offset}
+                onChange={(e) => onUpdate(track.id, { offset: parseFloat(e.target.value) })}
+                className="w-full h-2 mt-3 bg-transparent rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                style={{
+                  background: 'linear-gradient(to right, rgba(107,114,128,0.3) 0%, rgba(107,114,128,0.3) 100%)'
+                }}
+              />
+
+              {/* Current value */}
+              <div className="text-center mt-2">
+                <span className="text-lg font-mono font-bold text-white">{track.offset > 0 ? '+' : ''}{track.offset.toFixed(1)}s</span>
+                <p className="text-[10px] text-gray-500 mt-0.5">
+                  {track.offset > 0 ? 'Audio starts later' : track.offset < 0 ? 'Audio starts earlier' : 'Perfectly synced'}
+                </p>
+              </div>
+            </div>
+          </div>
 
           {/* EQ Controls */}
-          <div data-tour="eq-control" className="mt-3 pt-2 border-t border-gray-700/30">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-semibold text-teal-400 uppercase tracking-wider">🎛️ 3-Band EQ</span>
-              <span className="text-[9px] text-gray-600">Bass / Vokal / Treble</span>
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-medium text-teal-400 uppercase tracking-wider">3-Band EQ</span>
+              {(track.eq?.low !== 0 || track.eq?.mid !== 0 || track.eq?.high !== 0) && (
+                <button
+                  onClick={() => onUpdate(track.id, { eq: { low: 0, mid: 0, high: 0 } })}
+                  className="flex items-center gap-1 text-[10px] text-gray-500 hover:text-teal-400 transition-colors"
+                >
+                  <RotateCcw size={10} />
+                  Reset
+                </button>
+              )}
             </div>
-            <div className="grid grid-cols-3 gap-2">
-              {['low', 'mid', 'high'].map(band => (
-                <div key={band} className="text-center">
-                  <label className="block text-[10px] uppercase text-gray-500 mb-1">{band}</label>
-                  <input
-                    type="range"
-                    min="-12"
-                    max="12"
-                    value={track.eq?.[band as keyof typeof track.eq] || 0}
-                    onChange={(e) => onUpdate(track.id, { eq: { ...track.eq, [band]: parseFloat(e.target.value) } })}
-                    className="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-teal-500"
-                  />
+            <div className="grid grid-cols-3 gap-4">
+              {[
+                { key: 'low', label: 'LOW', color: 'from-teal-500 to-teal-600' },
+                { key: 'mid', label: 'MID', color: 'from-purple-500 to-purple-600' },
+                { key: 'high', label: 'HIGH', color: 'from-pink-500 to-pink-600' }
+              ].map(band => (
+                <div key={band.key} className="text-center">
+                  <div className="relative h-24 flex items-center justify-center mb-2">
+                    <input
+                      type="range"
+                      min="-12"
+                      max="12"
+                      value={track.eq?.[band.key as keyof typeof track.eq] || 0}
+                      onChange={(e) => onUpdate(track.id, { eq: { ...track.eq, [band.key]: parseFloat(e.target.value) } })}
+                      className="h-20 w-2 appearance-none cursor-pointer rounded-full"
+                      style={{
+                        writingMode: 'vertical-lr',
+                        direction: 'rtl',
+                        background: `linear-gradient(to top, #14b8a6 0%, #14b8a6 ${((track.eq?.[band.key as keyof typeof track.eq] || 0) + 12) / 24 * 100}%, rgba(107,114,128,0.3) ${((track.eq?.[band.key as keyof typeof track.eq] || 0) + 12) / 24 * 100}%, rgba(107,114,128,0.3) 100%)`
+                      }}
+                    />
+                  </div>
+                  <span className="text-[10px] uppercase text-gray-500 font-medium">{band.label}</span>
+                  <div className="text-xs font-mono text-gray-400">
+                    {(track.eq?.[band.key as keyof typeof track.eq] || 0) > 0 ? '+' : ''}
+                    {track.eq?.[band.key as keyof typeof track.eq] || 0}dB
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Limiter/Compressor */}
-          <div className="mt-3 pt-2 border-t border-gray-700/30">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <span className="text-[9px] text-gray-600">Yüksek sesleri otomatik bastırır</span>
-            </div>
-            <div className="flex justify-center">
-              <button
-                onClick={() => onUpdate(track.id, { useCompressor: !track.useCompressor })}
-                className={`text-[10px] px-3 py-1 rounded-full border transition-colors ${track.useCompressor ? 'bg-teal-500/20 border-teal-500 text-teal-400' : 'bg-transparent border-gray-600 text-gray-400 hover:border-gray-500'}`}
-              >
-                {track.useCompressor ? '🔊 Limiter Active' : '🔇 Enable Limiter'}
-              </button>
-            </div>
+          {/* Limiter Toggle */}
+          <div className="flex justify-center pt-2">
+            <button
+              onClick={() => onUpdate(track.id, { useCompressor: !track.useCompressor })}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${track.useCompressor
+                ? 'bg-teal-500/20 border border-teal-500 text-teal-400 shadow-[0_0_15px_rgba(20,184,166,0.2)]'
+                : 'bg-gray-800 border border-gray-600 text-gray-400 hover:border-gray-500'
+                }`}
+            >
+              {track.useCompressor ? '✓ Limiter Active' : 'Enable Limiter'}
+            </button>
           </div>
         </div>
       </div>
