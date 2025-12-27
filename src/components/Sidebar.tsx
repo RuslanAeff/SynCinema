@@ -345,14 +345,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         <div className="flex items-center gap-1.5">
                             <span
                                 onClick={(e) => { e.stopPropagation(); audioInputRef.current?.click(); }}
-                                className="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-1 rounded transition-colors flex items-center gap-1 shadow-sm cursor-pointer"
+                                className="text-xs bg-indigo-500 hover:bg-indigo-600 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 shadow-sm cursor-pointer border border-indigo-600 dark:border-transparent"
                                 title="Add from file"
                             >
                                 <Upload size={12} />
                             </span>
                             <span
                                 onClick={(e) => { e.stopPropagation(); setShowAudioUrlInput(!showAudioUrlInput); setIsAudioTracksCollapsed(false); }}
-                                className="text-xs bg-purple-600 hover:bg-purple-700 text-white px-2 py-1 rounded transition-colors flex items-center gap-1 shadow-sm cursor-pointer"
+                                className="text-xs bg-purple-500 hover:bg-purple-600 dark:bg-purple-600 dark:hover:bg-purple-700 text-white px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 shadow-sm cursor-pointer border border-purple-600 dark:border-transparent"
                                 title="Add from URL"
                             >
                                 <Link size={12} />
