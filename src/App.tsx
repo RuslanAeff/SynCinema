@@ -13,6 +13,7 @@ import { WelcomeScreen } from './components/WelcomeScreen';
 import { OnboardingTour } from './components/OnboardingTour';
 import { HelpPanel } from './components/HelpPanel';
 import { UrlLoaderModal } from './components/UrlLoaderModal';
+import { Snowfall } from './components/Snowfall';
 import { useVideoPlayer } from './hooks/useVideoPlayer';
 import { useAudioTracks } from './hooks/useAudioTracks';
 import { useTheme } from './hooks/useTheme';
@@ -188,6 +189,9 @@ function App() {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
+      {/* 🎄 New Year Snowfall - Festive Season Only */}
+      <Snowfall intensity="medium" />
+
       {/* Welcome Screen */}
       {showWelcome && <WelcomeScreen onComplete={handleWelcomeComplete} />}
 

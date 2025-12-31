@@ -1,6 +1,21 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 
 export const Logo: React.FC<{ size?: number, className?: string }> = ({ size = 32, className = '' }) => {
+    // Check if we're in festive season (Dec 20 - Jan 10)
+    const [isFestive, setIsFestive] = useState(false);
+
+    useEffect(() => {
+        const now = new Date();
+        const month = now.getMonth();
+        const day = now.getDate();
+
+        const festive =
+            (month === 11 && day >= 20) || // Dec 20-31
+            (month === 0 && day <= 10);    // Jan 1-10
+
+        setIsFestive(festive);
+    }, []);
+
     // Generate jagged audio data for visualizer effect
     const outerBars = useMemo(() => {
         return Array.from({ length: 32 }).map((_, i) => {
@@ -20,9 +35,9 @@ export const Logo: React.FC<{ size?: number, className?: string }> = ({ size = 3
 
     return (
         <svg
-            width={size}
-            height={size}
-            viewBox="0 0 100 100"
+            width={size * (isFestive ? 1.3 : 1)}
+            height={size * (isFestive ? 1.25 : 1)}
+            viewBox={isFestive ? "-15 -25 130 125" : "0 0 100 100"}
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             className={className}
@@ -40,7 +55,41 @@ export const Logo: React.FC<{ size?: number, className?: string }> = ({ size = 3
                     <stop offset="0%" style={{ stopColor: '#6366f1', stopOpacity: 1 }} />
                     <stop offset="100%" style={{ stopColor: '#d946ef', stopOpacity: 1 }} />
                 </linearGradient>
+                {/* Santa hat gradient */}
+                <linearGradient id="santa-red" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style={{ stopColor: '#ef4444', stopOpacity: 1 }} />
+                    <stop offset="100%" style={{ stopColor: '#b91c1c', stopOpacity: 1 }} />
+                </linearGradient>
             </defs>
+
+            {/* 🎅 Santa Hat - Only during festive season */}
+            {isFestive && (
+                <g>
+                    {/* Hat white fur trim - bottom (centered on logo) */}
+                    <ellipse cx="50" cy="8" rx="28" ry="6" fill="white" />
+
+                    {/* Hat red cone (centered) */}
+                    <path
+                        d="M22 8 Q38 -18 50 -12 Q65 -8 78 8 Z"
+                        fill="url(#santa-red)"
+                    />
+
+                    {/* Hat tip curve (extending to right) */}
+                    <path
+                        d="M50 -12 Q72 -8 85 2 Q95 12 100 8"
+                        stroke="url(#santa-red)"
+                        strokeWidth="9"
+                        fill="none"
+                        strokeLinecap="round"
+                    />
+
+                    {/* Pom-pom */}
+                    <circle cx="100" cy="8" r="9" fill="white" />
+
+                    {/* Pom-pom highlight */}
+                    <circle cx="97" cy="4" r="2.5" fill="white" opacity="0.6" />
+                </g>
+            )}
 
             {/* Outer Audio Ring - Spiky Waveform */}
             <g style={{ filter: 'url(#neon-glow-strong)' }} stroke="url(#neon-grad)" strokeLinecap="round">

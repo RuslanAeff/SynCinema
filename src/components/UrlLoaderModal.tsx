@@ -97,20 +97,49 @@ const validateUrl = (url: string, type: 'video' | 'audio'): UrlValidation => {
 
         // Check if it's a YouTube link
         if (urlObj.hostname.includes('youtube.com') || urlObj.hostname.includes('youtu.be')) {
-            const youtubePatterns = [
-                /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/)([a-zA-Z0-9_-]{11})/,
-                /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/
-            ];
+            // Extract video ID from various YouTube URL formats
+            let videoId: string | null = null;
 
-            for (const pattern of youtubePatterns) {
-                const match = url.match(pattern);
-                if (match && match[1]) {
-                    return {
-                        isValid: true,
-                        message: 'YouTube link detected ✓ (limited features)',
-                        convertedUrl: `youtube:${match[1]}` // Special prefix for YouTube
-                    };
-                }
+            // Standard youtube.com/watch?v=VIDEO_ID (with optional extra params like &t=, &list=, etc.)
+            const watchMatch = url.match(/youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/);
+            if (watchMatch) videoId = watchMatch[1];
+
+            // youtu.be/VIDEO_ID (short URL)
+            if (!videoId) {
+                const shortMatch = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+                if (shortMatch) videoId = shortMatch[1];
+            }
+
+            // youtube.com/embed/VIDEO_ID
+            if (!videoId) {
+                const embedMatch = url.match(/youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/);
+                if (embedMatch) videoId = embedMatch[1];
+            }
+
+            // youtube.com/v/VIDEO_ID
+            if (!videoId) {
+                const vMatch = url.match(/youtube\.com\/v\/([a-zA-Z0-9_-]{11})/);
+                if (vMatch) videoId = vMatch[1];
+            }
+
+            // youtube.com/shorts/VIDEO_ID
+            if (!videoId) {
+                const shortsMatch = url.match(/youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/);
+                if (shortsMatch) videoId = shortsMatch[1];
+            }
+
+            // youtube.com/live/VIDEO_ID
+            if (!videoId) {
+                const liveMatch = url.match(/youtube\.com\/live\/([a-zA-Z0-9_-]{11})/);
+                if (liveMatch) videoId = liveMatch[1];
+            }
+
+            if (videoId) {
+                return {
+                    isValid: true,
+                    message: 'YouTube link detected ✓ (limited features)',
+                    convertedUrl: `youtube:${videoId}` // Special prefix for YouTube
+                };
             }
 
             return {

@@ -8,6 +8,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Logo } from './Logo';
+import { Snowfall } from './Snowfall';
 import { ArrowRight, Headphones, Film, Sliders, Zap } from 'lucide-react';
 
 interface WelcomeScreenProps {
@@ -44,6 +45,9 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onComplete }) => {
             className={`fixed inset-0 z-[100] flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 transition-all duration-500 overflow-y-auto py-8 ${isExiting ? 'opacity-0 scale-110' : 'opacity-100 scale-100'
                 }`}
         >
+            {/* 🎄 Festive Snowfall */}
+            <Snowfall intensity="medium" />
+
             {/* Animated Background Glow */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[120px] animate-pulse" />
@@ -56,8 +60,10 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onComplete }) => {
                     }`}
             >
                 {/* Logo */}
-                <div className={`mb-6 transition-all duration-1000 delay-200 ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
-                    <Logo size={100} className="mx-auto drop-shadow-[0_0_40px_rgba(99,102,241,0.6)]" />
+                <div className={`mt-8 mb-6 transition-all duration-1000 delay-200 ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
+                    <div className="flex justify-center">
+                        <Logo size={100} className="drop-shadow-[0_0_40px_rgba(99,102,241,0.6)]" />
+                    </div>
                 </div>
 
                 {/* Title */}
@@ -114,14 +120,11 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onComplete }) => {
                     <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 blur-xl opacity-50 group-hover:opacity-75 transition-opacity -z-10" />
                 </button>
 
-                {/* Bottom Info - Now inside content div */}
+                {/* Bottom Info */}
                 <div
                     className={`text-center transition-all duration-700 delay-1000 ${isVisible ? 'opacity-100' : 'opacity-0'
                         }`}
                 >
-                    <p className="text-xs text-gray-400 mb-2">
-                        Press <kbd className="px-2 py-0.5 mx-1 bg-gray-700 border border-gray-600 rounded text-gray-300 font-mono text-[10px]">Enter</kbd> to continue
-                    </p>
                     <div className="flex items-center justify-center gap-3 text-[11px] text-gray-500 tracking-wide">
                         <span>Version 2.0.1</span>
                         <span className="w-1 h-1 rounded-full bg-gray-500"></span>
