@@ -17,7 +17,7 @@ import { Snowfall } from './components/Snowfall';
 import { useVideoPlayer } from './hooks/useVideoPlayer';
 import { useAudioTracks } from './hooks/useAudioTracks';
 import { useTheme } from './hooks/useTheme';
-import { useI18n } from './hooks/useI18n';
+
 
 function App() {
   const {
@@ -67,8 +67,7 @@ function App() {
   // Theme
   const { theme, toggleTheme } = useTheme();
 
-  // Internationalization
-  const { language, setLanguage, t, languages } = useI18n();
+
 
   // Welcome Screen State (sessionStorage = shows once per browser session)
   const [showWelcome, setShowWelcome] = useState(() => {
@@ -250,10 +249,6 @@ function App() {
         onHelpClose={() => setShowHelp(false)}
         onUrlLoaderOpen={() => setShowUrlLoader(true)}
         onAudioUrlLoad={addAudioFromUrl}
-        language={language}
-        languages={languages}
-        onLanguageChange={setLanguage}
-        t={t}
       />
 
       {/* Video Player - Show YouTube or regular player based on source */}
@@ -281,12 +276,11 @@ function App() {
           setDuration={setDuration}
           subtitleCues={subtitleCues}
           subtitleOffset={subtitleOffset}
-          t={t}
         />
       )}
 
       {/* Help Panel - at App level to overlay everything */}
-      <HelpPanel isOpen={showHelp} onClose={() => setShowHelp(false)} t={t} />
+      <HelpPanel isOpen={showHelp} onClose={() => setShowHelp(false)} />
 
       {/* URL Loader Modal - at App level to overlay everything */}
       <UrlLoaderModal

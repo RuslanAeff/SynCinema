@@ -9,6 +9,7 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { Play, Pause, RotateCcw, Film, Maximize, Minimize, Volume2 } from 'lucide-react';
 import { Translations } from '../i18n';
+import { useI18n } from '../context/I18nContext';
 
 interface VideoPlayerProps {
     videoFile: File | null;
@@ -24,7 +25,6 @@ interface VideoPlayerProps {
     setDuration: (duration: number) => void;
     subtitleCues?: { id: string, startTime: number, endTime: number, text: string }[];
     subtitleOffset?: number;
-    t: Translations;
 }
 
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({
@@ -41,8 +41,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     setDuration,
     subtitleCues = [],
     subtitleOffset = 0,
-    t
 }) => {
+    const { t } = useI18n();
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [showControls, setShowControls] = useState(true);
     const controlsTimeoutRef = useRef<number | null>(null);

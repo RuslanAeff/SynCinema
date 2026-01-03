@@ -8,6 +8,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { X, Link, Film, Music, AlertCircle, CheckCircle, Loader2, ExternalLink } from 'lucide-react';
+import { useI18n } from '../context/I18nContext';
 
 interface UrlLoaderModalProps {
     isOpen: boolean;
@@ -214,6 +215,7 @@ export const UrlLoaderModal: React.FC<UrlLoaderModalProps> = ({
     onVideoUrlLoad,
     onAudioUrlLoad
 }) => {
+    const { t } = useI18n();
     const [videoUrl, setVideoUrl] = useState('');
     const [audioUrl, setAudioUrl] = useState('');
     const [videoValidation, setVideoValidation] = useState<UrlValidation>({ isValid: false, message: '' });
@@ -293,8 +295,8 @@ export const UrlLoaderModal: React.FC<UrlLoaderModalProps> = ({
                                 <Link size={20} className="text-white" />
                             </div>
                             <div>
-                                <h2 className="text-lg font-bold text-gray-900 dark:text-white">Load Video Source</h2>
-                                <p className="text-xs text-gray-500 dark:text-gray-500">YouTube, Dropbox, Google Drive, Direct URL</p>
+                                <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t.urlLoader.title}</h2>
+                                <p className="text-xs text-gray-500 dark:text-gray-500">{t.urlLoader.subtitle}</p>
                             </div>
                         </div>
                         <button
@@ -311,13 +313,13 @@ export const UrlLoaderModal: React.FC<UrlLoaderModalProps> = ({
                     <div className="space-y-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Video / Source URL
+                                {t.urlLoader.label}
                             </label>
                             <input
                                 type="url"
                                 value={videoUrl}
                                 onChange={(e) => handleVideoUrlChange(e.target.value)}
-                                placeholder="Paste YouTube, Dropbox, Google Drive or direct video link"
+                                placeholder={t.urlLoader.placeholder}
                                 className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                             />
                             {videoValidation.message && (
@@ -346,7 +348,7 @@ export const UrlLoaderModal: React.FC<UrlLoaderModalProps> = ({
                             ) : (
                                 <>
                                     <Film size={18} />
-                                    Load Video
+                                    {t.urlLoader.loadBtn}
                                 </>
                             )}
                         </button>
@@ -356,21 +358,21 @@ export const UrlLoaderModal: React.FC<UrlLoaderModalProps> = ({
                     <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/50">
                         <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
                             <ExternalLink size={14} />
-                            Supported Sources
+                            {t.urlLoader.supportedSources.title}
                         </h4>
                         <ul className="text-xs text-gray-600 dark:text-gray-500 space-y-1">
-                            <li>• <span className="text-green-600 dark:text-green-400 font-medium">Direct links</span> to MP4, WebM, MP3, WAV files</li>
-                            <li>• <span className="text-purple-600 dark:text-purple-400 font-medium">Dropbox</span> share links (recommended for large files)</li>
-                            <li>• <span className="text-blue-600 dark:text-blue-400 font-medium">Google Drive</span> public links <span className="text-amber-600 dark:text-yellow-500">(max ~50MB)</span></li>
-                            <li>• <span className="text-red-600 dark:text-red-400 font-medium">YouTube</span> videos <span className="text-amber-600 dark:text-yellow-500">(limited features)</span></li>
-                            <li>• Any <span className="text-amber-600 dark:text-yellow-400 font-medium">HTTPS URL</span> that serves media files</li>
+                            <li>• {t.urlLoader.supportedSources.directLinks}</li>
+                            <li>• {t.urlLoader.supportedSources.dropbox}</li>
+                            <li>• {t.urlLoader.supportedSources.googleDrive}</li>
+                            <li>• {t.urlLoader.supportedSources.youtube}</li>
+                            <li>• {t.urlLoader.supportedSources.https}</li>
                         </ul>
                         <div className="mt-3 p-3 bg-amber-50 dark:bg-yellow-900/20 border border-amber-200 dark:border-yellow-700/30 rounded-lg">
-                            <p className="text-xs text-amber-800 dark:text-yellow-300 font-medium">⚠️ Limitations:</p>
+                            <p className="text-xs text-amber-800 dark:text-yellow-300 font-medium">⚠️ {t.urlLoader.limitations.title}</p>
                             <ul className="text-xs text-amber-700 dark:text-yellow-200/70 mt-1 space-y-0.5">
-                                <li>• <span className="text-red-600 dark:text-red-400 font-medium">YouTube:</span> Audio output cannot be changed (always default device)</li>
-                                <li>• <span className="text-blue-600 dark:text-blue-400 font-medium">Google Drive:</span> Files &gt;50MB may not load (use Dropbox)</li>
-                                <li>• <span className="text-gray-500 dark:text-gray-500">Netflix, Vimeo:</span> Not supported (DRM protection)</li>
+                                <li>• {t.urlLoader.limitations.youtube}</li>
+                                <li>• {t.urlLoader.limitations.googleDrive}</li>
+                                <li>• {t.urlLoader.limitations.drm}</li>
                             </ul>
                         </div>
                     </div>

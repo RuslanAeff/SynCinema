@@ -47,6 +47,11 @@ export const tr: Translations = {
         markers: 'İşaretler',
         addMarker: 'İşaret Ekle',
         noMarkers: 'Henüz işaret eklenmedi.',
+        audioUrlLabel: 'Ses Bağlantısı',
+        audioUrlPlaceholder: 'https://ornek.com/ses.mp3',
+        addAudioTrackBtn: 'Ses Parçası Ekle',
+        cancelBtn: 'İptal',
+        audioSupports: 'Desteklenir: Dropbox, Google Drive (<50MB), direkt MP3/WAV bağlantıları',
     },
 
     audioTrack: {
@@ -79,17 +84,25 @@ export const tr: Translations = {
     },
 
     urlLoader: {
-        title: 'URL\'den Yükle',
-        placeholder: 'Video veya ses URL\'sini buraya yapıştır...',
-        load: 'Yükle',
-        cancel: 'İptal',
-        supportedSources: 'Desteklenen Kaynaklar',
-        directLinks: 'Doğrudan video/ses linkleri',
-        youtubeVideos: 'YouTube videoları',
-        youtubeNote: 'sınırlı özellikler',
-        dropboxLinks: 'Dropbox linkleri',
-        googleDriveLinks: 'Google Drive linkleri',
-        limitations: 'Kısıtlamalar',
+        title: 'Video Kaynağı Yükle',
+        subtitle: 'YouTube, Dropbox, Google Drive, Direkt Bağlantı',
+        label: 'Video / Kaynak Bağlantısı',
+        placeholder: 'YouTube, Dropbox, Google Drive veya direkt video bağlantısını yapıştırın',
+        loadBtn: 'Videoyu Yükle',
+        supportedSources: {
+            title: 'Desteklenen Kaynaklar',
+            directLinks: 'MP4, WebM, MP3, WAV dosyalarına direkt bağlantılar',
+            dropbox: 'Dropbox paylaşım bağlantıları (büyük dosyalar için önerilir)',
+            googleDrive: 'Google Drive genel bağlantıları (maks ~50MB)',
+            youtube: 'YouTube videoları (kısıtlı özellikler)',
+            https: 'Medya dosyası sunan herhangi bir HTTPS bağlantısı',
+        },
+        limitations: {
+            title: 'Kısıtlamalar:',
+            youtube: 'YouTube: Ses çıkışı değiştirilemez (sadece varsayılan aygıt)',
+            googleDrive: 'Google Drive: >50MB dosyalar yüklenmeyebilir (Dropbox kullanın)',
+            drm: 'Netflix, Vimeo: Desteklenmez (DRM koruması)',
+        },
     },
 
     help: {

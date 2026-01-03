@@ -47,6 +47,11 @@ export const az: Translations = {
         markers: 'İşarələr',
         addMarker: 'İşarə Əlavə Et',
         noMarkers: 'Hələ işarə əlavə edilməyib.',
+        audioUrlLabel: 'Səs Linki',
+        audioUrlPlaceholder: 'https://numune.com/ses.mp3',
+        addAudioTrackBtn: 'Səs Parçası Əlavə Et',
+        cancelBtn: 'Ləğv et',
+        audioSupports: 'Dəstəklənir: Dropbox, Google Drive (<50MB), birbaşa MP3/WAV linkləri',
     },
 
     audioTrack: {
@@ -79,17 +84,25 @@ export const az: Translations = {
     },
 
     urlLoader: {
-        title: 'URL-dən Yüklə',
-        placeholder: 'Video və ya səs URL-ni bura yapışdır...',
-        load: 'Yüklə',
-        cancel: 'Ləğv et',
-        supportedSources: 'Dəstəklənən Mənbələr',
-        directLinks: 'Birbaşa video/səs linkləri',
-        youtubeVideos: 'YouTube videoları',
-        youtubeNote: 'məhdud funksiyalar',
-        dropboxLinks: 'Dropbox linkləri',
-        googleDriveLinks: 'Google Drive linkləri',
-        limitations: 'Məhdudiyyətlər',
+        title: 'Video Mənbəyi Yüklə',
+        subtitle: 'YouTube, Dropbox, Google Drive, Birbaşa Link',
+        label: 'Video / Mənbə Linki',
+        placeholder: 'YouTube, Dropbox, Google Drive və ya birbaşa video linkini yapışdırın',
+        loadBtn: 'Videonu Yüklə',
+        supportedSources: {
+            title: 'Dəstəklənən Mənbələr',
+            directLinks: 'MP4, WebM, MP3, WAV fayllarına birbaşa linklər',
+            dropbox: 'Dropbox paylaşım linkləri (böyük fayllar üçün tövsiyə olunur)',
+            googleDrive: 'Google Drive ictimai linkləri (maks ~50MB)',
+            youtube: 'YouTube videoları (məhdud funksiyalar)',
+            https: 'Media faylı təqdim edən istənilən HTTPS linki',
+        },
+        limitations: {
+            title: 'Məhdudiyyətlər:',
+            youtube: 'YouTube: Səs çıxışı dəyişdirilə bilməz (yalnız standart cihaz)',
+            googleDrive: 'Google Drive: >50MB fayllar yüklənməyə bilər (Dropbox istifadə edin)',
+            drm: 'Netflix, Vimeo: Dəstəklənmir (DRM qorunması)',
+        },
     },
 
     help: {

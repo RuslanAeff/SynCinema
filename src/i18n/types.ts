@@ -71,6 +71,34 @@ export interface Translations {
         markers: string;
         addMarker: string;
         noMarkers: string;
+        audioUrlLabel: string;
+        audioUrlPlaceholder: string;
+        addAudioTrackBtn: string;
+        cancelBtn: string;
+        audioSupports: string;
+    };
+
+    // URL Loader Modal
+    urlLoader: {
+        title: string;
+        subtitle: string;
+        label: string;
+        placeholder: string;
+        loadBtn: string;
+        supportedSources: {
+            title: string;
+            directLinks: string;
+            dropbox: string;
+            googleDrive: string;
+            youtube: string;
+            https: string;
+        };
+        limitations: {
+            title: string;
+            youtube: string;
+            googleDrive: string;
+            drm: string;
+        };
     };
 
     // Audio track row
@@ -104,20 +132,7 @@ export interface Translations {
         loading: string;
     };
 
-    // URL loader modal
-    urlLoader: {
-        title: string;
-        placeholder: string;
-        load: string;
-        cancel: string;
-        supportedSources: string;
-        directLinks: string;
-        youtubeVideos: string;
-        youtubeNote: string;
-        dropboxLinks: string;
-        googleDriveLinks: string;
-        limitations: string;
-    };
+
 
     // Help panel - expanded for all sections
     help: {

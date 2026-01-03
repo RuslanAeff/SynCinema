@@ -35,11 +35,11 @@ import {
     Monitor
 } from 'lucide-react';
 import { Translations } from '../i18n';
+import { useI18n } from '../context/I18nContext';
 
 interface HelpPanelProps {
     isOpen: boolean;
     onClose: () => void;
-    t: Translations;
 }
 
 interface HelpSection {
@@ -283,7 +283,8 @@ const getHelpSections = (t: Translations): HelpSection[] => [
     }
 ];
 
-export const HelpPanel: React.FC<HelpPanelProps> = ({ isOpen, onClose, t }) => {
+export const HelpPanel: React.FC<HelpPanelProps> = ({ isOpen, onClose }) => {
+    const { t } = useI18n();
     const [selectedSection, setSelectedSection] = useState<string>('video-controls');
     const [isVisible, setIsVisible] = useState(false);
 

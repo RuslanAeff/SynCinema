@@ -8,21 +8,17 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Globe, Check, ChevronDown } from 'lucide-react';
-import { Language, LanguageInfo } from '../i18n';
+import { useI18n } from '../context/I18nContext';
+import { Language } from '../i18n';
 
 interface LanguageSelectorProps {
-    currentLanguage: Language;
-    languages: LanguageInfo[];
-    onLanguageChange: (lang: Language) => void;
     compact?: boolean;
 }
 
 export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
-    currentLanguage,
-    languages,
-    onLanguageChange,
     compact = false,
 }) => {
+    const { language: currentLanguage, languages, setLanguage: onLanguageChange } = useI18n();
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 

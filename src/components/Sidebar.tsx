@@ -14,7 +14,7 @@ import { Logo } from './Logo';
 import { InfoButton } from './HelpPanel';
 import { LanguageSelector } from './LanguageSelector';
 import { AudioTrack, AudioDevice } from '../types';
-import { Language, LanguageInfo, Translations } from '../i18n';
+import { useI18n } from '../context/I18nContext';
 
 interface SidebarProps {
     videoFile: File | null;
@@ -53,11 +53,6 @@ interface SidebarProps {
     onHelpClose: () => void;
     onUrlLoaderOpen: () => void;
     onAudioUrlLoad: (url: string, filename: string) => void;
-    // i18n props
-    language: Language;
-    languages: LanguageInfo[];
-    onLanguageChange: (lang: Language) => void;
-    t: Translations;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -97,11 +92,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     onHelpClose,
     onUrlLoaderOpen,
     onAudioUrlLoad,
-    language,
-    languages,
-    onLanguageChange,
-    t
 }) => {
+    const { t, language } = useI18n();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const audioInputRef = useRef<HTMLInputElement>(null);
     const projectInputRef = useRef<HTMLInputElement>(null);
@@ -382,17 +374,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     >
                         {/* Audio URL Input */}
                         {showAudioUrlInput && (
-                            <div className="p-3 m-3 rounded-lg bg-gradient-to-r from-purple-900/30 to-pink-900/30 border border-purple-500/30">
+                            <div className="p-3 m-3 rounded-lg bg-gray-100 dark:bg-gradient-to-r dark:from-purple-900/30 dark:to-pink-900/30 border border-gray-200 dark:border-purple-500/30 shadow-inner dark:shadow-none">
                                 <div className="flex flex-col gap-2">
-                                    <label className="text-xs font-semibold text-purple-300 uppercase tracking-wider flex items-center gap-1">
-                                        <Link size={12} /> Audio URL
+                                    <label className="text-xs font-semibold text-purple-700 dark:text-purple-300 uppercase tracking-wider flex items-center gap-1">
+                                        <Link size={12} /> {t.sidebar.audioUrlLabel}
                                     </label>
                                     <input
                                         type="url"
                                         value={audioUrlInput}
                                         onChange={(e) => setAudioUrlInput(e.target.value)}
-                                        placeholder="https://example.com/audio.mp3"
-                                        className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                        placeholder={t.sidebar.audioUrlPlaceholder}
+                                        className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                                     />
                                     <div className="flex gap-2">
                                         <button
@@ -407,19 +399,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                                 }
                                             }}
                                             disabled={!audioUrlInput.trim()}
-                                            className="flex-1 py-2 px-3 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white text-xs font-medium rounded-lg transition-colors"
+                                            className="flex-1 py-2 px-3 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-300 dark:disabled:bg-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed text-white text-xs font-medium rounded-lg transition-colors"
                                         >
-                                            Add Audio Track
+                                            {t.sidebar.addAudioTrackBtn}
                                         </button>
                                         <button
                                             onClick={() => { setShowAudioUrlInput(false); setAudioUrlInput(''); }}
-                                            className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs rounded-lg transition-colors"
+                                            className="px-3 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-xs rounded-lg transition-colors"
                                         >
-                                            Cancel
+                                            {t.sidebar.cancelBtn}
                                         </button>
                                     </div>
-                                    <p className="text-[10px] text-purple-400/70">
-                                        Supports: Dropbox, Google Drive (&lt;50MB), direct MP3/WAV links
+                                    <p className="text-[10px] text-gray-500 dark:text-purple-400/70">
+                                        {t.sidebar.audioSupports}
                                     </p>
                                 </div>
                             </div>
@@ -480,12 +472,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-800/50">
                 <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-500 dark:text-gray-500">{t.settings.language}</span>
-                    <LanguageSelector
-                        currentLanguage={language}
-                        languages={languages}
-                        onLanguageChange={onLanguageChange}
-                        compact
-                    />
+                    <LanguageSelector compact />
                 </div>
             </div>
 

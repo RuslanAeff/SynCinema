@@ -47,6 +47,11 @@ export const ru: Translations = {
         markers: 'Маркеры',
         addMarker: 'Добавить Маркер',
         noMarkers: 'Маркеры ещё не добавлены.',
+        audioUrlLabel: 'Аудио Ссылка',
+        audioUrlPlaceholder: 'https://example.com/audio.mp3',
+        addAudioTrackBtn: 'Добавить Аудио',
+        cancelBtn: 'Отмена',
+        audioSupports: 'Поддерживается: Dropbox, Google Drive (<50MB), прямые ссылки MP3/WAV',
     },
 
     audioTrack: {
@@ -79,17 +84,25 @@ export const ru: Translations = {
     },
 
     urlLoader: {
-        title: 'Загрузить по URL',
-        placeholder: 'Вставьте URL видео или аудио сюда...',
-        load: 'Загрузить',
-        cancel: 'Отмена',
-        supportedSources: 'Поддерживаемые Источники',
-        directLinks: 'Прямые ссылки на видео/аудио',
-        youtubeVideos: 'Видео YouTube',
-        youtubeNote: 'ограниченные функции',
-        dropboxLinks: 'Ссылки Dropbox',
-        googleDriveLinks: 'Ссылки Google Drive',
-        limitations: 'Ограничения',
+        title: 'Загрузить Видео Источник',
+        subtitle: 'YouTube, Dropbox, Google Drive, Прямая Ссылка',
+        label: 'Видео / Ссылка на Источник',
+        placeholder: 'Вставьте ссылку YouTube, Dropbox, Google Drive или прямую ссылку',
+        loadBtn: 'Загрузить Видео',
+        supportedSources: {
+            title: 'Поддерживаемые Источники',
+            directLinks: 'Прямые ссылки на файлы MP4, WebM, MP3, WAV',
+            dropbox: 'Ссылки Dropbox (рекомендуется для больших файлов)',
+            googleDrive: 'Публичные ссылки Google Drive (макс. ~50МБ)',
+            youtube: 'Видео YouTube (ограниченные функции)',
+            https: 'Любая ссылка HTTPS с медиафайлами',
+        },
+        limitations: {
+            title: 'Ограничения:',
+            youtube: 'YouTube: Аудиовыход нельзя изменить (всегда устройство по умолчанию)',
+            googleDrive: 'Google Drive: Файлы >50МБ могут не загрузиться (используйте Dropbox)',
+            drm: 'Netflix, Vimeo: Не поддерживается (защита DRM)',
+        },
     },
 
     help: {

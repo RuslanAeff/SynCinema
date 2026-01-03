@@ -47,6 +47,11 @@ export const en: Translations = {
         markers: 'Markers',
         addMarker: 'Add Marker',
         noMarkers: 'No markers added yet.',
+        audioUrlLabel: 'Audio URL',
+        audioUrlPlaceholder: 'https://example.com/audio.mp3',
+        addAudioTrackBtn: 'Add Audio Track',
+        cancelBtn: 'Cancel',
+        audioSupports: 'Supports: Dropbox, Google Drive (<50MB), direct MP3/WAV links',
     },
 
     audioTrack: {
@@ -79,17 +84,25 @@ export const en: Translations = {
     },
 
     urlLoader: {
-        title: 'Load from URL',
-        placeholder: 'Paste video or audio URL here...',
-        load: 'Load',
-        cancel: 'Cancel',
-        supportedSources: 'Supported Sources',
-        directLinks: 'Direct video/audio links',
-        youtubeVideos: 'YouTube videos',
-        youtubeNote: 'limited features',
-        dropboxLinks: 'Dropbox links',
-        googleDriveLinks: 'Google Drive links',
-        limitations: 'Limitations',
+        title: 'Load Video Source',
+        subtitle: 'YouTube, Dropbox, Google Drive, Direct URL',
+        label: 'Video / Source URL',
+        placeholder: 'Paste YouTube, Dropbox, Google Drive or direct video link',
+        loadBtn: 'Load Video',
+        supportedSources: {
+            title: 'Supported Sources',
+            directLinks: 'Direct links to MP4, WebM, MP3, WAV files',
+            dropbox: 'Dropbox share links (recommended for large files)',
+            googleDrive: 'Google Drive public links (max ~50MB)',
+            youtube: 'YouTube videos (limited features)',
+            https: 'Any HTTPS URL that serves media files',
+        },
+        limitations: {
+            title: 'Limitations:',
+            youtube: 'YouTube: Audio output cannot be changed (always default device)',
+            googleDrive: 'Google Drive: Files >50MB may not load (use Dropbox)',
+            drm: 'Netflix, Vimeo: Not supported (DRM protection)',
+        },
     },
 
     help: {
