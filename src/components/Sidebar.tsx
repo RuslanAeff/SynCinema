@@ -12,7 +12,9 @@ import { Button } from './Button';
 import { AudioTrackRow } from './AudioTrackRow';
 import { Logo } from './Logo';
 import { InfoButton } from './HelpPanel';
+import { LanguageSelector } from './LanguageSelector';
 import { AudioTrack, AudioDevice } from '../types';
+import { Language, LanguageInfo, Translations } from '../i18n';
 
 interface SidebarProps {
     videoFile: File | null;
@@ -51,6 +53,11 @@ interface SidebarProps {
     onHelpClose: () => void;
     onUrlLoaderOpen: () => void;
     onAudioUrlLoad: (url: string, filename: string) => void;
+    // i18n props
+    language: Language;
+    languages: LanguageInfo[];
+    onLanguageChange: (lang: Language) => void;
+    t: Translations;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -89,7 +96,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
     onHelpOpen,
     onHelpClose,
     onUrlLoaderOpen,
-    onAudioUrlLoad
+    onAudioUrlLoad,
+    language,
+    languages,
+    onLanguageChange,
+    t
 }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const audioInputRef = useRef<HTMLInputElement>(null);
@@ -144,10 +155,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         </button>
                     </div>
                 </div>
-                <p className="text-xs font-bold tracking-wide text-gray-800 dark:text-gray-400 uppercase opacity-100">Multi-output synchronized player</p>
+                <p className="text-xs font-bold tracking-wide text-gray-800 dark:text-gray-400 uppercase opacity-100">{t.app.subtitle}</p>
                 <div className="flex gap-2 mt-4">
-                    <Button size="sm" variant="secondary" onClick={onSaveProject}>Save Project</Button>
-                    <Button size="sm" variant="secondary" onClick={() => projectInputRef.current?.click()}>Load Project</Button>
+                    <Button size="sm" variant="secondary" onClick={onSaveProject}>{t.sidebar.saveProject}</Button>
+                    <Button size="sm" variant="secondary" onClick={() => projectInputRef.current?.click()}>{t.sidebar.loadProject}</Button>
                     <input type="file" accept=".sync,.json" className="hidden" ref={projectInputRef} onChange={handleProjectLoad} />
                 </div>
                 {!permissionsGranted && (
@@ -163,7 +174,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 <div className="p-4 rounded-xl border border-dashed border-gray-700 bg-gray-800/30">
-                    <h2 className="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2"><Film size={16} /> Main Video Source</h2>
+                    <h2 className="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2"><Film size={16} /> {t.sidebar.mainVideoSource}</h2>
                     {videoFile ? (
                         <div className="flex items-center justify-between bg-gray-800 p-3 rounded-lg">
                             <span className="text-sm truncate max-w-[200px]">{videoFile.name}</span>
@@ -176,11 +187,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         <div className="flex gap-2">
                             <button onClick={() => fileInputRef.current?.click()} className="flex-1 py-6 flex flex-col items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors rounded-lg border-2 border-transparent hover:border-indigo-500/30">
                                 <Upload size={20} className="mb-1" />
-                                <span className="text-xs">Select File</span>
+                                <span className="text-xs">{t.sidebar.selectFile}</span>
                             </button>
                             <button onClick={onUrlLoaderOpen} className="flex-1 py-6 flex flex-col items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors rounded-lg border-2 border-transparent hover:border-purple-500/30">
                                 <Link size={20} className="mb-1" />
-                                <span className="text-xs">Load URL</span>
+                                <span className="text-xs">{t.sidebar.loadUrl}</span>
                             </button>
                         </div>
                     )}
@@ -192,7 +203,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             <div className="flex items-center justify-between mb-2">
                                 <span className="text-xs font-medium text-gray-500 flex items-center gap-1">
                                     {videoMuted ? <VolumeX size={12} /> : <Volume2 size={12} />}
-                                    Video Audio
+                                    {t.sidebar.videoVolume}
                                 </span>
                                 <div className="flex items-center gap-2">
                                     <span className="text-xs font-mono text-indigo-400">{Math.round(videoVolume * 100)}%</span>
@@ -200,7 +211,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                         onClick={() => onVideoMutedChange(!videoMuted)}
                                         className={`text-[10px] px-2 py-0.5 rounded ${videoMuted ? 'bg-red-500/20 text-red-400' : 'bg-gray-700 text-gray-400 hover:bg-gray-600'}`}
                                     >
-                                        {videoMuted ? 'Muted' : 'Mute'}
+                                        {videoMuted ? t.sidebar.muted : t.sidebar.mute}
                                     </button>
                                 </div>
                             </div>
@@ -227,7 +238,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                 onChange={(e) => onVideoDeviceChange(e.target.value)}
                                 className="w-full bg-gray-900 border border-gray-700 text-gray-300 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2"
                             >
-                                <option value="">Default System Output</option>
+                                <option value="">{t.sidebar.defaultOutput}</option>
                                 {audioDevices.map(device => (
                                     <option key={device.deviceId} value={device.deviceId}>
                                         {device.label || `Unknown Device (${device.deviceId.slice(0, 5)}...)`}
@@ -240,16 +251,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     {/* Subtitles */}
                     <div className="mt-3 pt-3 border-t border-gray-700/50">
                         <div className="flex items-center justify-between">
-                            <span className="text-xs font-medium text-gray-500">Subtitles (.srt)</span>
+                            <span className="text-xs font-medium text-gray-500">{t.sidebar.subtitles} (.srt)</span>
                             {!hasSubtitles ? (
                                 <button onClick={() => subtitleInputRef.current?.click()} className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
-                                    <Upload size={12} /> Load
+                                    <Upload size={12} /> {t.sidebar.load}
                                 </button>
                             ) : (
                                 <div className="flex items-center gap-3">
-                                    <span className="text-xs text-green-500">Active</span>
+                                    <span className="text-xs text-green-500">{t.sidebar.active}</span>
                                     <div className="flex items-center gap-1">
-                                        <span className="text-[10px] text-gray-500">Offset</span>
+                                        <span className="text-[10px] text-gray-500">{t.sidebar.offset}</span>
                                         <input
                                             type="number"
                                             step="0.1"
@@ -275,7 +286,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             className="w-full p-4 flex items-center justify-between hover:bg-gray-200/50 dark:hover:bg-gray-800/50 transition-colors"
                         >
                             <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                                🔖 Markers
+                                🔖 {t.sidebar.markers}
                                 <span className="text-xs font-normal text-gray-500 dark:text-gray-500">({markers.length})</span>
                             </h2>
                             <div className="flex items-center gap-2">
@@ -298,7 +309,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         >
                             <div className="px-4 pb-4">
                                 {markers.length === 0 ? (
-                                    <p className="text-xs text-gray-500 dark:text-gray-500 text-center py-2">No markers added yet.</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-500 text-center py-2">{t.sidebar.noMarkers}</p>
                                 ) : (
                                     <div className="space-y-1 max-h-32 overflow-y-auto">
                                         {markers.map((marker) => {
@@ -339,7 +350,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         className="w-full p-4 flex items-center justify-between hover:bg-gray-200/50 dark:hover:bg-gray-800/50 transition-colors border-b border-gray-300 dark:border-gray-800"
                     >
                         <h2 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider flex items-center gap-2">
-                            🎵 Audio Tracks
+                            🎵 {t.sidebar.audioTracks}
                             <span className="text-xs font-normal text-gray-500 dark:text-gray-500">({audioTracks.length})</span>
                         </h2>
                         <div className="flex items-center gap-1.5">
@@ -420,7 +431,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                 onClick={() => setIsMasterVolumeCollapsed(!isMasterVolumeCollapsed)}
                                 className="w-full flex items-center justify-between"
                             >
-                                <span className="text-xs font-semibold text-indigo-300 uppercase tracking-wider">🎚️ Master Volume</span>
+                                <span className="text-xs font-semibold text-indigo-300 uppercase tracking-wider">🎚️ {t.sidebar.masterVolume}</span>
                                 <div className="flex items-center gap-2">
                                     <span className="text-xs font-mono text-indigo-400">{Math.round(masterVolume * 100)}%</span>
                                     <ChevronDown
@@ -444,7 +455,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
                         <div className="space-y-4 px-3 pb-4">
                             {audioTracks.length === 0 ? (
-                                <div className="text-center py-6 text-gray-600"><p>No external audio tracks added.</p></div>
+                                <div className="text-center py-6 text-gray-600"><p>{t.sidebar.noAudioTracks}</p></div>
                             ) : (
                                 audioTracks.map(track => (
                                     <AudioTrackRow
@@ -465,12 +476,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </div>
             </div>
 
+            {/* Language Selector */}
+            <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-800/50">
+                <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500 dark:text-gray-500">{t.settings.language}</span>
+                    <LanguageSelector
+                        currentLanguage={language}
+                        languages={languages}
+                        onLanguageChange={onLanguageChange}
+                        compact
+                    />
+                </div>
+            </div>
+
             {/* Designer Signature Footer */}
-            <div className="p-4 border-t border-gray-800/50 bg-gradient-to-r from-gray-900 to-gray-900/80">
+            <div className="p-4 border-t border-gray-200 dark:border-gray-800/50 bg-gradient-to-r from-gray-100 dark:from-gray-900 to-gray-100/80 dark:to-gray-900/80">
                 <div className="flex items-center justify-center gap-2 opacity-70 hover:opacity-100 transition-opacity">
                     <div className="h-px flex-1 bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent"></div>
                     <div className="flex items-center gap-2 px-3">
-                        <span className="text-[10px] uppercase tracking-[0.2em] text-gray-500">Designed by</span>
+                        <span className="text-[10px] uppercase tracking-[0.2em] text-gray-500">{t.app.createdBy}</span>
                         <span className="text-xs font-semibold bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
                             Ruslan Aliyev
                         </span>

@@ -34,10 +34,12 @@ import {
     Smartphone,
     Monitor
 } from 'lucide-react';
+import { Translations } from '../i18n';
 
 interface HelpPanelProps {
     isOpen: boolean;
     onClose: () => void;
+    t: Translations;
 }
 
 interface HelpSection {
@@ -53,246 +55,235 @@ interface HelpSection {
     }[];
 }
 
-const helpSections: HelpSection[] = [
+// Dynamic function to generate help sections based on current language
+const getHelpSections = (t: Translations): HelpSection[] => [
     {
         id: 'video-controls',
-        title: 'Video Controls',
+        title: t.help.sections.videoControls,
         icon: <Film size={20} />,
         items: [
             {
-                name: 'Play / Pause',
+                name: t.help.videoControls.playPause,
                 icon: <Play size={16} />,
                 iconColor: 'bg-green-500/20 text-green-500 dark:bg-green-500/20 dark:text-green-400',
-                description: 'Start or stop video playback. All synchronized audio tracks will also play or pause together.',
-                shortcut: 'Space or K'
+                description: t.help.videoControls.playPauseDesc,
+                shortcut: 'Space / K'
             },
             {
-                name: 'Rewind 10s',
+                name: t.help.videoControls.rewind,
                 icon: <RotateCcw size={16} />,
                 iconColor: 'bg-blue-500/20 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400',
-                description: 'Jump backward 10 seconds in the video timeline.',
-                shortcut: 'J or ←'
+                description: t.help.videoControls.rewindDesc,
+                shortcut: 'J / ←'
             },
             {
-                name: 'Forward 10s',
+                name: t.help.videoControls.forward,
                 icon: <RotateCcw size={16} className="-scale-x-100" />,
                 iconColor: 'bg-blue-500/20 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400',
-                description: 'Jump forward 10 seconds in the video timeline.',
-                shortcut: 'L or →'
+                description: t.help.videoControls.forwardDesc,
+                shortcut: 'L / →'
             },
             {
-                name: 'Progress Bar',
-                description: 'Click or drag to seek to any position in the video. Hover to see a preview thumbnail.',
+                name: t.help.videoControls.progressBar,
+                description: t.help.videoControls.progressBarDesc,
             },
             {
-                name: 'Volume Slider',
+                name: t.help.videoControls.volume,
                 icon: <Volume2 size={16} />,
                 iconColor: 'bg-purple-500/20 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400',
-                description: 'Adjust the main video audio volume. Click the icon to mute/unmute.',
+                description: t.help.videoControls.volumeDesc,
                 shortcut: '↑ / ↓'
             },
             {
-                name: 'Fullscreen',
+                name: t.help.videoControls.fullscreen,
                 icon: <Maximize size={16} />,
                 iconColor: 'bg-indigo-500/20 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400',
-                description: 'Toggle fullscreen mode for immersive viewing. Controls auto-hide after 3 seconds (move mouse to show).',
+                description: t.help.videoControls.fullscreenDesc,
                 shortcut: 'F'
             },
             {
-                name: 'Detach Player',
-                description: 'Open the video in a separate window. Useful for multi-monitor setups.',
+                name: t.help.videoControls.detachPlayer,
+                description: t.help.videoControls.detachPlayerDesc,
             }
         ]
     },
     {
         id: 'audio-tracks',
-        title: 'Audio Tracks',
+        title: t.help.sections.audioTracks,
         icon: <Music size={20} />,
         items: [
             {
-                name: 'Add Audio',
+                name: t.help.audioTracks.addAudio,
                 icon: <Upload size={16} />,
                 iconColor: 'bg-emerald-500/20 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400',
-                description: 'Load external audio files (MP3, WAV, AAC, etc.) from your computer or via URL (Link button). You can add multiple tracks for different languages or commentary.',
+                description: t.help.audioTracks.addAudioDesc,
             },
             {
-                name: 'Output Device',
+                name: t.help.audioTracks.outputDevice,
                 icon: <MonitorSpeaker size={16} />,
                 iconColor: 'bg-cyan-500/20 text-cyan-600 dark:bg-cyan-500/20 dark:text-cyan-400',
-                description: 'Route each audio track to a different speaker or headphone. Perfect for family movie nights where everyone watches in their own language!',
+                description: t.help.audioTracks.outputDeviceDesc,
             },
             {
-                name: 'Start Offset',
+                name: t.help.audioTracks.startOffset,
                 icon: <Clock size={16} />,
                 iconColor: 'bg-amber-500/20 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400',
-                description: 'Adjust the delay (positive or negative) to sync audio with video. Use the +/- buttons for fine-tuning.',
+                description: t.help.audioTracks.startOffsetDesc,
             },
             {
-                name: 'Playback Speed',
+                name: t.help.audioTracks.playbackSpeed,
                 icon: <Gauge size={16} />,
                 iconColor: 'bg-orange-500/20 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400',
-                description: 'Adjust the playback rate if audio drifts out of sync over time. Useful for fixing frame rate mismatches.',
+                description: t.help.audioTracks.playbackSpeedDesc,
             },
             {
-                name: 'Volume',
+                name: t.help.audioTracks.volume,
                 icon: <Volume2 size={16} />,
                 iconColor: 'bg-purple-500/20 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400',
-                description: 'Control individual track volume. Each track has its own mute button.',
+                description: t.help.audioTracks.volumeDesc,
             },
             {
-                name: 'Master Volume',
-                description: 'Adjust the overall volume for all audio tracks simultaneously.',
+                name: t.help.audioTracks.masterVolume,
+                description: t.help.audioTracks.masterVolumeDesc,
             },
             {
-                name: '3-Band EQ',
+                name: t.help.audioTracks.eq3Band,
                 icon: <Sliders size={16} />,
                 iconColor: 'bg-pink-500/20 text-pink-600 dark:bg-pink-500/20 dark:text-pink-400',
-                description: 'Fine-tune audio with Bass (low frequencies), Mid (vocals), and Treble (high frequencies) controls.',
+                description: t.help.audioTracks.eq3BandDesc,
             },
             {
-                name: 'Limiter',
-                description: 'Automatically compress loud audio peaks to prevent distortion and protect your hearing.',
-            },
-            {
-                name: 'Waveform',
-                description: 'Visual representation of the audio file. Shows where you are in the track relative to the video timeline.',
+                name: t.help.audioTracks.limiter,
+                description: t.help.audioTracks.limiterDesc,
             }
         ]
     },
     {
         id: 'project',
-        title: 'Project Management',
+        title: t.help.sections.projectManagement,
         icon: <Save size={20} />,
         items: [
             {
-                name: 'Save Project',
+                name: t.help.projectManagement.saveProject,
                 icon: <Save size={16} />,
                 iconColor: 'bg-blue-500/20 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400',
-                description: 'Export your current settings (track offsets, EQ, device assignments, volume levels) as a .sync file. Does NOT save actual media files.',
+                description: t.help.projectManagement.saveProjectDesc,
             },
             {
-                name: 'Load Project',
+                name: t.help.projectManagement.loadProject,
                 icon: <FolderOpen size={16} />,
                 iconColor: 'bg-yellow-500/20 text-yellow-600 dark:bg-yellow-500/20 dark:text-yellow-400',
-                description: 'Import a previously saved .sync file. Settings will be applied to matching audio tracks by filename.',
+                description: t.help.projectManagement.loadProjectDesc,
             },
             {
-                name: 'Load Video',
-                icon: <Film size={16} />,
-                iconColor: 'bg-red-500/20 text-red-600 dark:bg-red-500/20 dark:text-red-400',
-                description: 'Select a video file from your computer. Supports MP4, MKV, WebM, AVI, and more.',
+                name: t.help.projectManagement.subtitles,
+                description: t.help.projectManagement.subtitlesDesc,
             },
             {
-                name: 'Load Subtitles',
-                description: 'Import SRT subtitle files. Adjust subtitle offset if they are out of sync.',
+                name: t.help.projectManagement.markers,
+                description: t.help.projectManagement.markersDesc,
             }
         ]
     },
     {
         id: 'keyboard',
-        title: 'Keyboard Shortcuts',
+        title: t.help.sections.keyboardShortcuts,
         icon: <Keyboard size={20} />,
         items: [
-            { name: 'Space / K', description: 'Play or pause the video' },
-            { name: 'J', description: 'Rewind 10 seconds' },
-            { name: 'L', description: 'Fast forward 10 seconds' },
-            { name: '← / →', description: 'Seek 5 seconds backward/forward' },
-            { name: '↑ / ↓', description: 'Increase/decrease volume' },
-            { name: 'F', description: 'Toggle fullscreen mode' },
-            { name: 'M', description: 'Mute/unmute video audio' },
-            { name: '0-9', description: 'Jump to 0%-90% of video' },
-            { name: 'Home', description: 'Jump to start of video' },
-            { name: 'End', description: 'Jump to end of video' },
-            { name: ', / .', description: 'Step one frame backward/forward (while paused)' },
-            { name: 'Esc', description: 'Exit fullscreen' }
+            { name: t.help.keyboardShortcuts.space, description: t.help.keyboardShortcuts.spaceDesc },
+            { name: 'J', description: t.help.keyboardShortcuts.arrowsDesc },
+            { name: t.help.keyboardShortcuts.arrows, description: t.help.keyboardShortcuts.arrowsDesc },
+            { name: t.help.keyboardShortcuts.fKey, description: t.help.keyboardShortcuts.fKeyDesc },
+            { name: t.help.keyboardShortcuts.mKey, description: t.help.keyboardShortcuts.mKeyDesc },
+            { name: t.help.keyboardShortcuts.escKey, description: t.help.keyboardShortcuts.escKeyDesc }
         ]
     },
     {
         id: 'settings',
-        title: 'Settings',
+        title: t.help.sections.settings,
         icon: <Sun size={20} />,
         items: [
             {
-                name: 'Theme Toggle',
+                name: t.help.settingsSection.theme,
                 icon: <Moon size={16} />,
                 iconColor: 'bg-violet-500/20 text-violet-600 dark:bg-violet-500/20 dark:text-violet-400',
-                description: 'Switch between dark and light mode. Your preference is saved automatically.',
+                description: t.help.settingsSection.themeDesc,
             },
             {
-                name: 'Refresh Devices',
-                description: 'Re-scan available audio output devices if you connect new speakers or headphones.',
+                name: t.help.settingsSection.language,
+                description: t.help.settingsSection.languageDesc,
             }
         ]
     },
     {
         id: 'url-sources',
-        title: 'URL Sources',
+        title: t.help.sections.urlSources,
         icon: <Link size={20} />,
         items: [
             {
-                name: 'Direct Links',
+                name: t.help.urlSources.directLinks,
                 icon: <Link size={16} />,
                 iconColor: 'bg-green-500/20 text-green-600 dark:bg-green-500/20 dark:text-green-400',
-                description: 'Any direct link to MP4, WebM, MP3, WAV files. Must be a public URL that serves the file directly.',
+                description: t.help.urlSources.directLinksDesc,
             },
             {
-                name: 'Dropbox',
+                name: t.help.urlSources.dropbox,
                 icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 6.17L6 10l6 3.83L0 10 6 6.17l6 3.83zm0 0L18 10l-6-3.83L18 2.34l6 3.83-6 3.83-6-3.83zM6 2.34L0 6.17l6 3.83 6-3.83-6-3.83zm6 11.32l-6-3.83L0 13.66l6 3.83 6-3.83zm0 0l6-3.83 6 3.83-6 3.83-6-3.83z" /></svg>,
                 iconColor: 'bg-blue-600/20 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400',
-                description: 'Share links from Dropbox work perfectly for all file sizes. Recommended for large files. Links are automatically converted to direct download URLs.',
+                description: t.help.urlSources.dropboxDesc,
             },
             {
-                name: 'Google Drive',
+                name: t.help.urlSources.googleDrive,
                 icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7.71 3.5L1.15 15l3.43 6L11.14 9.5 7.71 3.5zm1.42 0l6.86 12h6.86l-3.43-6-6.86-12H9.13zM12 10.44L8.56 16.5h6.88L12 10.44zm-4.57 7.06L4 22.5h13.72l3.43-5H7.43z"></path></svg>,
                 iconColor: 'bg-gradient-to-br from-yellow-400/20 via-green-500/20 to-blue-500/20 text-blue-600 dark:text-blue-400',
-                description: 'Public share links work for files under ~50MB. Larger files may fail due to Google\'s virus scan. For big files, use Dropbox instead.',
+                description: t.help.urlSources.googleDriveDesc,
             },
             {
-                name: 'YouTube',
+                name: t.help.urlSources.youtube,
                 icon: <Youtube size={16} />,
                 iconColor: 'bg-red-500/20 text-red-600 dark:bg-red-500/20 dark:text-red-500',
-                description: 'YouTube videos can be played, but with significant limitations:',
+                description: t.help.urlSources.youtubeDesc,
             },
             {
-                name: '⚠️ YouTube Limitations',
-                description: '• Audio output CANNOT be changed (always uses default device)\n• Video quality is automatic (shown in controls, cannot be changed)\n• External audio tracks can still be routed to different devices\n• Some videos may show ads\n• No download option',
+                name: '⚠️ ' + t.help.urlSources.youtubeLimitations,
+                description: t.help.urlSources.youtubeLimitationsDesc,
             },
             {
-                name: '❌ Not Supported',
-                description: 'Netflix, Vimeo, Disney+, Amazon Prime and similar streaming services are NOT supported due to DRM (Digital Rights Management) protection. These platforms encrypt their content.',
+                name: '❌ ' + t.help.urlSources.notSupported,
+                description: t.help.urlSources.notSupportedDesc,
             }
         ]
     },
     {
         id: 'platform',
-        title: 'Platform Requirements',
+        title: t.help.sections.platformRequirements,
         icon: <Monitor size={20} />,
         items: [
             {
-                name: '✅ Desktop / Laptop',
+                name: '✅ ' + t.help.platform.desktop,
                 icon: <Monitor size={16} />,
                 iconColor: 'bg-green-500/20 text-green-600 dark:bg-green-500/20 dark:text-green-400',
-                description: 'SynCinema is designed for desktop use. Full support for Chrome, Firefox, Edge, and other Chromium-based browsers. All features including multi-device audio routing work perfectly.',
+                description: t.help.platform.desktopDesc,
             },
             {
-                name: '⚠️ Mobile Devices (Android/iOS)',
+                name: '⚠️ ' + t.help.platform.mobile,
                 icon: <Smartphone size={16} />,
                 iconColor: 'bg-amber-500/20 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400',
-                description: 'Basic video playback works, but the main feature (routing audio to different devices) does NOT work on mobile. This is due to browser API limitations on iOS Safari and Android Chrome.',
+                description: t.help.platform.mobileDesc,
             },
             {
-                name: '📱 Why Mobile Doesn\'t Support Audio Routing',
-                description: 'Mobile browsers don\'t support the "setSinkId" Web Audio API that allows selecting audio output devices. Additionally, mobile devices typically have only one audio output at a time (speaker or headphones), making multi-output routing impractical.',
+                name: '📱 ' + t.help.platform.mobileWhy,
+                description: t.help.platform.mobileWhyDesc,
             },
             {
-                name: '💡 What Works on Mobile',
-                description: '• Video playback (local files, YouTube, URLs)\n• Adding audio tracks\n• Offset/sync adjustments\n• EQ and volume controls\n• Single audio output only',
+                name: '💡 ' + t.help.platform.mobileWorks,
+                description: t.help.platform.mobileWorksDesc,
             }
         ]
     }
 ];
 
-export const HelpPanel: React.FC<HelpPanelProps> = ({ isOpen, onClose }) => {
+export const HelpPanel: React.FC<HelpPanelProps> = ({ isOpen, onClose, t }) => {
     const [selectedSection, setSelectedSection] = useState<string>('video-controls');
     const [isVisible, setIsVisible] = useState(false);
 
@@ -316,6 +307,7 @@ export const HelpPanel: React.FC<HelpPanelProps> = ({ isOpen, onClose }) => {
 
     if (!isOpen) return null;
 
+    const helpSections = getHelpSections(t);
     const activeSection = helpSections.find(s => s.id === selectedSection) || helpSections[0];
 
     return (
@@ -340,8 +332,8 @@ export const HelpPanel: React.FC<HelpPanelProps> = ({ isOpen, onClose }) => {
                                 <Info size={20} className="text-white" />
                             </div>
                             <div>
-                                <h2 className="text-lg font-bold text-gray-900 dark:text-white">Help Center</h2>
-                                <p className="text-xs text-gray-500">SynCinema Guide</p>
+                                <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t.help.title}</h2>
+                                <p className="text-xs text-gray-500">SynCinema</p>
                             </div>
                         </div>
                     </div>

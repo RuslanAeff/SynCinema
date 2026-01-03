@@ -8,6 +8,7 @@
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { Play, Pause, RotateCcw, Film, Maximize, Minimize, Volume2 } from 'lucide-react';
+import { Translations } from '../i18n';
 
 interface VideoPlayerProps {
     videoFile: File | null;
@@ -23,6 +24,7 @@ interface VideoPlayerProps {
     setDuration: (duration: number) => void;
     subtitleCues?: { id: string, startTime: number, endTime: number, text: string }[];
     subtitleOffset?: number;
+    t: Translations;
 }
 
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({
@@ -38,7 +40,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     setCurrentTime,
     setDuration,
     subtitleCues = [],
-    subtitleOffset = 0
+    subtitleOffset = 0,
+    t
 }) => {
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [showControls, setShowControls] = useState(true);
@@ -459,7 +462,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 ) : (
                     <div className="text-center text-gray-600">
                         <Film size={64} className="mx-auto mb-4 opacity-20" />
-                        <h2 className="text-xl font-medium text-gray-500">No Video Loaded</h2>
+                        <h2 className="text-xl font-medium text-gray-500">{t.player.noVideoLoaded}</h2>
                     </div>
                 )}
                 {videoObjectUrl && !isPlaying && (
