@@ -152,6 +152,6 @@ See the [LICENSE](LICENSE) file for full details.
 
 ---
 
-*Made with ❤️ for movie lovers*
+*For movie lovers everywhere*
 
 </div>
