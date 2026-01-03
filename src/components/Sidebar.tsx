@@ -374,9 +374,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     >
                         {/* Audio URL Input */}
                         {showAudioUrlInput && (
-                            <div className="p-3 m-3 rounded-lg bg-gray-100 dark:bg-gradient-to-r dark:from-purple-900/30 dark:to-pink-900/30 border border-gray-200 dark:border-purple-500/30 shadow-inner dark:shadow-none">
+                            <div className="p-3 m-3 rounded-lg bg-gray-100 dark:bg-gray-800/80 border border-gray-200 dark:border-purple-500/30 shadow-inner dark:shadow-none">
                                 <div className="flex flex-col gap-2">
-                                    <label className="text-xs font-semibold text-purple-700 dark:text-purple-300 uppercase tracking-wider flex items-center gap-1">
+                                    <label className="text-xs font-semibold text-purple-700 dark:text-purple-400 uppercase tracking-wider flex items-center gap-1">
                                         <Link size={12} /> {t.sidebar.audioUrlLabel}
                                     </label>
                                     <input
@@ -384,7 +384,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                         value={audioUrlInput}
                                         onChange={(e) => setAudioUrlInput(e.target.value)}
                                         placeholder={t.sidebar.audioUrlPlaceholder}
-                                        className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                        className="w-full px-3 py-2 bg-white dark:bg-gray-900/50 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                                     />
                                     <div className="flex gap-2">
                                         <button
@@ -410,7 +410,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                             {t.sidebar.cancelBtn}
                                         </button>
                                     </div>
-                                    <p className="text-[10px] text-gray-500 dark:text-purple-400/70">
+                                    <p className="text-[10px] text-gray-500 dark:text-gray-400">
                                         {t.sidebar.audioSupports}
                                     </p>
                                 </div>
