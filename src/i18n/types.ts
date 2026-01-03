@@ -118,6 +118,15 @@ export interface Translations {
         limiter: string;
         limiterActive: string;
         enableLimiter: string;
+        eqPresets: {
+            label: string;
+            flat: string;
+            cinema: string;
+            dialogue: string;
+            music: string;
+            night: string;
+            bass: string;
+        };
     };
 
     // Video player

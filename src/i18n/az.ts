@@ -70,6 +70,15 @@ export const az: Translations = {
         limiter: 'Məhdudlaşdırıcı',
         limiterActive: 'Məhdudlaşdırıcı Aktiv',
         enableLimiter: 'Məhdudlaşdırıcını Aktivləşdir',
+        eqPresets: {
+            label: 'Hazır Ayar',
+            flat: 'Düz',
+            cinema: 'Kino',
+            dialogue: 'Dialoq',
+            music: 'Musiqi',
+            night: 'Gecə Rejimi',
+            bass: 'Bas Gücləndirmə',
+        },
     },
 
     player: {

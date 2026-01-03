@@ -70,6 +70,15 @@ export const ru: Translations = {
         limiter: 'Лимитер',
         limiterActive: 'Лимитер Активен',
         enableLimiter: 'Включить Лимитер',
+        eqPresets: {
+            label: 'Пресет',
+            flat: 'Плоский',
+            cinema: 'Кино',
+            dialogue: 'Диалог',
+            music: 'Музыка',
+            night: 'Ночной Режим',
+            bass: 'Усиление Баса',
+        },
     },
 
     player: {

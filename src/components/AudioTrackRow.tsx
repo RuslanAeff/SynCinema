@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { AudioTrack, AudioDevice, ExtendedMediaElement } from '../types';
 import { Trash2, Volume2, VolumeX, Clock, Gauge, ChevronDown, ChevronUp, Headphones, Check, RotateCcw } from 'lucide-react';
 import { AudioGraphManager } from './AudioGraphManager';
+import { useI18n } from '../context/I18nContext';
+import { eqPresets, getCurrentPresetId } from '../constants/eqPresets';
 
 interface AudioTrackRowProps {
   track: AudioTrack;
@@ -24,6 +26,7 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
   syncThreshold = 0.3,
   masterVolume = 1
 }) => {
+  const { t } = useI18n();
   const audioRef = useRef<ExtendedMediaElement>(null);
   const [driftWarning, setDriftWarning] = useState(false);
   const [isSwitchingDevice, setIsSwitchingDevice] = useState(false);
@@ -473,15 +476,35 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
           <div>
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-medium text-teal-600 dark:text-teal-400 uppercase tracking-wider">3-Band EQ</span>
-              {(track.eq?.low !== 0 || track.eq?.mid !== 0 || track.eq?.high !== 0) && (
-                <button
-                  onClick={() => onUpdate(track.id, { eq: { low: 0, mid: 0, high: 0 } })}
-                  className="flex items-center gap-1 text-[10px] text-gray-500 hover:text-teal-500 dark:hover:text-teal-400 transition-colors"
+              <div className="flex items-center gap-2">
+                {/* Preset Dropdown */}
+                <select
+                  value={getCurrentPresetId(track.eq || { low: 0, mid: 0, high: 0 }) || ''}
+                  onChange={(e) => {
+                    const preset = eqPresets.find(p => p.id === e.target.value);
+                    if (preset) {
+                      onUpdate(track.id, { eq: { low: preset.low, mid: preset.mid, high: preset.high } });
+                    }
+                  }}
+                  className="text-[10px] px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-1 focus:ring-teal-500 cursor-pointer"
                 >
-                  <RotateCcw size={10} />
-                  Reset
-                </button>
-              )}
+                  <option value="" disabled>{t.audioTrack.eqPresets.label}</option>
+                  {eqPresets.map(preset => (
+                    <option key={preset.id} value={preset.id}>
+                      {t.audioTrack.eqPresets[preset.id as keyof typeof t.audioTrack.eqPresets]}
+                    </option>
+                  ))}
+                </select>
+                {(track.eq?.low !== 0 || track.eq?.mid !== 0 || track.eq?.high !== 0) && (
+                  <button
+                    onClick={() => onUpdate(track.id, { eq: { low: 0, mid: 0, high: 0 } })}
+                    className="flex items-center gap-1 text-[10px] text-gray-500 hover:text-teal-500 dark:hover:text-teal-400 transition-colors"
+                  >
+                    <RotateCcw size={10} />
+                    {t.audioTrack.reset}
+                  </button>
+                )}
+              </div>
             </div>
             <div className="grid grid-cols-3 gap-4">
               {[

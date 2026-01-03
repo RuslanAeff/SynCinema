@@ -70,6 +70,15 @@ export const en: Translations = {
         limiter: 'Limiter',
         limiterActive: 'Limiter Active',
         enableLimiter: 'Enable Limiter',
+        eqPresets: {
+            label: 'Preset',
+            flat: 'Flat',
+            cinema: 'Cinema',
+            dialogue: 'Dialogue',
+            music: 'Music',
+            night: 'Night Mode',
+            bass: 'Bass Boost',
+        },
     },
 
     player: {

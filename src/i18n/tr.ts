@@ -70,6 +70,15 @@ export const tr: Translations = {
         limiter: 'Sınırlayıcı',
         limiterActive: 'Sınırlayıcı Aktif',
         enableLimiter: 'Sınırlayıcıyı Etkinleştir',
+        eqPresets: {
+            label: 'Hazır Ayar',
+            flat: 'Düz',
+            cinema: 'Sinema',
+            dialogue: 'Diyalog',
+            music: 'Müzik',
+            night: 'Gece Modu',
+            bass: 'Bas Güçlendirme',
+        },
     },
 
     player: {
