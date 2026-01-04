@@ -620,13 +620,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
                         {/* Detach / PIP Mode */}
                         <button
-                            onClick={() => {
-                                if (document.pictureInPictureElement) {
-                                    document.exitPictureInPicture();
-                                } else if (videoRef.current && videoRef.current !== document.pictureInPictureElement) {
-                                    videoRef.current.requestPictureInPicture();
-                                }
-                            }}
+                            onClick={openDetachedWindow}
                             className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors p-1.5 sm:p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg"
                             title={t.player.detach}
                         >
