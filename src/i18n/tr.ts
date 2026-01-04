@@ -60,6 +60,7 @@ export const tr: Translations = {
         delete: 'Sil',
         outputDevice: 'Çıkış Cihazı',
         defaultDevice: 'Varsayılan Çıkış',
+        systemDefaultDevice: 'Sistem varsayılan ses cihazı',
         advanced: 'Gelişmiş',
         offsetAdjustment: 'Ofset Ayarı',
         reset: 'Sıfırla',

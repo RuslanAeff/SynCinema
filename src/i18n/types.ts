@@ -108,6 +108,7 @@ export interface Translations {
         delete: string;
         outputDevice: string;
         defaultDevice: string;
+        systemDefaultDevice: string;
         advanced: string;
         offsetAdjustment: string;
         reset: string;

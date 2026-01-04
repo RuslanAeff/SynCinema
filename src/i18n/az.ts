@@ -60,6 +60,7 @@ export const az: Translations = {
         delete: 'Sil',
         outputDevice: 'Çıxış Cihazı',
         defaultDevice: 'Standart Çıxış',
+        systemDefaultDevice: 'Sistem standart səs cihazı',
         advanced: 'Ətraflı',
         offsetAdjustment: 'Ofset Tənzimləməsi',
         reset: 'Sıfırla',

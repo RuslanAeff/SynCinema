@@ -60,6 +60,7 @@ export const en: Translations = {
         delete: 'Delete',
         outputDevice: 'Output Device',
         defaultDevice: 'Default Output',
+        systemDefaultDevice: 'System default audio device',
         advanced: 'Advanced',
         offsetAdjustment: 'Offset Adjustment',
         reset: 'Reset',

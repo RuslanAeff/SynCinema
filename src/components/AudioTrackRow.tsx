@@ -1,9 +1,34 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AudioTrack, AudioDevice, ExtendedMediaElement } from '../types';
-import { Trash2, Volume2, VolumeX, Clock, Gauge, ChevronDown, ChevronUp, Headphones, Check, RotateCcw } from 'lucide-react';
+import { Trash2, Volume2, VolumeX, Clock, Gauge, ChevronDown, ChevronUp, Headphones, Check, RotateCcw, Speaker, Mic, Radio, Monitor } from 'lucide-react';
 import { AudioGraphManager } from './AudioGraphManager';
 import { useI18n } from '../context/I18nContext';
 import { eqPresets, getCurrentPresetId } from '../constants/eqPresets';
+
+// Format seconds to MM:SS.d
+const formatTime = (seconds: number): string => {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins.toString().padStart(2, '0')}:${secs.toFixed(1).padStart(4, '0')}`;
+};
+
+// Get device icon based on label
+const getDeviceIcon = (label: string): React.ReactNode => {
+  const lowerLabel = label.toLowerCase();
+  if (lowerLabel.includes('headphone') || lowerLabel.includes('headset') || lowerLabel.includes('earphone')) {
+    return <Headphones size={14} />;
+  }
+  if (lowerLabel.includes('microphone') || lowerLabel.includes('mic')) {
+    return <Mic size={14} />;
+  }
+  if (lowerLabel.includes('bluetooth') || lowerLabel.includes('wireless')) {
+    return <Radio size={14} />;
+  }
+  if (lowerLabel.includes('monitor') || lowerLabel.includes('display') || lowerLabel.includes('hdmi')) {
+    return <Monitor size={14} />;
+  }
+  return <Speaker size={14} />;
+};
 
 interface AudioTrackRowProps {
   track: AudioTrack;
@@ -154,7 +179,7 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
 
   return (
     <div
-      className={`relative rounded-xl bg-white dark:bg-gray-800/60 border backdrop-blur-sm transition-all duration-300 overflow-hidden shadow-sm dark:shadow-none ${driftWarning
+      className={`relative rounded-xl bg-white dark:bg-gray-800/60 border backdrop-blur-sm transition-all duration-300 shadow-sm dark:shadow-none ${driftWarning
         ? 'border-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.15)]'
         : 'border-gray-200 dark:border-gray-700/50 hover:border-gray-300 dark:hover:border-gray-600'
         }`}
@@ -200,40 +225,51 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
                 <Headphones size={12} />
                 <span className="truncate max-w-[180px]">
                   {track.deviceId
-                    ? (availableDevices.find(d => d.deviceId === track.deviceId)?.label || 'Unknown Device').slice(0, 25) + ((availableDevices.find(d => d.deviceId === track.deviceId)?.label || '').length > 25 ? '...' : '')
-                    : 'Default Output'
+                    ? (availableDevices.find(d => d.deviceId === track.deviceId)?.label || 'Unknown').slice(0, 25) + ((availableDevices.find(d => d.deviceId === track.deviceId)?.label || '').length > 25 ? '...' : '')
+                    : t.audioTrack.defaultDevice
                   }
                 </span>
                 <ChevronDown size={12} className={`transition-transform ${isDeviceDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
-              {/* Dropdown Menu */}
+              {/* Dropdown Menu - iOS Liquid Design */}
               {isDeviceDropdownOpen && (
-                <div className="absolute top-full left-0 mt-1 w-72 py-1 bg-gray-800 border border-gray-700 rounded-xl shadow-xl z-50 max-h-64 overflow-y-auto">
+                <div
+                  className="absolute top-full left-0 mt-2 w-80 py-2 bg-white/80 dark:bg-gray-800/90 backdrop-blur-2xl border border-white/20 dark:border-gray-600/50 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)] z-[9999] max-h-56 overflow-y-auto"
+                >
                   {/* Default Option */}
                   <button
                     onClick={() => {
                       onUpdate(track.id, { deviceId: '' });
                       setIsDeviceDropdownOpen(false);
                     }}
-                    className={`w-full flex items-center gap-3 px-3 py-2 text-left transition-colors ${!track.deviceId
-                      ? 'bg-indigo-500/20 text-indigo-400'
-                      : 'text-gray-300 hover:bg-gray-700/50'
+                    className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all duration-200 ${!track.deviceId
+                      ? 'bg-purple-500/20 dark:bg-purple-500/30'
+                      : 'hover:bg-gray-100/80 dark:hover:bg-gray-700/50'
                       }`}
                   >
-                    <div className={`w-5 h-5 rounded-full flex items-center justify-center ${!track.deviceId ? 'bg-indigo-500' : 'bg-gray-700'
+                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${!track.deviceId
+                      ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/30'
+                      : 'bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-300'
                       }`}>
-                      {!track.deviceId && <Check size={12} className="text-white" />}
+                      <Volume2 size={16} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium">Default Output</div>
-                      <div className="text-[10px] text-gray-500">System default audio device</div>
+                      <div className={`text-sm font-semibold ${!track.deviceId ? 'text-purple-600 dark:text-purple-300' : 'text-gray-700 dark:text-gray-200'}`}>
+                        {t.audioTrack.defaultDevice}
+                      </div>
+                      <div className="text-[11px] text-gray-500 dark:text-gray-400">{t.audioTrack.systemDefaultDevice}</div>
                     </div>
+                    {!track.deviceId && (
+                      <div className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center">
+                        <Check size={12} className="text-white" />
+                      </div>
+                    )}
                   </button>
 
                   {/* Divider */}
                   {availableDevices.length > 0 && (
-                    <div className="border-t border-gray-700 my-1" />
+                    <div className="border-t border-gray-200/50 dark:border-gray-600/50 my-1 mx-3" />
                   )}
 
                   {/* Device Options */}
@@ -244,20 +280,27 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
                         onUpdate(track.id, { deviceId: device.deviceId });
                         setIsDeviceDropdownOpen(false);
                       }}
-                      className={`w-full flex items-center gap-3 px-3 py-2 text-left transition-colors ${track.deviceId === device.deviceId
-                        ? 'bg-indigo-500/20 text-indigo-400'
-                        : 'text-gray-300 hover:bg-gray-700/50'
+                      className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all duration-200 ${track.deviceId === device.deviceId
+                        ? 'bg-purple-500/20 dark:bg-purple-500/30'
+                        : 'hover:bg-gray-100/80 dark:hover:bg-gray-700/50'
                         }`}
                     >
-                      <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${track.deviceId === device.deviceId ? 'bg-indigo-500' : 'bg-gray-700'
+                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${track.deviceId === device.deviceId
+                        ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/30'
+                        : 'bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-300'
                         }`}>
-                        {track.deviceId === device.deviceId && <Check size={12} className="text-white" />}
+                        {getDeviceIcon(device.label || '')}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium truncate">
+                        <div className={`text-sm font-medium truncate ${track.deviceId === device.deviceId ? 'text-purple-600 dark:text-purple-300' : 'text-gray-700 dark:text-gray-200'}`}>
                           {device.label || 'Unknown Device'}
                         </div>
                       </div>
+                      {track.deviceId === device.deviceId && (
+                        <div className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center flex-shrink-0">
+                          <Check size={12} className="text-white" />
+                        </div>
+                      )}
                     </button>
                   ))}
                 </div>
@@ -272,6 +315,29 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
           >
             <Trash2 size={18} />
           </button>
+        </div>
+
+        {/* Sync Timecode Display */}
+        <div className="mb-2 flex items-center justify-between text-[11px] font-mono text-gray-500 dark:text-gray-500">
+          <div className="flex items-center gap-3">
+            <span className="flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+              <span className="text-gray-600 dark:text-gray-400">{formatTime(Math.max(0, videoCurrentTime - track.offset))}</span>
+            </span>
+            <span className="text-gray-300 dark:text-gray-700">|</span>
+            <span className="flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-teal-500"></span>
+              <span className="text-gray-600 dark:text-gray-400">{formatTime(videoCurrentTime)}</span>
+            </span>
+          </div>
+          <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${Math.abs(track.offset) < 0.1
+            ? 'bg-green-500/10 text-green-600 dark:text-green-400'
+            : Math.abs(track.offset) < 0.5
+              ? 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400'
+              : 'bg-red-500/10 text-red-500 dark:text-red-400'
+            }`}>
+            {track.offset >= 0 ? '+' : ''}{track.offset.toFixed(1)}s
+          </span>
         </div>
 
         {/* Volume Slider */}

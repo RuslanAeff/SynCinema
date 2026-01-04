@@ -60,6 +60,7 @@ export const ru: Translations = {
         delete: 'Удалить',
         outputDevice: 'Устройство Вывода',
         defaultDevice: 'Выход по Умолчанию',
+        systemDefaultDevice: 'Системное аудиоустройство по умолчанию',
         advanced: 'Дополнительно',
         offsetAdjustment: 'Настройка Смещения',
         reset: 'Сбросить',

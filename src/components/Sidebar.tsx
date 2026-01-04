@@ -6,8 +6,8 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import React, { useRef, useState } from 'react';
-import { RotateCcw, AlertCircle, Film, Upload, Sun, Moon, Volume2, VolumeX, ChevronDown, Link } from 'lucide-react';
+import React, { useRef, useState, useEffect } from 'react';
+import { RotateCcw, AlertCircle, Film, Upload, Sun, Moon, Volume2, VolumeX, ChevronDown, Link, Speaker, Headphones, Mic, Radio, Monitor, Check } from 'lucide-react';
 import { Button } from './Button';
 import { AudioTrackRow } from './AudioTrackRow';
 import { Logo } from './Logo';
@@ -98,6 +98,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     const audioInputRef = useRef<HTMLInputElement>(null);
     const projectInputRef = useRef<HTMLInputElement>(null);
     const subtitleInputRef = useRef<HTMLInputElement>(null);
+    const videoDeviceDropdownRef = useRef<HTMLDivElement>(null);
 
     // Collapsible sections state
     const [isMarkersCollapsed, setIsMarkersCollapsed] = useState(false);
@@ -105,6 +106,36 @@ export const Sidebar: React.FC<SidebarProps> = ({
     const [isMasterVolumeCollapsed, setIsMasterVolumeCollapsed] = useState(false);
     const [showAudioUrlInput, setShowAudioUrlInput] = useState(false);
     const [audioUrlInput, setAudioUrlInput] = useState('');
+    const [isVideoDeviceDropdownOpen, setIsVideoDeviceDropdownOpen] = useState(false);
+
+    // Get device icon based on label
+    const getDeviceIcon = (label: string): React.ReactNode => {
+        const lowerLabel = label.toLowerCase();
+        if (lowerLabel.includes('headphone') || lowerLabel.includes('headset') || lowerLabel.includes('earphone')) {
+            return <Headphones size={14} />;
+        }
+        if (lowerLabel.includes('microphone') || lowerLabel.includes('mic')) {
+            return <Mic size={14} />;
+        }
+        if (lowerLabel.includes('bluetooth') || lowerLabel.includes('wireless')) {
+            return <Radio size={14} />;
+        }
+        if (lowerLabel.includes('monitor') || lowerLabel.includes('display') || lowerLabel.includes('hdmi')) {
+            return <Monitor size={14} />;
+        }
+        return <Speaker size={14} />;
+    };
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (videoDeviceDropdownRef.current && !videoDeviceDropdownRef.current.contains(event.target as Node)) {
+                setIsVideoDeviceDropdownOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const handleSubtitleLoad = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -223,20 +254,95 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     {videoFile && (
                         <div className="mt-3 pt-3 border-t border-gray-700/50">
                             <label className="text-xs font-medium text-gray-500 flex items-center gap-1 mb-2">
-                                🔊 Video Audio Output
+                                🔊 {t.sidebar.videoAudioOutput || 'Video Audio Output'}
                             </label>
-                            <select
-                                value={videoDeviceId}
-                                onChange={(e) => onVideoDeviceChange(e.target.value)}
-                                className="w-full bg-gray-900 border border-gray-700 text-gray-300 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2"
-                            >
-                                <option value="">{t.sidebar.defaultOutput}</option>
-                                {audioDevices.map(device => (
-                                    <option key={device.deviceId} value={device.deviceId}>
-                                        {device.label || `Unknown Device (${device.deviceId.slice(0, 5)}...)`}
-                                    </option>
-                                ))}
-                            </select>
+                            <div className="relative" ref={videoDeviceDropdownRef}>
+                                <button
+                                    onClick={() => setIsVideoDeviceDropdownOpen(!isVideoDeviceDropdownOpen)}
+                                    className={`w-full flex items-center gap-3 px-3 py-2.5 bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 rounded-xl transition-all text-left ${isVideoDeviceDropdownOpen ? 'border-purple-500/50 ring-1 ring-purple-500/20' : ''}`}
+                                >
+                                    <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-white dark:bg-gray-700 border border-gray-200 dark:border-transparent text-gray-500 dark:text-gray-300 shadow-sm dark:shadow-none">
+                                        {videoDeviceId ? getDeviceIcon(audioDevices.find(d => d.deviceId === videoDeviceId)?.label || '') : <Volume2 size={14} />}
+                                    </div>
+                                    <span className="flex-1 text-sm text-gray-700 dark:text-gray-200 truncate font-medium">
+                                        {videoDeviceId
+                                            ? (audioDevices.find(d => d.deviceId === videoDeviceId)?.label || 'Unknown').slice(0, 30)
+                                            : t.sidebar.defaultOutput}
+                                    </span>
+                                    <ChevronDown size={14} className={`text-gray-400 transition-transform ${isVideoDeviceDropdownOpen ? 'rotate-180' : ''}`} />
+                                </button>
+
+                                {/* Dropdown Menu - iOS Liquid Design */}
+                                {isVideoDeviceDropdownOpen && (
+                                    <div className="absolute top-full left-0 right-0 mt-2 py-2 bg-white/80 dark:bg-gray-800/90 backdrop-blur-2xl border border-white/20 dark:border-gray-600/50 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)] z-[9999] max-h-56 overflow-y-auto">
+                                        {/* Default Option */}
+                                        <button
+                                            onClick={() => {
+                                                onVideoDeviceChange('');
+                                                setIsVideoDeviceDropdownOpen(false);
+                                            }}
+                                            className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all duration-200 ${!videoDeviceId
+                                                ? 'bg-purple-500/20 dark:bg-purple-500/30'
+                                                : 'hover:bg-gray-100/80 dark:hover:bg-gray-700/50'
+                                                }`}
+                                        >
+                                            <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${!videoDeviceId
+                                                ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/30'
+                                                : 'bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-300'
+                                                }`}>
+                                                <Volume2 size={16} />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className={`text-sm font-semibold ${!videoDeviceId ? 'text-purple-600 dark:text-purple-300' : 'text-gray-700 dark:text-gray-200'}`}>
+                                                    {t.sidebar.defaultOutput}
+                                                </div>
+                                            </div>
+                                            {!videoDeviceId && (
+                                                <div className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center">
+                                                    <Check size={12} className="text-white" />
+                                                </div>
+                                            )}
+                                        </button>
+
+                                        {/* Divider */}
+                                        {audioDevices.length > 0 && (
+                                            <div className="border-t border-gray-200/50 dark:border-gray-600/50 my-1 mx-3" />
+                                        )}
+
+                                        {/* Device Options */}
+                                        {audioDevices.map(device => (
+                                            <button
+                                                key={device.deviceId}
+                                                onClick={() => {
+                                                    onVideoDeviceChange(device.deviceId);
+                                                    setIsVideoDeviceDropdownOpen(false);
+                                                }}
+                                                className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all duration-200 ${videoDeviceId === device.deviceId
+                                                    ? 'bg-purple-500/20 dark:bg-purple-500/30'
+                                                    : 'hover:bg-gray-100/80 dark:hover:bg-gray-700/50'
+                                                    }`}
+                                            >
+                                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${videoDeviceId === device.deviceId
+                                                    ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/30'
+                                                    : 'bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-300'
+                                                    }`}>
+                                                    {getDeviceIcon(device.label || '')}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className={`text-sm font-medium truncate ${videoDeviceId === device.deviceId ? 'text-purple-600 dark:text-purple-300' : 'text-gray-700 dark:text-gray-200'}`}>
+                                                        {device.label || 'Unknown Device'}
+                                                    </div>
+                                                </div>
+                                                {videoDeviceId === device.deviceId && (
+                                                    <div className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center flex-shrink-0">
+                                                        <Check size={12} className="text-white" />
+                                                    </div>
+                                                )}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     )}
 
