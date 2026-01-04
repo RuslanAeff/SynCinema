@@ -6,34 +6,32 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React from 'react';
 
-interface Props {
-    children: ReactNode;
+interface ErrorBoundaryProps {
+    children: React.ReactNode;
 }
 
-interface State {
+interface ErrorBoundaryState {
     hasError: boolean;
     error: Error | null;
-    errorInfo: ErrorInfo | null;
 }
 
-class ErrorBoundary extends Component<Props, State> {
-    constructor(props: Props) {
-        super(props);
-        this.state = { hasError: false, error: null, errorInfo: null };
+class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+    state: ErrorBoundaryState = {
+        hasError: false,
+        error: null,
+    };
+
+    static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
+        return { hasError: true, error };
     }
 
-    static getDerivedStateFromError(error: Error): State {
-        return { hasError: true, error, errorInfo: null };
-    }
-
-    componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
         console.error('SynCinema Error:', error, errorInfo);
-        this.setState({ errorInfo });
     }
 
-    render() {
+    render(): React.ReactNode {
         if (this.state.hasError) {
             return (
                 <div style={{
@@ -49,7 +47,7 @@ class ErrorBoundary extends Component<Props, State> {
                     fontFamily: 'system-ui, -apple-system, sans-serif'
                 }}>
                     <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>
-                        ⚠️ Something went wrong
+                        Something went wrong
                     </h1>
                     <p style={{ color: '#a0a0b0', marginBottom: '1rem', maxWidth: '500px' }}>
                         SynCinema encountered an error. This might be due to browser compatibility issues.
@@ -66,16 +64,8 @@ class ErrorBoundary extends Component<Props, State> {
                     }}>
                         <strong style={{ color: '#ff6b6b' }}>Error:</strong>
                         <pre style={{ color: '#ffa07a', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                            {this.state.error?.message}
+                            {this.state.error?.message || 'Unknown error'}
                         </pre>
-                        {this.state.error?.stack && (
-                            <>
-                                <strong style={{ color: '#ff6b6b' }}>Stack:</strong>
-                                <pre style={{ color: '#888', fontSize: '0.75rem', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                                    {this.state.error.stack.split('\n').slice(0, 5).join('\n')}
-                                </pre>
-                            </>
-                        )}
                     </div>
                     <button
                         onClick={() => window.location.reload()}
