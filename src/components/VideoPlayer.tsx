@@ -558,38 +558,38 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
                     <span className="text-xs font-mono text-gray-400 w-12">{formatTime(duration)}</span>
                 </div>
-                <div className="flex items-center justify-center px-4">
-                    {/* Left side buttons - hidden but takes space for centering */}
-                    <div className="flex-1 flex justify-start">
+                <div className="flex items-center justify-between sm:justify-center px-2 sm:px-4">
+                    {/* Left side buttons - hidden on mobile, takes space for centering on desktop */}
+                    <div className="hidden sm:flex flex-1 justify-start">
                         {/* Empty space for balance */}
                     </div>
 
                     {/* Center controls - Play/Pause and Skip */}
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-3 sm:gap-6">
                         <button
                             onClick={() => { if (videoRef.current) { videoRef.current.currentTime -= 10; setCurrentTime(videoRef.current.currentTime); } }}
-                            className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg"
+                            className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors p-1.5 sm:p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg"
                         >
-                            <RotateCcw size={20} /><span className="sr-only">-10s</span>
+                            <RotateCcw size={18} className="sm:w-5 sm:h-5" /><span className="sr-only">-10s</span>
                         </button>
                         <button
                             onClick={togglePlay}
-                            className="p-3 bg-white text-black rounded-full hover:bg-gray-200 transition-transform hover:scale-105 active:scale-95"
+                            className="p-2 sm:p-3 bg-white text-black rounded-full hover:bg-gray-200 transition-transform hover:scale-105 active:scale-95"
                         >
-                            {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" />}
+                            {isPlaying ? <Pause size={20} className="sm:w-6 sm:h-6" fill="currentColor" /> : <Play size={20} className="sm:w-6 sm:h-6" fill="currentColor" />}
                         </button>
                         <button
                             onClick={() => { if (videoRef.current) { videoRef.current.currentTime += 10; setCurrentTime(videoRef.current.currentTime); } }}
-                            className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg"
+                            className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors p-1.5 sm:p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg"
                         >
-                            <RotateCcw size={20} className="-scale-x-100" /><span className="sr-only">+10s</span>
+                            <RotateCcw size={18} className="sm:w-5 sm:h-5 -scale-x-100" /><span className="sr-only">+10s</span>
                         </button>
                     </div>
 
                     {/* Right side buttons - Volume, Fullscreen, Detach */}
-                    <div className="flex-1 flex items-center justify-end gap-4">
+                    <div className="flex items-center sm:flex-1 justify-end gap-2 sm:gap-4">
                         <div className="flex items-center gap-2 group relative">
-                            <Volume2 size={20} className="text-gray-600 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
+                            <Volume2 size={18} className="sm:w-5 sm:h-5 text-gray-600 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
                             <input
                                 type="range"
                                 min="0"
@@ -597,14 +597,40 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                                 step="0.05"
                                 defaultValue="1"
                                 onChange={(e) => { if (videoRef.current) videoRef.current.volume = parseFloat(e.target.value); }}
-                                className="w-20 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                                className="w-12 sm:w-20 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer accent-indigo-500"
                             />
                         </div>
-                        <button onClick={toggleFullscreen} className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg">
-                            {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
+
+                        {/* Fullscreen Toggle */}
+                        <button
+                            onClick={() => {
+                                if (!containerRef.current) return;
+                                if (!document.fullscreenElement) {
+                                    containerRef.current.requestFullscreen();
+                                    setIsFullscreen(true);
+                                } else {
+                                    document.exitFullscreen();
+                                    setIsFullscreen(false);
+                                }
+                            }}
+                            className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors p-1.5 sm:p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg"
+                        >
+                            {isFullscreen ? <Minimize size={18} className="sm:w-5 sm:h-5" /> : <Maximize size={18} className="sm:w-5 sm:h-5" />}
                         </button>
-                        <button onClick={openDetachedWindow} className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg" title="Detach Player">
-                            <Maximize size={20} className="rotate-45" />
+
+                        {/* Detach / PIP Mode */}
+                        <button
+                            onClick={() => {
+                                if (document.pictureInPictureElement) {
+                                    document.exitPictureInPicture();
+                                } else if (videoRef.current && videoRef.current !== document.pictureInPictureElement) {
+                                    videoRef.current.requestPictureInPicture();
+                                }
+                            }}
+                            className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors p-1.5 sm:p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg"
+                            title={t.videoPlayer.detach}
+                        >
+                            <Film size={18} className="sm:w-5 sm:h-5" />
                         </button>
                     </div>
                 </div>
