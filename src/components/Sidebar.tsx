@@ -160,8 +160,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     };
 
     return (
-        <div data-tour="sidebar" className="w-full md:w-[450px] flex-shrink-0 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col h-full z-10 shadow-2xl transition-colors duration-300">
-            <div className="p-6 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 transition-colors duration-300">
+        <div data-tour="sidebar" className="w-full lg:w-[450px] flex-shrink-0 bg-gray-50 dark:bg-gray-900 lg:border-r border-t lg:border-t-0 border-gray-200 dark:border-gray-800 flex flex-col h-auto lg:h-full z-10 shadow-2xl transition-colors duration-300">
+            <div className="hidden lg:block p-6 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 transition-colors duration-300">
                 <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-3">
                         <Logo size={48} className="drop-shadow-[0_0_15px_rgba(99,102,241,0.6)]" />

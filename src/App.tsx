@@ -17,6 +17,9 @@ import { Snowfall } from './components/Snowfall';
 import { useVideoPlayer } from './hooks/useVideoPlayer';
 import { useAudioTracks } from './hooks/useAudioTracks';
 import { useTheme } from './hooks/useTheme';
+import { Logo } from './components/Logo';
+import { InfoButton } from './components/HelpPanel';
+import { Sun, Moon } from 'lucide-react';
 
 
 function App() {
@@ -186,7 +189,7 @@ function App() {
 
   return (
     <div
-      className={`flex h-screen bg-gray-950 text-gray-100 font-sans relative transition-all ${isDragging ? 'ring-4 ring-inset ring-indigo-500' : ''}`}
+      className={`flex flex-col lg:flex-row-reverse h-dvh lg:h-screen bg-gray-950 text-gray-100 font-sans relative transition-all lg:overflow-hidden overflow-y-auto overflow-x-hidden ${isDragging ? 'ring-4 ring-inset ring-indigo-500' : ''}`}
       onDragEnter={handleDragEnter}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -212,6 +215,52 @@ function App() {
         </div>
       )}
 
+      {/* Mobile Header - Visible only on mobile */}
+      <div className="lg:hidden p-4 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 flex items-center justify-between sticky top-0 z-40 shadow-md">
+        <div className="flex items-center gap-3">
+          <Logo size={32} className="drop-shadow-[0_0_10px_rgba(99,102,241,0.5)]" />
+          <h1 className="text-xl font-extrabold tracking-tight text-gray-900 dark:text-white">SynCinema</h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <InfoButton onClick={() => setShowHelp(true)} />
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+          >
+            {theme === 'dark' ? <Sun size={18} className="text-yellow-400" /> : <Moon size={18} className="text-indigo-600" />}
+          </button>
+        </div>
+      </div>
+
+      {/* Video Player - Show YouTube or regular player based on source */}
+      {youtubeVideoId ? (
+        <YouTubePlayer
+          videoId={youtubeVideoId}
+          isPlaying={isPlaying}
+          onPlayingChange={setIsPlaying}
+          onTimeUpdate={setCurrentTime}
+          onDurationChange={setDuration}
+          currentTime={currentTime}
+        />
+      ) : (
+        <VideoPlayer
+          videoFile={videoFile}
+          videoObjectUrl={videoObjectUrl}
+          isPlaying={isPlaying}
+          currentTime={currentTime}
+          duration={duration}
+          videoRef={videoRef}
+          togglePlay={togglePlay}
+          handleSeek={handleSeek}
+          setIsPlaying={setIsPlaying}
+          setCurrentTime={setCurrentTime}
+          setDuration={setDuration}
+          subtitleCues={subtitleCues}
+          subtitleOffset={subtitleOffset}
+        />
+      )}
+
+      {/* Sidebar - Controls */}
       <Sidebar
         videoFile={videoFile}
         audioTracks={audioTracks}
@@ -250,34 +299,6 @@ function App() {
         onUrlLoaderOpen={() => setShowUrlLoader(true)}
         onAudioUrlLoad={addAudioFromUrl}
       />
-
-      {/* Video Player - Show YouTube or regular player based on source */}
-      {youtubeVideoId ? (
-        <YouTubePlayer
-          videoId={youtubeVideoId}
-          isPlaying={isPlaying}
-          onPlayingChange={setIsPlaying}
-          onTimeUpdate={setCurrentTime}
-          onDurationChange={setDuration}
-          currentTime={currentTime}
-        />
-      ) : (
-        <VideoPlayer
-          videoFile={videoFile}
-          videoObjectUrl={videoObjectUrl}
-          isPlaying={isPlaying}
-          currentTime={currentTime}
-          duration={duration}
-          videoRef={videoRef}
-          togglePlay={togglePlay}
-          handleSeek={handleSeek}
-          setIsPlaying={setIsPlaying}
-          setCurrentTime={setCurrentTime}
-          setDuration={setDuration}
-          subtitleCues={subtitleCues}
-          subtitleOffset={subtitleOffset}
-        />
-      )}
 
       {/* Help Panel - at App level to overlay everything */}
       <HelpPanel isOpen={showHelp} onClose={() => setShowHelp(false)} />
