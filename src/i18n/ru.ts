@@ -93,6 +93,7 @@ export const ru: Translations = {
         volume: 'Громкость',
         speed: 'Скорость',
         loading: 'Загрузка...',
+        detach: 'Открепить / PIP',
     },
 
     urlLoader: {

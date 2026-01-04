@@ -93,6 +93,7 @@ export const az: Translations = {
         volume: 'Səs',
         speed: 'Sürət',
         loading: 'Yüklənir...',
+        detach: 'Ayır / PIP',
     },
 
     urlLoader: {

@@ -142,6 +142,7 @@ export interface Translations {
         volume: string;
         speed: string;
         loading: string;
+        detach: string;
     };
 
 

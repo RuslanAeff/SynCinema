@@ -93,6 +93,7 @@ export const en: Translations = {
         volume: 'Volume',
         speed: 'Speed',
         loading: 'Loading...',
+        detach: 'Detach / PIP',
     },
 
     urlLoader: {

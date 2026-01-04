@@ -93,6 +93,7 @@ export const tr: Translations = {
         volume: 'Ses',
         speed: 'Hız',
         loading: 'Yükleniyor...',
+        detach: 'Ayır / PIP',
     },
 
     urlLoader: {

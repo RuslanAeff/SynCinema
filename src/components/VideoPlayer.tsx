@@ -628,7 +628,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                                 }
                             }}
                             className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors p-1.5 sm:p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg"
-                            title={t.videoPlayer.detach}
+                            title={t.player.detach}
                         >
                             <Film size={18} className="sm:w-5 sm:h-5" />
                         </button>
