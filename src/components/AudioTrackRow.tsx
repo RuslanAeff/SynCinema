@@ -320,15 +320,29 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
         {/* Sync Timecode Display */}
         <div className="mb-2 flex items-center justify-between text-[11px] font-mono text-gray-500 dark:text-gray-500">
           <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1">
+            {/* Audio Time - Purple Hover */}
+            <div className="group relative flex items-center gap-1 cursor-help">
+              <span className="absolute bottom-full left-0 mb-0.5 hidden group-hover:block whitespace-nowrap text-[10px] font-sans font-bold text-purple-600 dark:text-purple-400 animate-in fade-in slide-in-from-bottom-1 duration-200">
+                {t.audioTrack.audioTime}
+              </span>
               <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
-              <span className="text-gray-600 dark:text-gray-400">{formatTime(Math.max(0, videoCurrentTime - track.offset))}</span>
-            </span>
+              <span className="text-gray-600 dark:text-gray-400 transition-colors group-hover:text-purple-600 dark:group-hover:text-purple-400">
+                {formatTime(Math.max(0, videoCurrentTime - track.offset))}
+              </span>
+            </div>
+
             <span className="text-gray-300 dark:text-gray-700">|</span>
-            <span className="flex items-center gap-1">
+
+            {/* Video Time - Teal Hover */}
+            <div className="group relative flex items-center gap-1 cursor-help">
+              <span className="absolute bottom-full left-0 mb-0.5 hidden group-hover:block whitespace-nowrap text-[10px] font-sans font-bold text-teal-600 dark:text-teal-400 animate-in fade-in slide-in-from-bottom-1 duration-200">
+                {t.audioTrack.videoTime}
+              </span>
               <span className="w-1.5 h-1.5 rounded-full bg-teal-500"></span>
-              <span className="text-gray-600 dark:text-gray-400">{formatTime(videoCurrentTime)}</span>
-            </span>
+              <span className="text-gray-600 dark:text-gray-400 transition-colors group-hover:text-teal-600 dark:group-hover:text-teal-400">
+                {formatTime(videoCurrentTime)}
+              </span>
+            </div>
           </div>
           <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${Math.abs(track.offset) < 0.1
             ? 'bg-green-500/10 text-green-600 dark:text-green-400'
@@ -618,6 +632,6 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 };

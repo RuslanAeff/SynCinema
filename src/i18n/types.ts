@@ -109,6 +109,8 @@ export interface Translations {
         outputDevice: string;
         defaultDevice: string;
         systemDefaultDevice: string;
+        audioTime: string;
+        videoTime: string;
         advanced: string;
         offsetAdjustment: string;
         reset: string;

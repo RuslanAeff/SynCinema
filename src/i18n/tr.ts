@@ -61,6 +61,8 @@ export const tr: Translations = {
         outputDevice: 'Çıkış Cihazı',
         defaultDevice: 'Varsayılan Çıkış',
         systemDefaultDevice: 'Sistem varsayılan ses cihazı',
+        audioTime: 'Ses Zamanı',
+        videoTime: 'Video Zamanı',
         advanced: 'Gelişmiş',
         offsetAdjustment: 'Ofset Ayarı',
         reset: 'Sıfırla',

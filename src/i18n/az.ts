@@ -61,6 +61,8 @@ export const az: Translations = {
         outputDevice: 'Çıxış Cihazı',
         defaultDevice: 'Standart Çıxış',
         systemDefaultDevice: 'Sistem standart səs cihazı',
+        audioTime: 'Səs Zamanı',
+        videoTime: 'Video Zamanı',
         advanced: 'Ətraflı',
         offsetAdjustment: 'Ofset Tənzimləməsi',
         reset: 'Sıfırla',

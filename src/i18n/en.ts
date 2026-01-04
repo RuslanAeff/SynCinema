@@ -61,6 +61,8 @@ export const en: Translations = {
         outputDevice: 'Output Device',
         defaultDevice: 'Default Output',
         systemDefaultDevice: 'System default audio device',
+        audioTime: 'Audio Time',
+        videoTime: 'Video Time',
         advanced: 'Advanced',
         offsetAdjustment: 'Offset Adjustment',
         reset: 'Reset',

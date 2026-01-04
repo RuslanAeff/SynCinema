@@ -61,6 +61,8 @@ export const ru: Translations = {
         outputDevice: 'Устройство Вывода',
         defaultDevice: 'Выход по Умолчанию',
         systemDefaultDevice: 'Системное аудиоустройство по умолчанию',
+        audioTime: 'Аудио Время',
+        videoTime: 'Видео Время',
         advanced: 'Дополнительно',
         offsetAdjustment: 'Настройка Смещения',
         reset: 'Сбросить',
