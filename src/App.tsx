@@ -14,9 +14,11 @@ import { OnboardingTour } from './components/OnboardingTour';
 import { HelpPanel } from './components/HelpPanel';
 import { UrlLoaderModal } from './components/UrlLoaderModal';
 import { Snowfall } from './components/Snowfall';
+import { StatisticsPanel } from './components/StatisticsPanel';
 import { useVideoPlayer } from './hooks/useVideoPlayer';
 import { useAudioTracks } from './hooks/useAudioTracks';
 import { useTheme } from './hooks/useTheme';
+import { useAnalytics } from './hooks/useAnalytics';
 import { Logo } from './components/Logo';
 import { InfoButton } from './components/HelpPanel';
 import { Sun, Moon } from 'lucide-react';
@@ -70,7 +72,8 @@ function App() {
   // Theme
   const { theme, toggleTheme } = useTheme();
 
-
+  // Analytics
+  const { analytics, trackEvent, trackWatchTime, resetAnalytics, formatWatchTime } = useAnalytics();
 
   // Welcome Screen State (sessionStorage = shows once per browser session)
   const [showWelcome, setShowWelcome] = useState(() => {
@@ -87,6 +90,9 @@ function App() {
 
   // URL Loader Modal State
   const [showUrlLoader, setShowUrlLoader] = useState(false);
+
+  // Statistics Panel State
+  const [showStatistics, setShowStatistics] = useState(false);
 
   // YouTube Video State
   const [youtubeVideoId, setYoutubeVideoId] = useState<string | null>(null);
@@ -177,15 +183,61 @@ function App() {
       }
     });
 
-    // Load files
-    if (videoFiles.length > 0) loadVideo(videoFiles[0]);
+    // Load files with tracking
+    if (videoFiles.length > 0) {
+      loadVideo(videoFiles[0]);
+      trackEvent('videosLoaded');
+    }
     if (audioFiles.length > 0) {
       const dt = new DataTransfer();
       audioFiles.forEach(f => dt.items.add(f));
       addAudioTracks(dt.files);
+      trackEvent('audioTracksAdded');
     }
-    if (subtitleFiles.length > 0) loadSubtitles(subtitleFiles[0]);
-  }, [loadVideo, addAudioTracks, loadSubtitles]);
+    if (subtitleFiles.length > 0) {
+      loadSubtitles(subtitleFiles[0]);
+      trackEvent('subtitlesLoaded');
+    }
+  }, [loadVideo, addAudioTracks, loadSubtitles, trackEvent]);
+
+  // Tracked wrapper functions for analytics
+  const handleVideoUpload = useCallback((file: File) => {
+    loadVideo(file);
+    trackEvent('videosLoaded');
+  }, [loadVideo, trackEvent]);
+
+  const handleAudioUpload = useCallback((files: FileList) => {
+    addAudioTracks(files);
+    // Track each audio file added
+    for (let i = 0; i < files.length; i++) {
+      trackEvent('audioTracksAdded');
+    }
+  }, [addAudioTracks, trackEvent]);
+
+  const handleSubtitleUpload = useCallback((file: File) => {
+    loadSubtitles(file);
+    trackEvent('subtitlesLoaded');
+  }, [loadSubtitles, trackEvent]);
+
+  const handleSaveProject = useCallback(() => {
+    exportProject();
+    trackEvent('projectsSaved');
+  }, [exportProject, trackEvent]);
+
+  const handleLoadProject = useCallback((data: any) => {
+    importProject(data);
+    trackEvent('projectsLoaded');
+  }, [importProject, trackEvent]);
+
+  const handleAddMarker = useCallback(() => {
+    addMarker();
+    trackEvent('markersAdded');
+  }, [addMarker, trackEvent]);
+
+  const handleAudioFromUrl = useCallback((url: string, filename: string) => {
+    addAudioFromUrl(url, filename);
+    trackEvent('audioTracksAdded');
+  }, [addAudioFromUrl, trackEvent]);
 
   return (
     <div
@@ -257,6 +309,8 @@ function App() {
           setDuration={setDuration}
           subtitleCues={subtitleCues}
           subtitleOffset={subtitleOffset}
+          onTrackEvent={trackEvent}
+          onTrackWatchTime={trackWatchTime}
         />
       )}
 
@@ -269,13 +323,13 @@ function App() {
         videoCurrentTime={currentTime}
         isVideoPlaying={isPlaying}
         onRefreshDevices={refreshDevices}
-        onVideoUpload={loadVideo}
-        onAudioUpload={addAudioTracks}
+        onVideoUpload={handleVideoUpload}
+        onAudioUpload={handleAudioUpload}
         onTrackUpdate={updateAudioTrack}
         onTrackDelete={deleteAudioTrack}
-        onSaveProject={exportProject}
-        onLoadProject={importProject}
-        onSubtitleUpload={loadSubtitles}
+        onSaveProject={handleSaveProject}
+        onLoadProject={handleLoadProject}
+        onSubtitleUpload={handleSubtitleUpload}
         subtitleOffset={subtitleOffset}
         onSubtitleOffsetChange={setSubtitleOffset}
         hasSubtitles={subtitleCues.length > 0}
@@ -288,7 +342,7 @@ function App() {
         onVideoVolumeChange={setVideoVolume}
         onVideoMutedChange={setVideoMuted}
         markers={markers}
-        onAddMarker={addMarker}
+        onAddMarker={handleAddMarker}
         onDeleteMarker={deleteMarker}
         onSeekToMarker={handleSeek}
         videoDeviceId={videoDeviceId}
@@ -297,7 +351,9 @@ function App() {
         onHelpOpen={() => setShowHelp(true)}
         onHelpClose={() => setShowHelp(false)}
         onUrlLoaderOpen={() => setShowUrlLoader(true)}
-        onAudioUrlLoad={addAudioFromUrl}
+        onAudioUrlLoad={handleAudioFromUrl}
+        onStatisticsOpen={() => setShowStatistics(true)}
+        onTrackEvent={trackEvent}
       />
 
       {/* Help Panel - at App level to overlay everything */}
@@ -321,9 +377,19 @@ function App() {
             setYoutubeVideoId(null);
             loadVideoFromUrl(url, filename);
           }
+          trackEvent('videosLoaded');
           setShowUrlLoader(false);
         }}
-        onAudioUrlLoad={addAudioFromUrl}
+        onAudioUrlLoad={handleAudioFromUrl}
+      />
+
+      {/* Statistics Panel */}
+      <StatisticsPanel
+        isOpen={showStatistics}
+        onClose={() => setShowStatistics(false)}
+        analytics={analytics}
+        formatWatchTime={formatWatchTime}
+        onReset={resetAnalytics}
       />
     </div>
   );

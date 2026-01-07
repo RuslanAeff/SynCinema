@@ -25,6 +25,8 @@ interface VideoPlayerProps {
     setDuration: (duration: number) => void;
     subtitleCues?: { id: string, startTime: number, endTime: number, text: string }[];
     subtitleOffset?: number;
+    onTrackEvent?: (event: string) => void;
+    onTrackWatchTime?: (seconds: number) => void;
 }
 
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({
@@ -41,6 +43,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     setDuration,
     subtitleCues = [],
     subtitleOffset = 0,
+    onTrackEvent,
+    onTrackWatchTime,
 }) => {
     const { t } = useI18n();
     const [isFullscreen, setIsFullscreen] = useState(false);
@@ -78,6 +82,17 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             subtitleOffset
         };
     }, [videoObjectUrl, currentTime, isPlaying, duration, subtitleCues, subtitleOffset]);
+
+    // Track watch time when video is playing
+    useEffect(() => {
+        if (!isPlaying || !onTrackWatchTime) return;
+
+        const interval = setInterval(() => {
+            onTrackWatchTime(1); // Track 1 second of watch time
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [isPlaying, onTrackWatchTime]);
 
     // Initialize BroadcastChannel for detached player sync (runs once)
     useEffect(() => {
@@ -240,6 +255,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 case 'KeyK':
                     e.preventDefault();
                     togglePlay();
+                    onTrackEvent?.('playPauseCount');
                     break;
 
                 // Seek 5 seconds
@@ -248,6 +264,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                     if (video) {
                         video.currentTime = Math.max(0, video.currentTime - 5);
                         setCurrentTime(video.currentTime);
+                        onTrackEvent?.('seekCount');
                     }
                     break;
                 case 'ArrowRight':
@@ -255,6 +272,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                     if (video) {
                         video.currentTime = Math.min(video.duration, video.currentTime + 5);
                         setCurrentTime(video.currentTime);
+                        onTrackEvent?.('seekCount');
                     }
                     break;
 
@@ -457,7 +475,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                         className="max-w-full max-h-full shadow-2xl"
                         onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
                         onEnded={() => setIsPlaying(false)}
-                        onClick={(e) => { e.stopPropagation(); togglePlay(); }}
+                        onClick={(e) => { e.stopPropagation(); togglePlay(); onTrackEvent?.('playPauseCount'); }}
                     />
                 ) : (
                     <div className="text-center text-gray-600">
@@ -466,7 +484,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                     </div>
                 )}
                 {videoObjectUrl && !isPlaying && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 cursor-pointer backdrop-blur-[2px]" onClick={togglePlay}>
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 cursor-pointer backdrop-blur-[2px]" onClick={() => { togglePlay(); onTrackEvent?.('playPauseCount'); }}>
                         <div className="p-6 bg-white/10 rounded-full backdrop-blur-md border border-white/20 hover:scale-110 transition-transform">
                             <Play size={48} fill="currentColor" className="text-white ml-1" />
                         </div>
@@ -567,19 +585,19 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                     {/* Center controls - Play/Pause and Skip */}
                     <div className="flex items-center gap-3 sm:gap-6">
                         <button
-                            onClick={() => { if (videoRef.current) { videoRef.current.currentTime -= 10; setCurrentTime(videoRef.current.currentTime); } }}
+                            onClick={() => { if (videoRef.current) { videoRef.current.currentTime -= 10; setCurrentTime(videoRef.current.currentTime); onTrackEvent?.('seekCount'); } }}
                             className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors p-1.5 sm:p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg"
                         >
                             <RotateCcw size={18} className="sm:w-5 sm:h-5" /><span className="sr-only">-10s</span>
                         </button>
                         <button
-                            onClick={togglePlay}
+                            onClick={() => { togglePlay(); onTrackEvent?.('playPauseCount'); }}
                             className="p-2 sm:p-3 bg-white text-black rounded-full hover:bg-gray-200 transition-transform hover:scale-105 active:scale-95"
                         >
                             {isPlaying ? <Pause size={20} className="sm:w-6 sm:h-6" fill="currentColor" /> : <Play size={20} className="sm:w-6 sm:h-6" fill="currentColor" />}
                         </button>
                         <button
-                            onClick={() => { if (videoRef.current) { videoRef.current.currentTime += 10; setCurrentTime(videoRef.current.currentTime); } }}
+                            onClick={() => { if (videoRef.current) { videoRef.current.currentTime += 10; setCurrentTime(videoRef.current.currentTime); onTrackEvent?.('seekCount'); } }}
                             className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors p-1.5 sm:p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg"
                         >
                             <RotateCcw size={18} className="sm:w-5 sm:h-5 -scale-x-100" /><span className="sr-only">+10s</span>
@@ -596,7 +614,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                                 max="1"
                                 step="0.05"
                                 defaultValue="1"
-                                onChange={(e) => { if (videoRef.current) videoRef.current.volume = parseFloat(e.target.value); }}
+                                onChange={(e) => { if (videoRef.current) videoRef.current.volume = parseFloat(e.target.value); onTrackEvent?.('volumeAdjustments'); }}
                                 className="w-12 sm:w-20 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer accent-indigo-500"
                             />
                         </div>
@@ -612,6 +630,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                                     document.exitFullscreen();
                                     setIsFullscreen(false);
                                 }
+                                onTrackEvent?.('fullscreenToggles');
                             }}
                             className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors p-1.5 sm:p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg"
                         >
@@ -620,7 +639,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
                         {/* Detach / PIP Mode */}
                         <button
-                            onClick={openDetachedWindow}
+                            onClick={() => { openDetachedWindow(); onTrackEvent?.('detachOpened'); }}
                             className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors p-1.5 sm:p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg"
                             title={t.player.detach}
                         >

@@ -39,6 +39,7 @@ interface AudioTrackRowProps {
   onDelete: (id: string) => void;
   syncThreshold: number;
   masterVolume?: number;
+  onTrackEvent?: (event: string) => void;
 }
 
 export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
@@ -49,7 +50,8 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
   onUpdate,
   onDelete,
   syncThreshold = 0.3,
-  masterVolume = 1
+  masterVolume = 1,
+  onTrackEvent,
 }) => {
   const { t } = useI18n();
   const audioRef = useRef<ExtendedMediaElement>(null);
@@ -564,6 +566,7 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
                     const preset = eqPresets.find(p => p.id === e.target.value);
                     if (preset) {
                       onUpdate(track.id, { eq: { low: preset.low, mid: preset.mid, high: preset.high } });
+                      onTrackEvent?.('eqAdjustments');
                     }
                   }}
                   className="text-[10px] px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-1 focus:ring-teal-500 cursor-pointer"
@@ -599,7 +602,7 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
                       min="-12"
                       max="12"
                       value={track.eq?.[band.key as keyof typeof track.eq] || 0}
-                      onChange={(e) => onUpdate(track.id, { eq: { ...track.eq, [band.key]: parseFloat(e.target.value) } })}
+                      onChange={(e) => { onUpdate(track.id, { eq: { ...track.eq, [band.key]: parseFloat(e.target.value) } }); onTrackEvent?.('eqAdjustments'); }}
                       className="h-20 w-2 appearance-none cursor-pointer rounded-full"
                       style={{
                         writingMode: 'vertical-lr',

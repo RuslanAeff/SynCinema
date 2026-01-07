@@ -7,7 +7,7 @@
  */
 
 import React, { useRef, useState, useEffect } from 'react';
-import { RotateCcw, AlertCircle, Film, Upload, Sun, Moon, Volume2, VolumeX, ChevronDown, Link, Speaker, Headphones, Mic, Radio, Monitor, Check } from 'lucide-react';
+import { RotateCcw, AlertCircle, Film, Upload, Sun, Moon, Volume2, VolumeX, ChevronDown, Link, Speaker, Headphones, Mic, Radio, Monitor, Check, BarChart3 } from 'lucide-react';
 import { Button } from './Button';
 import { AudioTrackRow } from './AudioTrackRow';
 import { Logo } from './Logo';
@@ -53,6 +53,8 @@ interface SidebarProps {
     onHelpClose: () => void;
     onUrlLoaderOpen: () => void;
     onAudioUrlLoad: (url: string, filename: string) => void;
+    onStatisticsOpen: () => void;
+    onTrackEvent?: (event: string) => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -92,6 +94,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     onHelpClose,
     onUrlLoaderOpen,
     onAudioUrlLoad,
+    onStatisticsOpen,
+    onTrackEvent,
 }) => {
     const { t, language } = useI18n();
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -169,6 +173,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     </div>
                     <div className="flex items-center gap-2">
                         <InfoButton onClick={onHelpOpen} />
+                        <button
+                            onClick={onStatisticsOpen}
+                            className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                            title={t.statistics?.title || 'Statistics'}
+                        >
+                            <BarChart3 size={20} className="text-indigo-500" />
+                        </button>
                         <button
                             onClick={onThemeToggle}
                             className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
@@ -566,6 +577,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                         onDelete={onTrackDelete}
                                         syncThreshold={0.2}
                                         masterVolume={masterVolume}
+                                        onTrackEvent={onTrackEvent}
                                     />
                                 ))
                             )}

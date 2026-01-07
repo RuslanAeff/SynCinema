@@ -299,4 +299,28 @@ export interface Translations {
         complete: string;
         completeDesc: string;
     };
+
+    // Statistics
+    statistics?: {
+        title: string;
+        since: string;
+        totalWatchTime: string;
+        totalSessions: string;
+        videosLoaded: string;
+        audioTracksAdded: string;
+        projectsSaved: string;
+        projectsLoaded: string;
+        subtitlesLoaded: string;
+        markersAdded: string;
+        mostUsedFeatures: string;
+        playPause: string;
+        volumeAdjust: string;
+        seek: string;
+        eqAdjust: string;
+        fullscreen: string;
+        detach: string;
+        lastUsed: string;
+        reset: string;
+        resetConfirm: string;
+    };
 }
