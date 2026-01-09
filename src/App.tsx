@@ -276,7 +276,7 @@ function App() {
       )}
 
       {/* Mobile Header - Visible only on mobile */}
-      <div className="lg:hidden p-4 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 flex items-center justify-between sticky top-0 z-40 shadow-md">
+      <div className="lg:hidden p-4 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Logo size={32} className="drop-shadow-[0_0_10px_rgba(99,102,241,0.5)]" />
           <h1 className="text-xl font-extrabold tracking-tight text-gray-900 dark:text-white">SynCinema</h1>
