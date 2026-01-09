@@ -21,7 +21,7 @@ import { useTheme } from './hooks/useTheme';
 import { useAnalytics } from './hooks/useAnalytics';
 import { Logo } from './components/Logo';
 import { InfoButton } from './components/HelpPanel';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, BarChart3 } from 'lucide-react';
 
 
 function App() {
@@ -282,6 +282,13 @@ function App() {
           <h1 className="text-xl font-extrabold tracking-tight text-gray-900 dark:text-white">SynCinema</h1>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowStatistics(true)}
+            className="p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border border-purple-500/30 text-purple-400 hover:text-purple-300 transition-colors"
+            title="Statistics"
+          >
+            <BarChart3 size={18} />
+          </button>
           <InfoButton onClick={() => setShowHelp(true)} />
           <button
             onClick={toggleTheme}
