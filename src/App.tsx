@@ -100,7 +100,15 @@ function App() {
   const handleWelcomeComplete = useCallback(() => {
     setShowWelcome(false);
     sessionStorage.setItem('syncinema_welcome_seen', 'true');
-    // Check if user has completed the tour this session
+
+    // Skip tour on mobile devices (width < 1024px = lg breakpoint)
+    const isMobile = window.innerWidth < 1024;
+    if (isMobile) {
+      sessionStorage.setItem('syncinema_tour_completed', 'true');
+      return; // Don't start tour on mobile
+    }
+
+    // Check if user has completed the tour this session (desktop only)
     const hasCompletedTour = sessionStorage.getItem('syncinema_tour_completed');
     if (!hasCompletedTour) {
       // Start tour after a short delay

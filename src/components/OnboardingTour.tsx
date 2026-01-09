@@ -2,7 +2,7 @@
  * ═══════════════════════════════════════════════════════════════════════════
  *  SynCinema - Onboarding Tour Component
  *  @author Ruslan Aliyev
- *  Interactive first-time user guide
+ *  Interactive first-time user guide (Desktop Only)
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
