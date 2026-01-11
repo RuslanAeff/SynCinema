@@ -315,15 +315,28 @@ Aşağıdaki özellikler **kasıtlı olarak uygulanmamıştır**:
 
 ---
 
-## 8. Lisans ve Açık Kaynak
+## 8. Lisans ve Fikri Mülkiyet
 
-SynCinema **MIT Lisansı** altında yayınlanmıştır, şunlara izin verir:
-- ✅ Ticari kullanım
-- ✅ Değiştirme
-- ✅ Dağıtım
-- ✅ Özel kullanım
+SynCinema aşağıdaki koşullarla **Özel Lisans** altında yayınlanmıştır:
 
-**Depo:** https://github.com/RuslanAeff/SynCinema
+### İzin Verilen Kullanımlar:
+- ✅ Kaynak kodunu görüntüleme ve inceleme
+- ✅ Kişisel, ticari olmayan kullanım
+- ✅ Eğitim amaçlı kullanım
+- ✅ Güvenlik araştırması ve denetimi
+- ✅ İyileştirmelerle katkıda bulunma (Yazar onayıyla)
+
+### Kısıtlamalar:
+- ❌ Lisans olmadan ticari kullanım
+- ❌ İzinsiz türev eserler oluşturma
+- ❌ Ticari amaçlı yeniden dağıtım
+- ❌ Lisans olmadan SaaS olarak sunma
+
+### Ticari Lisanslama:
+Ticari kullanım için lütfen ticari lisans almak üzere Yazar ile iletişime geçin.
+
+**Depo:** https://github.com/RuslanAeff/SynCinema  
+**Telif Hakkı:** © 2025-2026 Ruslan Aliyev. Tüm Hakları Saklıdır.
 
 ---
 

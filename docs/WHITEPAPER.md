@@ -315,15 +315,28 @@ The following features are **intentionally not implemented**:
 
 ---
 
-## 8. License and Open Source
+## 8. License and Intellectual Property
 
-SynCinema is released under the **MIT License**, allowing:
-- ✅ Commercial use
-- ✅ Modification
-- ✅ Distribution
-- ✅ Private use
+SynCinema is released under a **Proprietary License** with the following terms:
 
-**Repository:** https://github.com/RuslanAeff/SynCinema
+### Permitted Uses:
+- ✅ View and study the source code
+- ✅ Personal, non-commercial use
+- ✅ Educational purposes
+- ✅ Security research and auditing
+- ✅ Contributing improvements (with Author approval)
+
+### Restrictions:
+- ❌ Commercial use without license
+- ❌ Creating derivative works without permission
+- ❌ Redistribution for commercial purposes
+- ❌ Offering as SaaS without license
+
+### Commercial Licensing:
+For commercial use, please contact the Author to obtain a commercial license.
+
+**Repository:** https://github.com/RuslanAeff/SynCinema  
+**Copyright:** © 2025-2026 Ruslan Aliyev. All Rights Reserved.
 
 ---
 
