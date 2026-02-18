@@ -8,12 +8,14 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { AudioTrack, AudioDevice } from '../types';
+import { useToast } from '../components/Toast';
 
 export const useAudioTracks = () => {
     const [audioTracks, setAudioTracks] = useState<AudioTrack[]>([]);
     const [permissionsGranted, setPermissionsGranted] = useState(false);
     const [audioDevices, setAudioDevices] = useState<AudioDevice[]>([]);
     const [masterVolume, setMasterVolume] = useState(1);
+    const { showToast } = useToast();
 
     const refreshDevices = useCallback(async () => {
         try {
@@ -165,8 +167,8 @@ export const useAudioTracks = () => {
         setTimeout(() => URL.revokeObjectURL(url), 1000);
 
         // Show confirmation
-        alert(`Project saved as: ${fileName}`);
-    }, [getStoredPrefs, masterVolume]);
+        showToast(`Project saved as: ${fileName}`);
+    }, [getStoredPrefs, masterVolume, showToast]);
 
     const importProject = useCallback((file: File) => {
         const reader = new FileReader();
@@ -210,14 +212,14 @@ export const useAudioTracks = () => {
                 }));
 
                 const trackCount = Object.keys(prefs).length;
-                alert(`Project loaded! Found settings for ${trackCount} tracks.\n${matchCount} active tracks updated.\n\n${appSettings ? 'App settings restored. Refresh for theme change.' : ''}`);
+                showToast(`Project loaded! Found settings for ${trackCount} tracks.\n${matchCount} active tracks updated.${appSettings ? '\nApp settings restored. Refresh for theme change.' : ''}`);
             } catch (err) {
                 console.error("Failed to load project", err);
-                alert("Error parsing project file. Please check if it's a valid .sync or .json file.");
+                showToast("Error parsing project file. Please check if it's a valid .sync or .json file.", 'error');
             }
         };
         reader.readAsText(file);
-    }, [setMasterVolume]);
+    }, [setMasterVolume, showToast]);
 
     return {
         audioTracks,

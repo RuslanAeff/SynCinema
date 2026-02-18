@@ -22,6 +22,7 @@ import './index.css';
 import App from './App';
 import { I18nProvider } from './context/I18nContext';
 import ErrorBoundary from './components/ErrorBoundary';
+import { ToastProvider } from './components/Toast';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -33,7 +34,9 @@ root.render(
   <React.StrictMode>
     <ErrorBoundary>
       <I18nProvider>
-        <App />
+        <ToastProvider>
+          <App />
+        </ToastProvider>
       </I18nProvider>
     </ErrorBoundary>
   </React.StrictMode>
