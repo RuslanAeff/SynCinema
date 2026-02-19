@@ -51,7 +51,15 @@ export const tr: Translations = {
         audioUrlPlaceholder: 'https://ornek.com/ses.mp3',
         addAudioTrackBtn: 'Ses Parçası Ekle',
         cancelBtn: 'İptal',
-        audioSupports: 'Desteklenir: Dropbox, Google Drive (<50MB), direkt MP3/WAV bağlantıları',
+        audioSupports: 'Desteklenen: Dropbox, Google Drive (<50MB), doğrudan MP3/WAV linkleri',
+        micPermission: 'Ses cihazı isimlerini listelemek için mikrofon izni gereklidir.',
+        grantPermission: 'İzin Ver',
+        change: 'Değiştir',
+        switchToLight: 'Açık Moda Geç',
+        switchToDark: 'Koyu Moda Geç',
+        addFromFile: 'Dosyadan ekle',
+        addFromUrl: 'URL\'den ekle',
+        unknownDevice: 'Bilinmeyen',
     },
 
     audioTrack: {
@@ -73,6 +81,12 @@ export const tr: Translations = {
         limiter: 'Sınırlayıcı',
         limiterActive: 'Sınırlayıcı Aktif',
         enableLimiter: 'Sınırlayıcıyı Etkinleştir',
+        hideAdvanced: 'Gelişmişi Gizle',
+        showAdvanced: 'Gelişmişi Göster',
+        unknownDevice: 'Bilinmeyen Cihaz',
+        audioStartsLater: 'Ses daha geç başlar',
+        audioStartsEarlier: 'Ses daha erken başlar',
+        perfectlySynced: 'Mükemmel senkronize',
         eqPresets: {
             label: 'Hazır Ayar',
             flat: 'Düz',
@@ -82,6 +96,30 @@ export const tr: Translations = {
             night: 'Gece Modu',
             bass: 'Bas Güçlendirme',
         },
+    },
+
+    dragDrop: {
+        title: 'Dosyaları Bırakın',
+        subtitle: 'Video, Ses veya Altyazı (.srt)',
+    },
+
+    detached: {
+        connected: '● Bağlandı',
+        waiting: '○ Bekleniyor...',
+        audioFromMain: '🔇 Ses ana pencereden geliyor',
+        waitingForVideo: 'Video bekleniyor...',
+        loadVideoHint: 'Ana SynCinema penceresinden video yükleyin',
+        detachedView: 'Ayrık Görünüm',
+        unmute: 'Sesi Aç',
+    },
+
+    errorBoundary: {
+        title: 'Bir şeyler ters gitti',
+        description: 'SynCinema bir hatayla karşılaştı. Bu, tarayıcı uyumluluk sorunlarından kaynaklanıyor olabilir.',
+        errorLabel: 'Hata:',
+        unknownError: 'Bilinmeyen hata',
+        reloadPage: 'Sayfayı Yenile',
+        persistHint: 'Sorun devam ederse, lütfen bir masaüstü tarayıcısı deneyin (Chrome önerilir).',
     },
 
     player: {

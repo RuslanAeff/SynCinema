@@ -8,6 +8,92 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
+// ═══════════════════════════════════════════════════════════════════════════
+//  Security: Allowed origins for CORS & Referer checks
+// ═══════════════════════════════════════════════════════════════════════════
+const ALLOWED_ORIGINS = [
+    'https://syncinema.vercel.app',
+    'https://www.syncinema.vercel.app',
+    'http://localhost:5173',    // Vite dev server
+    'http://localhost:4173',    // Vite preview
+    'http://localhost:3000',
+];
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Security: Rate limiting (in-memory, per serverless instance)
+// ═══════════════════════════════════════════════════════════════════════════
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
+const RATE_LIMIT_MAX_REQUESTS = 10;     // max 10 requests per IP per minute
+
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+
+function isRateLimited(ip: string): boolean {
+    const now = Date.now();
+    const entry = rateLimitMap.get(ip);
+
+    if (!entry || now > entry.resetTime) {
+        rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+        return false;
+    }
+
+    entry.count++;
+    if (entry.count > RATE_LIMIT_MAX_REQUESTS) {
+        return true;
+    }
+
+    return false;
+}
+
+// Cleanup stale entries periodically (prevent memory leak)
+setInterval(() => {
+    const now = Date.now();
+    for (const [ip, entry] of rateLimitMap.entries()) {
+        if (now > entry.resetTime) {
+            rateLimitMap.delete(ip);
+        }
+    }
+}, 5 * 60 * 1000); // Clean every 5 minutes
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Security: Google Drive file ID validation
+//  Valid IDs: 28-44 characters, alphanumeric + hyphens + underscores
+// ═══════════════════════════════════════════════════════════════════════════
+const GDRIVE_ID_REGEX = /^[a-zA-Z0-9_-]{28,44}$/;
+
+function isValidGDriveId(id: string): boolean {
+    return GDRIVE_ID_REGEX.test(id);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Security: Origin / Referer validation
+// ═══════════════════════════════════════════════════════════════════════════
+function isAllowedOrigin(req: VercelRequest): boolean {
+    const origin = req.headers.origin;
+    const referer = req.headers.referer;
+
+    // Check Origin header first
+    if (origin && ALLOWED_ORIGINS.includes(origin)) {
+        return true;
+    }
+
+    // Fallback to Referer header
+    if (referer) {
+        return ALLOWED_ORIGINS.some(allowed => referer.startsWith(allowed));
+    }
+
+    // No origin/referer = likely direct browser navigation or curl
+    // Deny by default for security
+    return false;
+}
+
+function getAllowedOriginForResponse(req: VercelRequest): string {
+    const origin = req.headers.origin;
+    if (origin && ALLOWED_ORIGINS.includes(origin)) {
+        return origin;
+    }
+    return ALLOWED_ORIGINS[0]; // Default to production domain
+}
+
 // Extract confirmation token from Google's virus scan page
 function extractConfirmToken(html: string): string | null {
     // Look for the confirmation link in the HTML
@@ -51,25 +137,50 @@ async function fetchGoogleDrive(url: string): Promise<Response> {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+    const corsOrigin = getAllowedOriginForResponse(req);
+
     // Handle CORS preflight
     if (req.method === 'OPTIONS') {
-        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Origin', corsOrigin);
         res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
         res.setHeader('Access-Control-Allow-Headers', 'Range, Content-Type');
         res.setHeader('Access-Control-Max-Age', '86400');
         return res.status(200).end();
     }
 
-    // Set CORS headers
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    // Set CORS headers (specific origin, not wildcard)
+    res.setHeader('Access-Control-Allow-Origin', corsOrigin);
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
     res.setHeader('Access-Control-Expose-Headers', 'Content-Length, Content-Range, Accept-Ranges');
+
+    // ── Security Layer 1: Origin/Referer Check ──
+    if (!isAllowedOrigin(req)) {
+        console.warn(`[Proxy] Blocked request from unauthorized origin: ${req.headers.origin || req.headers.referer || 'none'}`);
+        return res.status(403).json({ error: 'Forbidden: unauthorized origin' });
+    }
+
+    // ── Security Layer 2: Rate Limiting ──
+    const clientIp = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim()
+        || req.socket?.remoteAddress
+        || 'unknown';
+
+    if (isRateLimited(clientIp)) {
+        console.warn(`[Proxy] Rate limited IP: ${clientIp}`);
+        res.setHeader('Retry-After', '60');
+        return res.status(429).json({ error: 'Too many requests. Please try again later.' });
+    }
 
     try {
         const { id } = req.query;
 
         if (!id || typeof id !== 'string') {
             return res.status(400).json({ error: 'Missing file ID' });
+        }
+
+        // ── Security Layer 3: File ID Validation ──
+        if (!isValidGDriveId(id)) {
+            console.warn(`[Proxy] Invalid file ID format: ${id}`);
+            return res.status(400).json({ error: 'Invalid file ID format' });
         }
 
         console.log(`[Proxy] Request for file: ${id}`);

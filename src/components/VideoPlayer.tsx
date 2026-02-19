@@ -8,6 +8,7 @@
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { Play, Pause, RotateCcw, Film, Maximize, Minimize, Volume2 } from 'lucide-react';
+import { formatTime } from '../utils/formatTime';
 import { Translations } from '../i18n';
 import { useI18n } from '../context/I18nContext';
 
@@ -17,7 +18,7 @@ interface VideoPlayerProps {
     isPlaying: boolean;
     currentTime: number;
     duration: number;
-    videoRef: React.RefObject<HTMLVideoElement>;
+    videoRef: React.RefObject<HTMLVideoElement | null>;
     togglePlay: () => void;
     handleSeek: (time: number) => void;
     setIsPlaying: (playing: boolean) => void;
@@ -197,11 +198,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         // No need to store reference - BroadcastChannel handles sync
     }, []);
 
-    const formatTime = (time: number) => {
-        const minutes = Math.floor(time / 60);
-        const seconds = Math.floor(time % 60);
-        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-    };
+
 
     const handleUserActivity = useCallback(() => {
         setShowControls(true);

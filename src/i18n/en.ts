@@ -52,6 +52,14 @@ export const en: Translations = {
         addAudioTrackBtn: 'Add Audio Track',
         cancelBtn: 'Cancel',
         audioSupports: 'Supports: Dropbox, Google Drive (<50MB), direct MP3/WAV links',
+        micPermission: 'Microphone permission is required to list audio device names.',
+        grantPermission: 'Grant Permission',
+        change: 'Change',
+        switchToLight: 'Switch to Light Mode',
+        switchToDark: 'Switch to Dark Mode',
+        addFromFile: 'Add from file',
+        addFromUrl: 'Add from URL',
+        unknownDevice: 'Unknown',
     },
 
     audioTrack: {
@@ -73,6 +81,12 @@ export const en: Translations = {
         limiter: 'Limiter',
         limiterActive: 'Limiter Active',
         enableLimiter: 'Enable Limiter',
+        hideAdvanced: 'Hide Advanced',
+        showAdvanced: 'Show Advanced',
+        unknownDevice: 'Unknown Device',
+        audioStartsLater: 'Audio starts later',
+        audioStartsEarlier: 'Audio starts earlier',
+        perfectlySynced: 'Perfectly synced',
         eqPresets: {
             label: 'Preset',
             flat: 'Flat',
@@ -82,6 +96,30 @@ export const en: Translations = {
             night: 'Night Mode',
             bass: 'Bass Boost',
         },
+    },
+
+    dragDrop: {
+        title: 'Drop Files',
+        subtitle: 'Video, Audio or Subtitle (.srt)',
+    },
+
+    detached: {
+        connected: '● Connected',
+        waiting: '○ Waiting...',
+        audioFromMain: '🔇 Audio from main window',
+        waitingForVideo: 'Waiting for video...',
+        loadVideoHint: 'Load a video in the main SynCinema window',
+        detachedView: 'Detached View',
+        unmute: 'Unmute',
+    },
+
+    errorBoundary: {
+        title: 'Something went wrong',
+        description: 'SynCinema encountered an error. This might be due to browser compatibility issues.',
+        errorLabel: 'Error:',
+        unknownError: 'Unknown error',
+        reloadPage: 'Reload Page',
+        persistHint: 'If this persists, please try a desktop browser (Chrome recommended).',
     },
 
     player: {

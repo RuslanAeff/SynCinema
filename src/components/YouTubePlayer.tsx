@@ -8,6 +8,7 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { AlertTriangle, Volume2, VolumeX, Play, Pause, Maximize, Minimize, Youtube, ExternalLink } from 'lucide-react';
+import { formatTime } from '../utils/formatTime';
 
 // YouTube IFrame API types
 declare global {
@@ -231,13 +232,7 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({
     };
 
     // Format time
-    const formatTime = (seconds: number) => {
-        const h = Math.floor(seconds / 3600);
-        const m = Math.floor((seconds % 3600) / 60);
-        const s = Math.floor(seconds % 60);
-        if (h > 0) return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-        return `${m}:${s.toString().padStart(2, '0')}`;
-    };
+
 
     // Format quality label
     const formatQuality = (quality: string): string => {

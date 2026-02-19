@@ -7,7 +7,8 @@
  */
 
 import React, { useRef, useState, useEffect } from 'react';
-import { RotateCcw, AlertCircle, Film, Upload, Sun, Moon, Volume2, VolumeX, ChevronDown, Link, Speaker, Headphones, Mic, Radio, Monitor, Check, BarChart3 } from 'lucide-react';
+import { RotateCcw, AlertCircle, Film, Upload, Sun, Moon, Volume2, VolumeX, ChevronDown, Link, Headphones, Check, BarChart3 } from 'lucide-react';
+import { getDeviceIcon } from '../utils/getDeviceIcon';
 import { Button } from './Button';
 import { AudioTrackRow } from './AudioTrackRow';
 import { Logo } from './Logo';
@@ -113,22 +114,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     const [isVideoDeviceDropdownOpen, setIsVideoDeviceDropdownOpen] = useState(false);
 
     // Get device icon based on label
-    const getDeviceIcon = (label: string): React.ReactNode => {
-        const lowerLabel = label.toLowerCase();
-        if (lowerLabel.includes('headphone') || lowerLabel.includes('headset') || lowerLabel.includes('earphone')) {
-            return <Headphones size={14} />;
-        }
-        if (lowerLabel.includes('microphone') || lowerLabel.includes('mic')) {
-            return <Mic size={14} />;
-        }
-        if (lowerLabel.includes('bluetooth') || lowerLabel.includes('wireless')) {
-            return <Radio size={14} />;
-        }
-        if (lowerLabel.includes('monitor') || lowerLabel.includes('display') || lowerLabel.includes('hdmi')) {
-            return <Monitor size={14} />;
-        }
-        return <Speaker size={14} />;
-    };
+
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -183,7 +169,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         <button
                             onClick={onThemeToggle}
                             className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                            title={theme === 'dark' ? t.sidebar.switchToLight : t.sidebar.switchToDark}
                         >
                             {theme === 'dark' ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-indigo-600" />}
                         </button>
@@ -199,8 +185,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <div className="mt-4 p-3 bg-yellow-900/20 border border-yellow-700/50 rounded-lg flex items-start gap-3">
                         <AlertCircle className="text-yellow-500 shrink-0 mt-0.5" size={16} />
                         <div>
-                            <p className="text-xs text-yellow-200 mb-2">Microphone permission is required to list audio device names.</p>
-                            <Button size="sm" variant="secondary" onClick={onRefreshDevices}>Grant Permission</Button>
+                            <p className="text-xs text-yellow-200 mb-2">{t.sidebar.micPermission}</p>
+                            <Button size="sm" variant="secondary" onClick={onRefreshDevices}>{t.sidebar.grantPermission}</Button>
                         </div>
                     </div>
                 )}
@@ -214,7 +200,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             <span className="text-sm truncate max-w-[200px]">{videoFile.name}</span>
                             <div className="flex items-center gap-2">
                                 <button onClick={onUrlLoaderOpen} className="text-xs text-purple-400 hover:text-purple-300">URL</button>
-                                <button onClick={() => fileInputRef.current?.click()} className="text-xs text-indigo-400 hover:text-indigo-300">Change</button>
+                                <button onClick={() => fileInputRef.current?.click()} className="text-xs text-indigo-400 hover:text-indigo-300">{t.sidebar.change}</button>
                             </div>
                         </div>
                     ) : (
@@ -277,7 +263,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                     </div>
                                     <span className="flex-1 text-sm text-gray-700 dark:text-gray-200 truncate font-medium">
                                         {videoDeviceId
-                                            ? (audioDevices.find(d => d.deviceId === videoDeviceId)?.label || 'Unknown').slice(0, 30)
+                                            ? (audioDevices.find(d => d.deviceId === videoDeviceId)?.label || t.sidebar.unknownDevice).slice(0, 30)
                                             : t.sidebar.defaultOutput}
                                     </span>
                                     <ChevronDown size={14} className={`text-gray-400 transition-transform ${isVideoDeviceDropdownOpen ? 'rotate-180' : ''}`} />
@@ -341,7 +327,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <div className={`text-sm font-medium truncate ${videoDeviceId === device.deviceId ? 'text-purple-600 dark:text-purple-300' : 'text-gray-700 dark:text-gray-200'}`}>
-                                                        {device.label || 'Unknown Device'}
+                                                        {device.label || t.sidebar.unknownDevice}
                                                     </div>
                                                 </div>
                                                 {videoDeviceId === device.deviceId && (
@@ -466,14 +452,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             <span
                                 onClick={(e) => { e.stopPropagation(); audioInputRef.current?.click(); }}
                                 className="text-xs bg-indigo-500 hover:bg-indigo-600 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 shadow-sm cursor-pointer border border-indigo-600 dark:border-transparent"
-                                title="Add from file"
+                                title={t.sidebar.addFromFile}
                             >
                                 <Upload size={12} />
                             </span>
                             <span
                                 onClick={(e) => { e.stopPropagation(); setShowAudioUrlInput(!showAudioUrlInput); setIsAudioTracksCollapsed(false); }}
                                 className="text-xs bg-purple-500 hover:bg-purple-600 dark:bg-purple-600 dark:hover:bg-purple-700 text-white px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 shadow-sm cursor-pointer border border-purple-600 dark:border-transparent"
-                                title="Add from URL"
+                                title={t.sidebar.addFromUrl}
                             >
                                 <Link size={12} />
                             </span>

@@ -7,11 +7,7 @@
  */
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-
-interface MediaElementWithSinkId extends HTMLMediaElement {
-    setSinkId(sinkId: string): Promise<void>;
-    sinkId: string;
-}
+import { ExtendedMediaElement } from '../types';
 
 export const useVideoPlayer = () => {
     const [videoFile, setVideoFile] = useState<File | null>(null);
@@ -36,7 +32,7 @@ export const useVideoPlayer = () => {
 
     // Handle video output device change
     useEffect(() => {
-        const video = videoRef.current as MediaElementWithSinkId | null;
+        const video = videoRef.current as ExtendedMediaElement | null;
         if (!video) return;
 
         const setOutputDevice = async () => {

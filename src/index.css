@@ -169,28 +169,28 @@
 /* Light Mode Secondary Buttons (gray-700) */
 .light button.bg-gray-700,
 .light .bg-gray-700 {
-  background-color: #ffffff !important;
-  color: #374151 !important;
-  border: 1px solid #d1d5db !important;
+  background-color: #ffffff;
+  color: #374151;
+  border: 1px solid #d1d5db;
 }
 
 .light button.bg-gray-700:hover,
 .light .bg-gray-700:hover {
-  background-color: #f3f4f6 !important;
-  color: #1f2937 !important;
+  background-color: #f3f4f6;
+  color: #1f2937;
 }
 
 /* Light Mode Text Override for Buttons */
 .light button .text-white,
 .light button.text-white {
-  color: #374151 !important;
+  color: #374151;
 }
 
 /* Light Mode Select/Dropdown */
 .light select {
-  background-color: #ffffff !important;
-  color: #1f2937 !important;
-  border-color: #d1d5db !important;
+  background-color: #ffffff;
+  color: #1f2937;
+  border-color: #d1d5db;
 }
 
 /* Light Mode Input Fields */
@@ -202,8 +202,8 @@
 
 /* Light Mode Track Cards */
 .light .bg-gray-800\/50 {
-  background-color: #ffffff !important;
-  border-color: #e5e7eb !important;
+  background-color: #ffffff;
+  border-color: #e5e7eb;
 }
 
 /* Light Mode Designer Footer */

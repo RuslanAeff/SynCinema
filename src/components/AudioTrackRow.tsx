@@ -1,34 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AudioTrack, AudioDevice, ExtendedMediaElement } from '../types';
-import { Trash2, Volume2, VolumeX, Clock, Gauge, ChevronDown, ChevronUp, Headphones, Check, RotateCcw, Speaker, Mic, Radio, Monitor } from 'lucide-react';
+import { Trash2, Volume2, VolumeX, Clock, Gauge, ChevronDown, ChevronUp, Headphones, Check, RotateCcw } from 'lucide-react';
 import { AudioGraphManager } from './AudioGraphManager';
 import { useI18n } from '../context/I18nContext';
 import { eqPresets, getCurrentPresetId } from '../constants/eqPresets';
+import { formatTime } from '../utils/formatTime';
+import { getDeviceIcon } from '../utils/getDeviceIcon';
 
 // Format seconds to MM:SS.d
-const formatTime = (seconds: number): string => {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins.toString().padStart(2, '0')}:${secs.toFixed(1).padStart(4, '0')}`;
-};
+
 
 // Get device icon based on label
-const getDeviceIcon = (label: string): React.ReactNode => {
-  const lowerLabel = label.toLowerCase();
-  if (lowerLabel.includes('headphone') || lowerLabel.includes('headset') || lowerLabel.includes('earphone')) {
-    return <Headphones size={14} />;
-  }
-  if (lowerLabel.includes('microphone') || lowerLabel.includes('mic')) {
-    return <Mic size={14} />;
-  }
-  if (lowerLabel.includes('bluetooth') || lowerLabel.includes('wireless')) {
-    return <Radio size={14} />;
-  }
-  if (lowerLabel.includes('monitor') || lowerLabel.includes('display') || lowerLabel.includes('hdmi')) {
-    return <Monitor size={14} />;
-  }
-  return <Speaker size={14} />;
-};
+
 
 interface AudioTrackRowProps {
   track: AudioTrack;
@@ -170,13 +153,13 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
 
   // Get selected device name
   const getDeviceName = () => {
-    if (!track.deviceId) return 'Default Output';
+    if (!track.deviceId) return t.audioTrack.defaultDevice;
     const device = availableDevices.find(d => d.deviceId === track.deviceId);
     if (device?.label) {
       // Truncate long names
       return device.label.length > 20 ? device.label.slice(0, 18) + '...' : device.label;
     }
-    return 'Unknown Device';
+    return t.audioTrack.unknownDevice;
   };
 
   return (
@@ -400,7 +383,7 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
           {/* Offset */}
           <div className="flex items-center gap-1.5">
             <Clock size={12} className="text-gray-400 dark:text-gray-500 flex-shrink-0" />
-            <span className="text-[11px] text-gray-500 dark:text-gray-500">Offset:</span>
+            <span className="text-[11px] text-gray-500 dark:text-gray-500">{t.sidebar.offset}:</span>
             <div className="flex items-center bg-gray-100 dark:bg-gray-900/50 rounded-lg overflow-hidden">
               <button
                 onClick={() => onUpdate(track.id, { offset: Number((track.offset - 0.1).toFixed(1)) })}
@@ -428,7 +411,7 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
           {/* Speed */}
           <div className="flex items-center gap-1.5">
             <Gauge size={12} className="text-gray-400 dark:text-gray-500 flex-shrink-0" />
-            <span className="text-[11px] text-gray-500 dark:text-gray-500">Speed:</span>
+            <span className="text-[11px] text-gray-500 dark:text-gray-500">{t.audioTrack.speed}:</span>
             <div className="flex items-center bg-gray-100 dark:bg-gray-900/50 rounded-lg overflow-hidden">
               <button
                 onClick={() => onUpdate(track.id, { playbackRate: Number((track.playbackRate - 0.1).toFixed(1)) })}
@@ -464,12 +447,12 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
           {isExpanded ? (
             <>
               <ChevronUp size={14} />
-              <span>Hide Advanced</span>
+              <span>{t.audioTrack.hideAdvanced}</span>
             </>
           ) : (
             <>
               <ChevronDown size={14} />
-              <span>Show Advanced</span>
+              <span>{t.audioTrack.showAdvanced}</span>
             </>
           )}
         </button>
@@ -483,14 +466,14 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
           {/* Offset Adjustment */}
           <div>
             <div className="flex items-center justify-between text-xs mb-3">
-              <span className="text-gray-600 dark:text-gray-500">Offset Adjustment</span>
+              <span className="text-gray-600 dark:text-gray-500">{t.audioTrack.offsetAdjustment}</span>
               {track.offset !== 0 && (
                 <button
                   onClick={() => onUpdate(track.id, { offset: 0 })}
                   className="flex items-center gap-1 text-[10px] text-gray-500 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
                 >
                   <RotateCcw size={10} />
-                  Reset
+                  {t.audioTrack.reset}
                 </button>
               )}
             </div>
@@ -548,7 +531,7 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
               <div className="text-center mt-2">
                 <span className="text-lg font-mono font-bold text-gray-900 dark:text-white">{track.offset > 0 ? '+' : ''}{track.offset.toFixed(1)}s</span>
                 <p className="text-[10px] text-gray-500 mt-0.5">
-                  {track.offset > 0 ? 'Audio starts later' : track.offset < 0 ? 'Audio starts earlier' : 'Perfectly synced'}
+                  {track.offset > 0 ? t.audioTrack.audioStartsLater : track.offset < 0 ? t.audioTrack.audioStartsEarlier : t.audioTrack.perfectlySynced}
                 </p>
               </div>
             </div>
@@ -557,7 +540,7 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
           {/* EQ Controls */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-medium text-teal-600 dark:text-teal-400 uppercase tracking-wider">3-Band EQ</span>
+              <span className="text-xs font-medium text-teal-600 dark:text-teal-400 uppercase tracking-wider">{t.audioTrack.eq3Band}</span>
               <div className="flex items-center gap-2">
                 {/* Preset Dropdown */}
                 <select
@@ -630,7 +613,7 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
                 : 'bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500'
                 }`}
             >
-              {track.useCompressor ? '✓ Limiter Active' : 'Enable Limiter'}
+              {track.useCompressor ? `✓ ${t.audioTrack.limiterActive}` : t.audioTrack.enableLimiter}
             </button>
           </div>
         </div>

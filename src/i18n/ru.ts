@@ -52,6 +52,14 @@ export const ru: Translations = {
         addAudioTrackBtn: 'Добавить Аудио',
         cancelBtn: 'Отмена',
         audioSupports: 'Поддерживается: Dropbox, Google Drive (<50MB), прямые ссылки MP3/WAV',
+        micPermission: 'Для отображения имён аудиоустройств требуется разрешение микрофона.',
+        grantPermission: 'Дать Разрешение',
+        change: 'Изменить',
+        switchToLight: 'Переключить на Светлый Режим',
+        switchToDark: 'Переключить на Тёмный Режим',
+        addFromFile: 'Добавить из файла',
+        addFromUrl: 'Добавить по URL',
+        unknownDevice: 'Неизвестно',
     },
 
     audioTrack: {
@@ -73,6 +81,12 @@ export const ru: Translations = {
         limiter: 'Лимитер',
         limiterActive: 'Лимитер Активен',
         enableLimiter: 'Включить Лимитер',
+        hideAdvanced: 'Скрыть Дополнительно',
+        showAdvanced: 'Показать Дополнительно',
+        unknownDevice: 'Неизвестное Устройство',
+        audioStartsLater: 'Аудио начинается позже',
+        audioStartsEarlier: 'Аудио начинается раньше',
+        perfectlySynced: 'Идеально синхронизировано',
         eqPresets: {
             label: 'Пресет',
             flat: 'Плоский',
@@ -82,6 +96,30 @@ export const ru: Translations = {
             night: 'Ночной Режим',
             bass: 'Усиление Баса',
         },
+    },
+
+    dragDrop: {
+        title: 'Перетащите файлы',
+        subtitle: 'Видео, Аудио или Субтитры (.srt)',
+    },
+
+    detached: {
+        connected: '● Подключено',
+        waiting: '○ Ожидание...',
+        audioFromMain: '🔇 Звук из основного окна',
+        waitingForVideo: 'Ожидание видео...',
+        loadVideoHint: 'Загрузите видео в основном окне SynCinema',
+        detachedView: 'Отдельное Окно',
+        unmute: 'Включить звук',
+    },
+
+    errorBoundary: {
+        title: 'Что-то пошло не так',
+        description: 'SynCinema столкнулся с ошибкой. Это может быть связано с проблемами совместимости браузера.',
+        errorLabel: 'Ошибка:',
+        unknownError: 'Неизвестная ошибка',
+        reloadPage: 'Перезагрузить Страницу',
+        persistHint: 'Если проблема сохраняется, попробуйте настольный браузер (рекомендуется Chrome).',
     },
 
     player: {

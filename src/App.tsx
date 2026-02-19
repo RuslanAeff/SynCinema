@@ -22,9 +22,11 @@ import { useAnalytics } from './hooks/useAnalytics';
 import { Logo } from './components/Logo';
 import { InfoButton } from './components/HelpPanel';
 import { Sun, Moon, BarChart3 } from 'lucide-react';
+import { useI18n } from './context/I18nContext';
 
 
 function App() {
+  const { t } = useI18n();
   const {
     videoFile,
     videoObjectUrl,
@@ -214,7 +216,8 @@ function App() {
     trackEvent('videosLoaded');
   }, [loadVideo, trackEvent]);
 
-  const handleAudioUpload = useCallback((files: FileList) => {
+  const handleAudioUpload = useCallback((files: FileList | null) => {
+    if (!files) return;
     addAudioTracks(files);
     // Track each audio file added
     for (let i = 0; i < files.length; i++) {
@@ -255,8 +258,8 @@ function App() {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      {/* 🎄 New Year Snowfall - Festive Season Only */}
-      <Snowfall intensity="medium" />
+      {/* 🎄 New Year Snowfall - Festive Season Only (Dec 20 - Jan 10) */}
+      {(() => { const now = new Date(); const m = now.getMonth(); const d = now.getDate(); return (m === 11 && d >= 20) || (m === 0 && d <= 10); })() && <Snowfall intensity="medium" />}
 
       {/* Welcome Screen */}
       {showWelcome && <WelcomeScreen onComplete={handleWelcomeComplete} />}
@@ -269,8 +272,8 @@ function App() {
         <div className="absolute inset-0 bg-indigo-900/50 backdrop-blur-sm z-50 flex items-center justify-center pointer-events-none">
           <div className="text-center">
             <div className="text-6xl mb-4">📂</div>
-            <h2 className="text-2xl font-bold text-white">Dosyaları Bırakın</h2>
-            <p className="text-indigo-300 mt-2">Video, Ses veya Altyazı (.srt)</p>
+            <h2 className="text-2xl font-bold text-white">{t.dragDrop.title}</h2>
+            <p className="text-indigo-300 mt-2">{t.dragDrop.subtitle}</p>
           </div>
         </div>
       )}
@@ -324,7 +327,7 @@ function App() {
           setDuration={setDuration}
           subtitleCues={subtitleCues}
           subtitleOffset={subtitleOffset}
-          onTrackEvent={trackEvent}
+          onTrackEvent={trackEvent as (event: string) => void}
           onTrackWatchTime={trackWatchTime}
         />
       )}
@@ -368,7 +371,7 @@ function App() {
         onUrlLoaderOpen={() => setShowUrlLoader(true)}
         onAudioUrlLoad={handleAudioFromUrl}
         onStatisticsOpen={() => setShowStatistics(true)}
-        onTrackEvent={trackEvent}
+        onTrackEvent={trackEvent as (event: string) => void}
       />
 
       {/* Help Panel - at App level to overlay everything */}

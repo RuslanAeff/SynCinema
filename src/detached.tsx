@@ -10,6 +10,8 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import { Play, Pause, Maximize, Minimize, Volume2, VolumeX } from 'lucide-react';
+import { formatTime } from './utils/formatTime';
+import { I18nProvider, useI18n } from './context/I18nContext';
 
 interface SubtitleCue {
     start: number;
@@ -20,6 +22,7 @@ interface SubtitleCue {
 const CHANNEL_NAME = 'syncinema-player-sync';
 
 const DetachedPlayer: React.FC = () => {
+    const { t } = useI18n();
     const videoRef = useRef<HTMLVideoElement>(null);
     const channelRef = useRef<BroadcastChannel | null>(null);
 
@@ -253,11 +256,7 @@ const DetachedPlayer: React.FC = () => {
         }
     }, []);
 
-    const formatTime = (seconds: number) => {
-        const mins = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
-    };
+
 
     // Get active subtitles
     const activeSubtitles = subtitleCues.filter(
@@ -329,13 +328,13 @@ const DetachedPlayer: React.FC = () => {
 
                         {/* Connection Status */}
                         <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-medium transition-opacity ${showControls ? 'opacity-100' : 'opacity-0'} ${isConnected ? 'bg-green-500/80' : 'bg-yellow-500/80'}`}>
-                            {isConnected ? '● Connected' : '○ Waiting...'}
+                            {isConnected ? t.detached.connected : t.detached.waiting}
                         </div>
 
                         {/* Muted Indicator */}
                         {isMuted && (
                             <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs bg-gray-800/80 text-gray-300 transition-opacity ${showControls ? 'opacity-100' : 'opacity-0'}`}>
-                                🔇 Audio from main window
+                                {t.detached.audioFromMain}
                             </div>
                         )}
                     </>
@@ -344,8 +343,8 @@ const DetachedPlayer: React.FC = () => {
                         <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-800 flex items-center justify-center animate-pulse">
                             <Play size={32} className="text-gray-600" />
                         </div>
-                        <p className="text-lg mb-2">Waiting for video...</p>
-                        <p className="text-sm text-gray-600">Load a video in the main SynCinema window</p>
+                        <p className="text-lg mb-2">{t.detached.waitingForVideo}</p>
+                        <p className="text-sm text-gray-600">{t.detached.loadVideoHint}</p>
                     </div>
                 )}
             </div>
@@ -369,7 +368,7 @@ const DetachedPlayer: React.FC = () => {
                 {/* Control Buttons */}
                 <div className="flex items-center justify-between px-4">
                     <div className="w-24 text-xs text-gray-500">
-                        Detached View
+                        {t.detached.detachedView}
                     </div>
 
                     <div className="flex items-center gap-6">
@@ -385,7 +384,7 @@ const DetachedPlayer: React.FC = () => {
                         <button
                             onClick={() => setIsMuted(!isMuted)}
                             className="text-gray-400 hover:text-white transition-colors p-2"
-                            title={isMuted ? "Unmute" : "Mute"}
+                            title={isMuted ? t.detached.unmute : t.sidebar.mute}
                         >
                             {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
                         </button>
@@ -406,5 +405,9 @@ const DetachedPlayer: React.FC = () => {
 const rootElement = document.getElementById('root');
 if (rootElement) {
     const root = ReactDOM.createRoot(rootElement);
-    root.render(<DetachedPlayer />);
+    root.render(
+        <I18nProvider>
+            <DetachedPlayer />
+        </I18nProvider>
+    );
 }

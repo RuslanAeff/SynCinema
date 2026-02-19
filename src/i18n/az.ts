@@ -52,6 +52,14 @@ export const az: Translations = {
         addAudioTrackBtn: 'Səs Parçası Əlavə Et',
         cancelBtn: 'Ləğv et',
         audioSupports: 'Dəstəklənir: Dropbox, Google Drive (<50MB), birbaşa MP3/WAV linkləri',
+        micPermission: 'Səs cihazı adlarını sadalamaq üçün mikrofon icazəsi tələb olunur.',
+        grantPermission: 'İcazə Ver',
+        change: 'Dəyişdir',
+        switchToLight: 'Açıq Rejimə Keç',
+        switchToDark: 'Tünd Rejimə Keç',
+        addFromFile: 'Fayldan əlavə et',
+        addFromUrl: 'URL-dən əlavə et',
+        unknownDevice: 'Naməlum',
     },
 
     audioTrack: {
@@ -73,6 +81,12 @@ export const az: Translations = {
         limiter: 'Məhdudlaşdırıcı',
         limiterActive: 'Məhdudlaşdırıcı Aktiv',
         enableLimiter: 'Məhdudlaşdırıcını Aktivləşdir',
+        hideAdvanced: 'Ətraflını Gizlə',
+        showAdvanced: 'Ətraflını Göstər',
+        unknownDevice: 'Naməlum Cihaz',
+        audioStartsLater: 'Səs daha gec başlayır',
+        audioStartsEarlier: 'Səs daha tez başlayır',
+        perfectlySynced: 'Mükəmməl sinxronlaşdırılıb',
         eqPresets: {
             label: 'Hazır Ayar',
             flat: 'Düz',
@@ -82,6 +96,30 @@ export const az: Translations = {
             night: 'Gecə Rejimi',
             bass: 'Bas Gücləndirmə',
         },
+    },
+
+    dragDrop: {
+        title: 'Faylları Buraxın',
+        subtitle: 'Video, Səs və ya Altyazı (.srt)',
+    },
+
+    detached: {
+        connected: '● Qoşulub',
+        waiting: '○ Gözlənilir...',
+        audioFromMain: '🔇 Səs əsas pəncərədən gəlir',
+        waitingForVideo: 'Video gözlənilir...',
+        loadVideoHint: 'Əsas SynCinema pəncərəsindən video yükləyin',
+        detachedView: 'Ayrılmış Görünüş',
+        unmute: 'Səsi Aç',
+    },
+
+    errorBoundary: {
+        title: 'Bir xəta baş verdi',
+        description: 'SynCinema bir xəta ilə üzləşdi. Bu brauzer uyğunluq problemlərindən qaynaqlanır.',
+        errorLabel: 'Xəta:',
+        unknownError: 'Naməlum xəta',
+        reloadPage: 'Səhifəni Yenilə',
+        persistHint: 'Problem davam edərsə, zəhmət olmasa masaüstü brauzeri sınayın (Chrome tövsiyə olunur).',
     },
 
     player: {

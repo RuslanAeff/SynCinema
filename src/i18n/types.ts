@@ -76,6 +76,14 @@ export interface Translations {
         addAudioTrackBtn: string;
         cancelBtn: string;
         audioSupports: string;
+        micPermission: string;
+        grantPermission: string;
+        change: string;
+        switchToLight: string;
+        switchToDark: string;
+        addFromFile: string;
+        addFromUrl: string;
+        unknownDevice: string;
     };
 
     // URL Loader Modal
@@ -121,6 +129,12 @@ export interface Translations {
         limiter: string;
         limiterActive: string;
         enableLimiter: string;
+        hideAdvanced: string;
+        showAdvanced: string;
+        unknownDevice: string;
+        audioStartsLater: string;
+        audioStartsEarlier: string;
+        perfectlySynced: string;
         eqPresets: {
             label: string;
             flat: string;
@@ -130,6 +144,33 @@ export interface Translations {
             night: string;
             bass: string;
         };
+    };
+
+    // Drag & Drop overlay
+    dragDrop: {
+        title: string;
+        subtitle: string;
+    };
+
+    // Detached player window
+    detached: {
+        connected: string;
+        waiting: string;
+        audioFromMain: string;
+        waitingForVideo: string;
+        loadVideoHint: string;
+        detachedView: string;
+        unmute: string;
+    };
+
+    // Error boundary
+    errorBoundary: {
+        title: string;
+        description: string;
+        errorLabel: string;
+        unknownError: string;
+        reloadPage: string;
+        persistHint: string;
     };
 
     // Video player

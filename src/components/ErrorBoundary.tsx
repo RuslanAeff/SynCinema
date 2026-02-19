@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { getSavedLanguage, getTranslation } from '../i18n';
 
 interface ErrorBoundaryProps {
     children: React.ReactNode;
@@ -34,6 +35,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
 
     render(): React.ReactNode {
         if (this.state.hasError) {
+            const t = getTranslation(getSavedLanguage());
             return (
                 <div style={{
                     minHeight: '100vh',
@@ -48,10 +50,10 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
                     fontFamily: 'system-ui, -apple-system, sans-serif'
                 }}>
                     <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>
-                        Something went wrong
+                        {t.errorBoundary.title}
                     </h1>
                     <p style={{ color: '#a0a0b0', marginBottom: '1rem', maxWidth: '500px' }}>
-                        SynCinema encountered an error. This might be due to browser compatibility issues.
+                        {t.errorBoundary.description}
                     </p>
                     <div style={{
                         backgroundColor: '#1a1a2e',
@@ -63,9 +65,9 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
                         fontSize: '0.875rem',
                         marginBottom: '1rem'
                     }}>
-                        <strong style={{ color: '#ff6b6b' }}>Error:</strong>
+                        <strong style={{ color: '#ff6b6b' }}>{t.errorBoundary.errorLabel}</strong>
                         <pre style={{ color: '#ffa07a', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                            {this.state.error?.message || 'Unknown error'}
+                            {this.state.error?.message || t.errorBoundary.unknownError}
                         </pre>
                     </div>
                     <button
@@ -80,10 +82,10 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
                             fontSize: '1rem'
                         }}
                     >
-                        Reload Page
+                        {t.errorBoundary.reloadPage}
                     </button>
                     <p style={{ color: '#666', marginTop: '2rem', fontSize: '0.75rem' }}>
-                        If this persists, please try a desktop browser (Chrome recommended).
+                        {t.errorBoundary.persistHint}
                     </p>
                 </div>
             );
