@@ -95,19 +95,25 @@ export function useCloudSync() {
                 // Upvote the most voted one in this range
                 const bestMatch = existingSettings.sort((a, b) => b.votes - a.votes)[0];
 
-                // Extremely simple anti-spam: check localStorage
-                const votedKey = `voted_${bestMatch.id}`;
-                if (localStorage.getItem(votedKey)) {
-                    console.log('[Supabase] Already voted for this preset');
-                    return true; // Pretend success
+                // Generate a simple browser fingerprint for server-side deduplication
+                const voterHash = btoa(encodeURIComponent(
+                    `${navigator.userAgent}_${screen.width}x${screen.height}_${navigator.language}_${new Date().getTimezoneOffset()}`
+                )).substring(0, 64);
+
+                // Server-side vote deduplication (replaces localStorage check)
+                const { data: voteResult, error: voteError } = await supabase
+                    .rpc('safe_increment_vote', {
+                        p_row_id: bestMatch.id,
+                        p_voter_hash: voterHash
+                    });
+
+                if (voteError) throw voteError;
+
+                // voteResult === false means already voted (server rejected)
+                if (voteResult === false) {
+                    console.log('[Supabase] Already voted for this preset (server-side check)');
                 }
 
-                const { error: updateError } = await supabase
-                    .rpc('increment_vote', { row_id: bestMatch.id });
-
-                if (updateError) throw updateError;
-
-                localStorage.setItem(votedKey, 'true');
                 return true;
             } else {
                 // Insert a new preset via secure RPC (server-side rate limiting)
