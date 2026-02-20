@@ -7,16 +7,36 @@
  */
 
 /**
+ * Simple hash function to create a compact fingerprint from a string.
+ * Uses DJB2 algorithm - fast and produces good distribution.
+ */
+const simpleHash = (str: string): string => {
+    let hash = 5381;
+    for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) + hash) + str.charCodeAt(i);
+        hash = hash & hash; // Convert to 32-bit integer
+    }
+    return Math.abs(hash).toString(36);
+};
+
+/**
+ * Creates a unique fingerprint for a local file using name, size, and modification time.
+ */
+const getLocalFileFingerprint = (file: File): string => {
+    const raw = `${file.name}_${file.size}_${file.lastModified}`;
+    return `local_${file.size}_${simpleHash(raw)}`;
+};
+
+/**
  * Extracts a unique ID for a video source.
- * - Local files: "local_<size>_<optional_duration>"
+ * - Local files: "local_<size>_<hash>"
  * - YouTube: "yt_<videoId>"
  * - Google Drive: "gdrive_<fileId>"
  * - Other URLs: "url_<hash_or_clean_url>"
  */
 export const getVideoFingerprint = (file: File | null, objectUrl: string | null): string | null => {
     if (file) {
-        // Local file fingerprint based on exact byte size
-        return `local_${file.size}`;
+        return getLocalFileFingerprint(file);
     }
 
     if (objectUrl) {
@@ -58,7 +78,7 @@ export const getVideoFingerprint = (file: File | null, objectUrl: string | null)
  */
 export const getAudioFingerprint = (file: File | null, url: string | null): string | null => {
     if (file) {
-        return `local_${file.size}`;
+        return getLocalFileFingerprint(file);
     }
 
     if (url) {
