@@ -7,7 +7,7 @@
  */
 
 import React, { useRef, useState, useEffect } from 'react';
-import { RotateCcw, AlertCircle, Film, Upload, Sun, Moon, Volume2, VolumeX, ChevronDown, Link, Headphones, Check, BarChart3 } from 'lucide-react';
+import { RotateCcw, AlertCircle, Film, Upload, Sun, Moon, Volume2, VolumeX, ChevronDown, Link, Headphones, Check, BarChart3, ShieldAlert } from 'lucide-react';
 import { getDeviceIcon } from '../utils/getDeviceIcon';
 import { Button } from './Button';
 import { AudioTrackRow } from './AudioTrackRow';
@@ -55,6 +55,7 @@ interface SidebarProps {
     onUrlLoaderOpen: () => void;
     onAudioUrlLoad: (url: string, filename: string) => void;
     onStatisticsOpen: () => void;
+    onAdminOpen: () => void;
     onTrackEvent?: (event: string) => void;
     onShareSync?: (trackId: string, offset: number) => void;
 }
@@ -97,6 +98,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     onUrlLoaderOpen,
     onAudioUrlLoad,
     onStatisticsOpen,
+    onAdminOpen,
     onTrackEvent,
     onShareSync,
 }) => {
@@ -160,6 +162,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">SynCinema</h1>
                     </div>
                     <div className="flex items-center gap-2">
+                        <button
+                            onClick={onAdminOpen}
+                            className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 transition-colors"
+                            title={t.adminPanel?.title || 'Admin Panel'}
+                        >
+                            <ShieldAlert size={20} className="text-red-500" />
+                        </button>
                         <InfoButton onClick={onHelpOpen} />
                         <button
                             onClick={onStatisticsOpen}

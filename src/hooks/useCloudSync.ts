@@ -6,18 +6,20 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { supabase, SyncPreset } from '../lib/supabase';
 
 export function useCloudSync() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const lastRequestTimeRef = useRef<number>(0);
 
     /**
      * Checks if there's a community preset for the given video and audio IDs
      */
     const findPreset = useCallback(async (videoId: string, audioId: string): Promise<SyncPreset | null> => {
         if (!supabase) return null;
+        if (typeof videoId !== 'string' || typeof audioId !== 'string' || !videoId || !audioId) return null;
 
         setIsLoading(true);
         setError(null);
@@ -52,6 +54,24 @@ export function useCloudSync() {
      */
     const saveOrUpvotePreset = useCallback(async (videoId: string, audioId: string, offsetMs: number) => {
         if (!supabase) return false;
+
+        // 1. Payload validation (Prevent NaN, Infinity, excessive values, or non-strings)
+        if (typeof videoId !== 'string' || typeof audioId !== 'string' || !videoId || !audioId) {
+            console.error('[Supabase] Invalid ID payload types.');
+            return false;
+        }
+        if (!Number.isFinite(offsetMs) || Math.abs(offsetMs) > 36000000) { // Limit to +/- 10 hours
+            console.error('[Supabase] Invalid offset payload.');
+            return false;
+        }
+
+        // 2. Rate Limiting (Prevent spamming the "Share" button)
+        const now = Date.now();
+        if (now - lastRequestTimeRef.current < 5000) { // 5 seconds cooldown
+            console.warn('[Supabase] Rate limited. Please wait before sharing again.');
+            return false;
+        }
+        lastRequestTimeRef.current = now;
 
         setIsLoading(true);
         setError(null);

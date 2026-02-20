@@ -163,6 +163,43 @@ export interface Translations {
         unmute: string;
     };
 
+    // Cloud Sync Notifications (Community Sync)
+    cloudSyncMessages: {
+        foundTitle: string;
+        foundMessage: string; // e.g., "A community offset of {seconds}s is available. ({votes} votes / {trust}) Apply?"
+        trustTrusted: string;
+        trustWarning: string;
+        btnApply: string;
+        appliedSuccess: string;
+        alreadySyncedTitle: string;
+        alreadySyncedMessage: string;
+        shareSuccess: string;
+        shareFailed: string;
+        shareRateLimit: string;
+        errorNoVideoFingerprint: string;
+        errorNoAudioFingerprint: string;
+    };
+
+    // Admin Panel
+    adminPanel: {
+        title: string;
+        login: string;
+        passwordPlaceholder: string;
+        loginBtn: string;
+        invalidPassword: string;
+        tableVideoId: string;
+        tableAudioId: string;
+        tableOffset: string;
+        tableVotes: string;
+        tableActions: string;
+        deleteBtn: string;
+        deleteSuccess: string;
+        deleteError: string;
+        noData: string;
+        refresh: string;
+        close: string;
+    };
+
     // Error boundary
     errorBoundary: {
         title: string;

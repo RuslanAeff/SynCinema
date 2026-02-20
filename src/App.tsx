@@ -15,6 +15,7 @@ import { HelpPanel } from './components/HelpPanel';
 import { UrlLoaderModal } from './components/UrlLoaderModal';
 import { Snowfall } from './components/Snowfall';
 import { StatisticsPanel } from './components/StatisticsPanel';
+import { AdminPanel } from './components/AdminPanel';
 import { useVideoPlayer } from './hooks/useVideoPlayer';
 import { useAudioTracks } from './hooks/useAudioTracks';
 import { useTheme } from './hooks/useTheme';
@@ -23,7 +24,7 @@ import { useCloudSync } from './hooks/useCloudSync';
 import { useToast } from './components/Toast';
 import { Logo } from './components/Logo';
 import { InfoButton } from './components/HelpPanel';
-import { Sun, Moon, BarChart3 } from 'lucide-react';
+import { Sun, Moon, BarChart3, ShieldAlert } from 'lucide-react';
 import { useI18n } from './context/I18nContext';
 
 
@@ -92,6 +93,9 @@ function App() {
 
   // Help Panel State
   const [showHelp, setShowHelp] = useState(false);
+
+  // Admin Panel State
+  const [showAdmin, setShowAdmin] = useState(false);
 
   // URL Loader Modal State
   const [showUrlLoader, setShowUrlLoader] = useState(false);
@@ -174,23 +178,26 @@ function App() {
         // Anti-spam & Trust logic
         const isTrusted = preset.votes > 1;
         const trustWarning = isTrusted
-          ? `(${preset.votes} votes / Güvenilir)`
-          : `(1 vote / Doğrulanmamış - Dikkatli kullanın)`;
+          ? t.cloudSyncMessages.trustTrusted
+          : t.cloudSyncMessages.trustWarning;
 
         if (diff > 100) {
           // We found a preset that's significantly different from the current offset
           showToast({
-            title: "🌐 Cloud Sync Found!",
-            message: `A community offset of ${seconds}s is available. ${trustWarning} Apply?`,
+            title: t.cloudSyncMessages.foundTitle,
+            message: t.cloudSyncMessages.foundMessage
+              .replace('{seconds}', seconds)
+              .replace('{votes}', preset.votes.toString())
+              .replace('{trust}', trustWarning),
             type: isTrusted ? 'info' : 'warning',
             duration: 10000,
             action: {
-              label: "Apply Sync",
+              label: t.cloudSyncMessages.btnApply,
               onClick: () => {
                 updateAudioTrack(primaryAudio.id, { offset: preset.offset_ms / 1000, isCloudSynced: true });
                 trackEvent('syncOffsetAdjusted');
                 showToast({
-                  message: "Cloud sync applied! ☁️✓",
+                  message: t.cloudSyncMessages.appliedSuccess,
                   type: 'success'
                 });
               }
@@ -200,8 +207,10 @@ function App() {
           // The current local offset already matches the cloud preset (e.g. both are 0)
           updateAudioTrack(primaryAudio.id, { isCloudSynced: true });
           showToast({
-            title: "🌐 Already Synced",
-            message: `This media pair is already perfectly synced with the community! ${trustWarning}`,
+            title: t.cloudSyncMessages.alreadySyncedTitle,
+            message: t.cloudSyncMessages.alreadySyncedMessage
+              .replace('{votes}', preset.votes.toString())
+              .replace('{trust}', trustWarning),
             type: 'success',
             duration: 6000
           });
@@ -216,12 +225,12 @@ function App() {
 
   const handleShareSync = useCallback(async (trackId: string, offset: number) => {
     if (!videoFingerprint) {
-      showToast({ message: "Cannot share: Video fingerprint not found.", type: 'error' });
+      showToast({ message: t.cloudSyncMessages.errorNoVideoFingerprint, type: 'error' });
       return;
     }
     const track = audioTracks.find(t => t.id === trackId);
     if (!track || !track.audioFingerprint) {
-      showToast({ message: "Cannot share: Audio fingerprint not found.", type: 'error' });
+      showToast({ message: t.cloudSyncMessages.errorNoAudioFingerprint, type: 'error' });
       return;
     }
 
@@ -230,12 +239,14 @@ function App() {
     const success = await saveOrUpvotePreset(videoFingerprint, track.audioFingerprint, offsetMs);
 
     if (success) {
-      showToast({ message: "Community sync shared successfully! 🎉", type: 'success' });
+      showToast({ message: t.cloudSyncMessages.shareSuccess, type: 'success' });
       updateAudioTrack(trackId, { isCloudSynced: true });
     } else {
-      showToast({ message: "Failed to share sync preset.", type: 'error' });
+      // Differentiate generic failed vs rate limit using try-catch or simple generic text for now.
+      // Since useCloudSync returns false for rate limits, we'll inform user they might be rate limited.
+      showToast({ message: t.cloudSyncMessages.shareRateLimit, type: 'error' });
     }
-  }, [videoFingerprint, audioTracks, saveOrUpvotePreset, showToast, updateAudioTrack]);
+  }, [videoFingerprint, audioTracks, saveOrUpvotePreset, showToast, updateAudioTrack, t]);
 
   // Drag and Drop State
   const [isDragging, setIsDragging] = useState(false);
@@ -381,6 +392,13 @@ function App() {
         </div>
         <div className="flex items-center gap-2">
           <button
+            onClick={() => setShowAdmin(true)}
+            className="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
+            title={t.adminPanel?.title || "Admin"}
+          >
+            <ShieldAlert size={18} />
+          </button>
+          <button
             onClick={() => setShowStatistics(true)}
             className="p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border border-purple-500/30 text-purple-400 hover:text-purple-300 transition-colors"
             title="Statistics"
@@ -466,12 +484,16 @@ function App() {
         onUrlLoaderOpen={() => setShowUrlLoader(true)}
         onAudioUrlLoad={handleAudioFromUrl}
         onStatisticsOpen={() => setShowStatistics(true)}
+        onAdminOpen={() => setShowAdmin(true)}
         onTrackEvent={trackEvent as (event: string) => void}
         onShareSync={handleShareSync}
       />
 
       {/* Help Panel - at App level to overlay everything */}
       <HelpPanel isOpen={showHelp} onClose={() => setShowHelp(false)} />
+
+      {/* Admin Panel */}
+      <AdminPanel isOpen={showAdmin} onClose={() => setShowAdmin(false)} />
 
       {/* URL Loader Modal - at App level to overlay everything */}
       <UrlLoaderModal

@@ -104,15 +104,47 @@ export const az: Translations = {
     },
 
     detached: {
-        connected: '● Qoşulub',
-        waiting: '○ Gözlənilir...',
-        audioFromMain: '🔇 Səs əsas pəncərədən gəlir',
+        connected: 'Əsas Pəncərəyə Qoşuldu',
+        waiting: 'Əsas Pəncərə Gözlənilir...',
+        audioFromMain: 'Səs əsas pəncərədə oxudulur',
         waitingForVideo: 'Video gözlənilir...',
-        loadVideoHint: 'Əsas SynCinema pəncərəsindən video yükləyin',
+        loadVideoHint: 'Əsas pəncərədə bir video seçin və yükləyin',
         detachedView: 'Ayrılmış Görünüş',
-        unmute: 'Səsi Aç',
+        unmute: 'Səsi Açmaq üçün Klikləyin'
     },
-
+    cloudSyncMessages: {
+        foundTitle: "🌐 Bulud Sinxronizasiyası Tapıldı!",
+        foundMessage: "İcma tərəfindən {seconds}s dəyərində bir zamanlama tapıldı. ({votes} səs / {trust}) Tətbiq edilsin?",
+        trustTrusted: "Güvənilir",
+        trustWarning: "Təsdiqlənməmiş - Ehtiyatla istifadə edin",
+        btnApply: "Sinx. Tətbiq Et",
+        appliedSuccess: "Bulud sinxronizasiyası tətbiq edildi! ☁️✓",
+        alreadySyncedTitle: "🌐 Artıq Sinxronlaşdırılıb",
+        alreadySyncedMessage: "Bu video və səs cütü icma ilə artıq qüsursuz şəkildə sinxronlaşdırılmışdır! ({votes} səs / {trust})",
+        shareSuccess: "İcma sinxronizasiyası uğurla paylaşıldı! 🎉",
+        shareFailed: "Sinxronizasiya paylaşıla bilmədi.",
+        shareRateLimit: "Həddən artıq sorğu. Lütfən yenidən paylaşmadan öncə bir qədər gözləyin.",
+        errorNoVideoFingerprint: "Paylaşıla bilmir: Video mənbəyi təsdiqlənmədi.",
+        errorNoAudioFingerprint: "Paylaşıla bilmir: Səs mənbəyi təsdiqlənmədi."
+    },
+    adminPanel: {
+        title: "İdarəetmə Paneli",
+        login: "Admin Girişi",
+        passwordPlaceholder: "Əsas Şifrəni Daxil Edin",
+        loginBtn: "Daxil Ol",
+        invalidPassword: "Səlahiyyətsiz və ya Yanlış Şifrə",
+        tableVideoId: "Video ID",
+        tableAudioId: "Səs ID",
+        tableOffset: "Zamanlama (ms)",
+        tableVotes: "Səslər",
+        tableActions: "Əməliyyatlar",
+        deleteBtn: "Sil",
+        deleteSuccess: "Sinxronizasiya uğurla silindi!",
+        deleteError: "Sinxronizasiyanı silmək mümkün olmadı.",
+        noData: "İcma sinxronizasiyası tapılmadı.",
+        refresh: "Yenilə",
+        close: "Bağla"
+    },
     errorBoundary: {
         title: 'Bir xəta baş verdi',
         description: 'SynCinema bir xəta ilə üzləşdi. Bu brauzer uyğunluq problemlərindən qaynaqlanır.',

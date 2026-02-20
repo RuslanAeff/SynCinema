@@ -40,10 +40,12 @@ export const getVideoFingerprint = (file: File | null, objectUrl: string | null)
         // Handle direct URLs (remove query params to be safe, unless it's youtube/gdrive)
         try {
             const url = new URL(objectUrl);
-            // Just use hostname + pathname as ID to avoid ephemeral tokens in query params
-            return `url_${btoa(url.hostname + url.pathname).replace(/=/g, '')}`;
+            const safeStr = `${url.hostname}${url.pathname}`.substring(0, 200);
+            // encodeURIComponent prevents btoa crashes with non-Latin1 chars
+            return `url_${btoa(encodeURIComponent(safeStr)).replace(/=/g, '').substring(0, 250)}`;
         } catch {
-            return `url_${btoa(objectUrl).substring(0, 32).replace(/=/g, '')}`;
+            const safeObjUrl = String(objectUrl).substring(0, 200);
+            return `url_${btoa(encodeURIComponent(safeObjUrl)).replace(/=/g, '').substring(0, 250)}`;
         }
     }
 
@@ -73,9 +75,11 @@ export const getAudioFingerprint = (file: File | null, url: string | null): stri
 
         try {
             const urlObj = new URL(url);
-            return `url_${btoa(urlObj.hostname + urlObj.pathname).replace(/=/g, '')}`;
+            const safeStr = `${urlObj.hostname}${urlObj.pathname}`.substring(0, 200);
+            return `url_${btoa(encodeURIComponent(safeStr)).replace(/=/g, '').substring(0, 250)}`;
         } catch {
-            return `url_${btoa(url).substring(0, 32).replace(/=/g, '')}`;
+            const safeUrl = String(url).substring(0, 200);
+            return `url_${btoa(encodeURIComponent(safeUrl)).replace(/=/g, '').substring(0, 250)}`;
         }
     }
 
