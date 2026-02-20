@@ -124,6 +124,7 @@ export const en: Translations = {
         shareSuccess: "Community sync shared successfully! 🎉",
         shareFailed: "Failed to share sync preset.",
         shareRateLimit: "Too many requests. Please wait a moment before sharing again.",
+        shareError: "Failed to share sync. Please try again later.",
         errorNoVideoFingerprint: "Cannot share: Video fingerprint not found.",
         errorNoAudioFingerprint: "Cannot share: Audio fingerprint not found."
     },

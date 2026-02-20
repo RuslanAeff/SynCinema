@@ -71,14 +71,32 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
         setIsLoading(true);
 
         try {
-            // Test if password works by running a dummy delete or checking if we can fetch
-            // Actually, we can just fetch all rows (RLS allows SELECT)
-            // But we don't know if password is correct until we try to delete.
-            // Let's just fetch first. Admin panel is somewhat a trust interface. We'll show data, and password is used for deletion.
-            setIsLoggedIn(true);
-            await fetchAllPresets();
+            if (!supabase) throw new Error("Supabase is not initialized");
+
+            // Verify password server-side via RPC
+            const { data: isValid, error: verifyError } = await supabase
+                .rpc('verify_admin_password', { p_secret: password });
+
+            if (verifyError) throw verifyError;
+
+            if (isValid === true) {
+                setIsLoggedIn(true);
+                setFailedAttempts(0);
+                await fetchAllPresets();
+            } else {
+                const newFailedCount = failedAttempts + 1;
+                setFailedAttempts(newFailedCount);
+
+                if (newFailedCount >= MAX_FAILED_ATTEMPTS) {
+                    triggerLockout();
+                    setError(`🔒 ${MAX_FAILED_ATTEMPTS} failed attempts. Locked for 30 seconds.`);
+                } else {
+                    setError(`${t.adminPanel.invalidPassword} (${newFailedCount}/${MAX_FAILED_ATTEMPTS})`);
+                }
+            }
         } catch (err) {
             console.error(err);
+            setError(t.adminPanel.invalidPassword);
         } finally {
             setIsLoading(false);
         }

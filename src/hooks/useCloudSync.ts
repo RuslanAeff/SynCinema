@@ -52,24 +52,24 @@ export function useCloudSync() {
     /**
      * Saves or upvotes a sync offset
      */
-    const saveOrUpvotePreset = useCallback(async (videoId: string, audioId: string, offsetMs: number) => {
-        if (!supabase) return false;
+    const saveOrUpvotePreset = useCallback(async (videoId: string, audioId: string, offsetMs: number): Promise<'success' | 'rate_limited' | 'error'> => {
+        if (!supabase) return 'error';
 
         // 1. Payload validation (Prevent NaN, Infinity, excessive values, or non-strings)
         if (typeof videoId !== 'string' || typeof audioId !== 'string' || !videoId || !audioId) {
             console.error('[Supabase] Invalid ID payload types.');
-            return false;
+            return 'error';
         }
         if (!Number.isFinite(offsetMs) || Math.abs(offsetMs) > 36000000) { // Limit to +/- 10 hours
             console.error('[Supabase] Invalid offset payload.');
-            return false;
+            return 'error';
         }
 
         // 2. Rate Limiting (Prevent spamming the "Share" button)
         const now = Date.now();
         if (now - lastRequestTimeRef.current < 5000) { // 5 seconds cooldown
             console.warn('[Supabase] Rate limited. Please wait before sharing again.');
-            return false;
+            return 'rate_limited';
         }
         lastRequestTimeRef.current = now;
 
@@ -114,7 +114,7 @@ export function useCloudSync() {
                     console.log('[Supabase] Already voted for this preset (server-side check)');
                 }
 
-                return true;
+                return 'success';
             } else {
                 // Insert a new preset via secure RPC (server-side rate limiting)
                 const { data: insertResult, error: insertError } = await supabase
@@ -124,13 +124,19 @@ export function useCloudSync() {
                         p_offset_ms: offsetMs
                     });
 
-                if (insertError) throw insertError;
-                return true;
+                if (insertError) {
+                    // Check if it's a server-side rate limit
+                    if (insertError.message?.toLowerCase().includes('rate limit')) {
+                        return 'rate_limited';
+                    }
+                    throw insertError;
+                }
+                return 'success';
             }
         } catch (err) {
             console.error('[Supabase] Error saving preset:', err);
             setError(err instanceof Error ? err.message : 'Unknown error');
-            return false;
+            return 'error';
         } finally {
             setIsLoading(false);
         }

@@ -124,6 +124,7 @@ export const tr: Translations = {
         shareSuccess: "Topluluk senkronizasyonu başarıyla paylaşıldı! 🎉",
         shareFailed: "Senkronizasyon paylaşılamadı.",
         shareRateLimit: "Çok fazla istek. Lütfen tekrar paylaşmadan önce biraz bekleyin.",
+        shareError: "Senkronizasyon paylaşılamadı. Lütfen daha sonra tekrar deneyin.",
         errorNoVideoFingerprint: "Paylaşılamıyor: Video kaynağı doğrulanamadı.",
         errorNoAudioFingerprint: "Paylaşılamıyor: Ses kaynağı doğrulanamadı."
     },

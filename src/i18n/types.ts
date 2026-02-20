@@ -176,6 +176,7 @@ export interface Translations {
         shareSuccess: string;
         shareFailed: string;
         shareRateLimit: string;
+        shareError: string;
         errorNoVideoFingerprint: string;
         errorNoAudioFingerprint: string;
     };

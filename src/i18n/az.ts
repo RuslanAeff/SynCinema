@@ -124,6 +124,7 @@ export const az: Translations = {
         shareSuccess: "İcma sinxronizasiyası uğurla paylaşıldı! 🎉",
         shareFailed: "Sinxronizasiya paylaşıla bilmədi.",
         shareRateLimit: "Həddən artıq sorğu. Lütfən yenidən paylaşmadan öncə bir qədər gözləyin.",
+        shareError: "Sinxronizasiya paylaşıla bilmədi. Zəhmət olmasa daha sonra yenidən cəhd edin.",
         errorNoVideoFingerprint: "Paylaşıla bilmir: Video mənbəyi təsdiqlənmədi.",
         errorNoAudioFingerprint: "Paylaşıla bilmir: Səs mənbəyi təsdiqlənmədi."
     },

@@ -236,15 +236,15 @@ function App() {
 
     // Convert seconds to milliseconds
     const offsetMs = Math.round(offset * 1000);
-    const success = await saveOrUpvotePreset(videoFingerprint, track.audioFingerprint, offsetMs);
+    const result = await saveOrUpvotePreset(videoFingerprint, track.audioFingerprint, offsetMs);
 
-    if (success) {
+    if (result === 'success') {
       showToast({ message: t.cloudSyncMessages.shareSuccess, type: 'success' });
       updateAudioTrack(trackId, { isCloudSynced: true });
-    } else {
-      // Differentiate generic failed vs rate limit using try-catch or simple generic text for now.
-      // Since useCloudSync returns false for rate limits, we'll inform user they might be rate limited.
+    } else if (result === 'rate_limited') {
       showToast({ message: t.cloudSyncMessages.shareRateLimit, type: 'error' });
+    } else {
+      showToast({ message: t.cloudSyncMessages.shareError || 'Failed to share sync. Please try again.', type: 'error' });
     }
   }, [videoFingerprint, audioTracks, saveOrUpvotePreset, showToast, updateAudioTrack, t]);
 
