@@ -21,6 +21,9 @@ interface SubtitleCue {
 
 const CHANNEL_NAME = 'syncinema-player-sync';
 
+// Read session token from URL parameter (passed by main window)
+const SESSION_TOKEN = new URLSearchParams(window.location.search).get('token') || '';
+
 const DetachedPlayer: React.FC = () => {
     const { t } = useI18n();
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -82,7 +85,10 @@ const DetachedPlayer: React.FC = () => {
         channelRef.current = channel;
 
         channel.onmessage = (event: MessageEvent) => {
-            const { type, payload, timestamp } = event.data;
+            const { type, payload, timestamp, token } = event.data;
+
+            // Reject messages without a valid session token
+            if (token !== SESSION_TOKEN) return;
 
             // Ignore old messages
             if (timestamp && timestamp < lastSyncRef.current - 1000) return;
@@ -149,7 +155,7 @@ const DetachedPlayer: React.FC = () => {
         };
 
         // Request initial state from main window
-        channel.postMessage({ type: 'DETACHED_READY', timestamp: Date.now() });
+        channel.postMessage({ type: 'DETACHED_READY', token: SESSION_TOKEN, timestamp: Date.now() });
 
         return () => { channel.close(); };
     }, [isPlaying]);
@@ -233,6 +239,7 @@ const DetachedPlayer: React.FC = () => {
             channelRef.current?.postMessage({
                 type: 'DETACHED_SEEK',
                 payload: time,
+                token: SESSION_TOKEN,
                 timestamp: Date.now()
             });
         }
@@ -242,6 +249,7 @@ const DetachedPlayer: React.FC = () => {
         const newState = !isPlaying;
         channelRef.current?.postMessage({
             type: newState ? 'DETACHED_PLAY' : 'DETACHED_PAUSE',
+            token: SESSION_TOKEN,
             timestamp: Date.now()
         });
     }, [isPlaying]);

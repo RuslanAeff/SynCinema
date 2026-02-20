@@ -53,6 +53,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     const controlsTimeoutRef = useRef<number | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const syncChannelRef = useRef<BroadcastChannel | null>(null);
+    const sessionTokenRef = useRef<string>('');
 
     // Progress bar hover preview
     const [hoverTime, setHoverTime] = useState<number | null>(null);
@@ -97,12 +98,20 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
     // Initialize BroadcastChannel for detached player sync (runs once)
     useEffect(() => {
+        // Generate a unique session token for secure BroadcastChannel communication
+        const sessionToken = crypto.randomUUID();
+        sessionTokenRef.current = sessionToken;
+
         const channel = new BroadcastChannel('syncinema-player-sync');
         syncChannelRef.current = channel;
 
         // Listen for messages from detached window
         channel.onmessage = (event: MessageEvent) => {
-            const { type, payload } = event.data;
+            const { type, payload, token } = event.data;
+
+            // Reject messages without a valid session token
+            if (token !== sessionTokenRef.current) return;
+
             const state = stateRef.current; // Always get fresh state from ref
 
             switch (type) {
@@ -114,17 +123,19 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                         currentTime: state.currentTime
                     });
                     if (state.videoObjectUrl) {
-                        channel.postMessage({ type: 'SYNC_VIDEO_URL', payload: state.videoObjectUrl, timestamp: Date.now() });
+                        channel.postMessage({ type: 'SYNC_VIDEO_URL', payload: state.videoObjectUrl, token: sessionToken, timestamp: Date.now() });
                     }
                     channel.postMessage({
                         type: 'SYNC_STATE',
                         payload: { currentTime: state.currentTime, isPlaying: state.isPlaying, duration: state.duration },
+                        token: sessionToken,
                         timestamp: Date.now()
                     });
                     if (state.subtitleCues.length > 0) {
                         channel.postMessage({
                             type: 'SYNC_SUBTITLES',
                             payload: { cues: state.subtitleCues, offset: state.subtitleOffset },
+                            token: sessionToken,
                             timestamp: Date.now()
                         });
                     }
@@ -152,6 +163,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             syncChannelRef.current.postMessage({
                 type: 'SYNC_VIDEO_URL',
                 payload: videoObjectUrl,
+                token: sessionTokenRef.current,
                 timestamp: Date.now()
             });
         }
@@ -162,6 +174,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         if (syncChannelRef.current) {
             syncChannelRef.current.postMessage({
                 type: isPlaying ? 'SYNC_PLAY' : 'SYNC_PAUSE',
+                token: sessionTokenRef.current,
                 timestamp: Date.now()
             });
         }
@@ -173,6 +186,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             syncChannelRef.current.postMessage({
                 type: 'SYNC_SUBTITLES',
                 payload: { cues: subtitleCues, offset: subtitleOffset },
+                token: sessionTokenRef.current,
                 timestamp: Date.now()
             });
         }
@@ -185,6 +199,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 syncChannelRef.current?.postMessage({
                     type: 'SYNC_STATE',
                     payload: { currentTime, isPlaying, duration },
+                    token: sessionTokenRef.current,
                     timestamp: Date.now()
                 });
             }, 2000); // Sync every 2 seconds
@@ -192,10 +207,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         }
     }, [currentTime, isPlaying, duration]);
 
-    // Open detached window - now just opens the window, sync via BroadcastChannel
+    // Open detached window - pass session token via URL
     const openDetachedWindow = useCallback(() => {
-        window.open('/detached.html', 'SynCinema_Detached', 'width=960,height=600,resizable=yes');
-        // No need to store reference - BroadcastChannel handles sync
+        window.open(`/detached.html?token=${sessionTokenRef.current}`, 'SynCinema_Detached', 'width=960,height=600,resizable=yes');
     }, []);
 
 
