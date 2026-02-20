@@ -110,12 +110,13 @@ export function useCloudSync() {
                 localStorage.setItem(votedKey, 'true');
                 return true;
             } else {
-                // Insert a new preset
-                const { error: insertError } = await supabase
-                    .from('sync_presets')
-                    .insert([
-                        { video_id: videoId, audio_id: audioId, offset_ms: offsetMs }
-                    ]);
+                // Insert a new preset via secure RPC (server-side rate limiting)
+                const { data: insertResult, error: insertError } = await supabase
+                    .rpc('safe_insert_preset', {
+                        p_video_id: videoId,
+                        p_audio_id: audioId,
+                        p_offset_ms: offsetMs
+                    });
 
                 if (insertError) throw insertError;
                 return true;
