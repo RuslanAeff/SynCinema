@@ -10,7 +10,7 @@ import React, { useState, useEffect, useCallback, createContext, useContext, Rea
 import { CheckCircle, AlertCircle, Info, X } from 'lucide-react';
 import { Button } from './Button';
 
-type ToastType = 'success' | 'error' | 'info';
+type ToastType = 'success' | 'error' | 'info' | 'warning';
 
 export interface ToastOptions {
     message?: string;
@@ -96,20 +96,24 @@ const ToastItem: React.FC<{ toast: ToastMessage; onDismiss: (id: number) => void
     const isSuccess = toast.type === 'success';
     const isError = toast.type === 'error';
     const isInfo = toast.type === 'info';
+    const isWarning = toast.type === 'warning';
+
+    const getToastStyle = () => {
+        if (isSuccess) return 'bg-gray-900/90 border-green-500/30 text-white';
+        if (isError) return 'bg-gray-900/90 border-red-500/30 text-white';
+        if (isWarning) return 'bg-gray-900/90 border-yellow-500/30 text-white';
+        return 'bg-gray-900/90 border-blue-500/30 text-white';
+    };
 
     return (
         <div
-            className={`pointer-events-auto flex flex-col gap-2 max-w-sm px-4 py-3 rounded-xl shadow-2xl border backdrop-blur-md transition-all duration-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-                } ${isSuccess
-                    ? 'bg-gray-900/90 border-green-500/30 text-white'
-                    : isError ? 'bg-gray-900/90 border-red-500/30 text-white'
-                        : 'bg-gray-900/90 border-blue-500/30 text-white'
-                }`}
+            className={`pointer-events-auto flex flex-col gap-2 max-w-sm px-4 py-3 rounded-xl shadow-2xl border backdrop-blur-md transition-all duration-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'} ${getToastStyle()}`}
         >
             <div className="flex items-start gap-3">
                 {isSuccess && <CheckCircle size={18} className="text-green-400 mt-0.5 shrink-0" />}
                 {isError && <AlertCircle size={18} className="text-red-400 mt-0.5 shrink-0" />}
                 {isInfo && <Info size={18} className="text-blue-400 mt-0.5 shrink-0" />}
+                {isWarning && <AlertCircle size={18} className="text-yellow-400 mt-0.5 shrink-0" />}
 
                 <div className="flex-1">
                     {toast.title && <h4 className="font-semibold text-sm mb-1">{toast.title}</h4>}

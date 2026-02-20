@@ -32,7 +32,9 @@ import {
     Youtube,
     AlertTriangle,
     Smartphone,
-    Monitor
+    Monitor,
+    Cloud,
+    ShieldCheck
 } from 'lucide-react';
 import { Translations } from '../i18n';
 import { useI18n } from '../context/I18nContext';
@@ -216,6 +218,37 @@ const getHelpSections = (t: Translations): HelpSection[] => [
         ]
     },
     {
+        id: 'cloud-sync',
+        title: t.help.sections.cloudSync,
+        icon: <Cloud size={20} />,
+        items: [
+            {
+                name: t.help.cloudSync.whatIsIt,
+                icon: <Cloud size={16} />,
+                iconColor: 'bg-indigo-500/20 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400',
+                description: t.help.cloudSync.whatIsItDesc,
+            },
+            {
+                name: t.help.cloudSync.autoApply,
+                icon: <RotateCcw size={16} className="rotate-180" />,
+                iconColor: 'bg-green-500/20 text-green-600 dark:bg-green-500/20 dark:text-green-400',
+                description: t.help.cloudSync.autoApplyDesc,
+            },
+            {
+                name: t.help.cloudSync.share,
+                icon: <Upload size={16} />,
+                iconColor: 'bg-blue-500/20 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400',
+                description: t.help.cloudSync.shareDesc,
+            },
+            {
+                name: t.help.cloudSync.trust,
+                icon: <ShieldCheck size={16} />,
+                iconColor: 'bg-yellow-500/20 text-yellow-600 dark:bg-yellow-500/20 dark:text-yellow-400',
+                description: t.help.cloudSync.trustDesc,
+            }
+        ]
+    },
+    {
         id: 'url-sources',
         title: t.help.sections.urlSources,
         icon: <Link size={20} />,
@@ -366,8 +399,8 @@ export const HelpPanel: React.FC<HelpPanelProps> = ({ isOpen, onClose }) => {
                                     setShowMobileMenu(false);
                                 }}
                                 className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all border-b border-gray-100 dark:border-gray-800 last:border-b-0 ${selectedSection === section.id
-                                        ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
-                                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                                    ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
+                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
                                     }`}
                             >
                                 <span className={selectedSection === section.id ? 'text-indigo-600 dark:text-indigo-400' : ''}>{section.icon}</span>

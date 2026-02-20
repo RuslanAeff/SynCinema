@@ -166,27 +166,46 @@ function App() {
 
       const preset = await findPreset(videoFingerprint, primaryAudio.audioFingerprint);
 
-      if (preset && Math.abs(preset.offset_ms - primaryAudio.offset) > 100) {
-        // We found a preset that's significantly different from the current offset
+      if (preset) {
+        const currentOffsetMs = primaryAudio.offset * 1000;
+        const diff = Math.abs(preset.offset_ms - currentOffsetMs);
         const seconds = (preset.offset_ms / 1000).toFixed(3);
 
-        showToast({
-          title: t.app.title || "Cloud Sync Found!",
-          message: `${preset.votes} user(s) synced this audio with a ${seconds}s offset. Do you want to apply it?`,
-          type: 'info',
-          duration: 10000,
-          action: {
-            label: "Apply Sync",
-            onClick: () => {
-              updateAudioTrack(primaryAudio.id, { offset: preset.offset_ms, isCloudSynced: true });
-              trackEvent('syncOffsetAdjusted');
-              showToast({
-                message: "Cloud sync applied successfully! ☁️✓",
-                type: 'success'
-              });
+        // Anti-spam & Trust logic
+        const isTrusted = preset.votes > 1;
+        const trustWarning = isTrusted
+          ? `(${preset.votes} votes / Güvenilir)`
+          : `(1 vote / Doğrulanmamış - Dikkatli kullanın)`;
+
+        if (diff > 100) {
+          // We found a preset that's significantly different from the current offset
+          showToast({
+            title: "🌐 Cloud Sync Found!",
+            message: `A community offset of ${seconds}s is available. ${trustWarning} Apply?`,
+            type: isTrusted ? 'info' : 'warning',
+            duration: 10000,
+            action: {
+              label: "Apply Sync",
+              onClick: () => {
+                updateAudioTrack(primaryAudio.id, { offset: preset.offset_ms / 1000, isCloudSynced: true });
+                trackEvent('syncOffsetAdjusted');
+                showToast({
+                  message: "Cloud sync applied! ☁️✓",
+                  type: 'success'
+                });
+              }
             }
-          }
-        });
+          });
+        } else {
+          // The current local offset already matches the cloud preset (e.g. both are 0)
+          updateAudioTrack(primaryAudio.id, { isCloudSynced: true });
+          showToast({
+            title: "🌐 Already Synced",
+            message: `This media pair is already perfectly synced with the community! ${trustWarning}`,
+            type: 'success',
+            duration: 6000
+          });
+        }
       }
 
       setAskedPresets(prev => new Set(prev).add(comboKeys));

@@ -168,6 +168,7 @@ export const tr: Translations = {
             settings: 'Ayarlar',
             urlSources: 'URL Kaynakları',
             platformRequirements: 'Platform Gereksinimleri',
+            cloudSync: "Topluluk Senkronizasyonu ☁️"
         },
         videoControls: {
             playPause: 'Oynat / Duraklat',
@@ -227,9 +228,19 @@ export const tr: Translations = {
         },
         settingsSection: {
             theme: 'Tema',
-            themeDesc: 'Koyu ve açık mod arasında geçiş yapın.',
-            language: 'Dil',
-            languageDesc: 'Arayüz dilini değiştirin.',
+            themeDesc: "Düşük ışık için modern Karanlık mod ve net aydınlık için Açık mod arasında geçiş yapın.",
+            language: "Dil",
+            languageDesc: "Arayüz dilini değiştirin. Şu anda Türkçe, İngilizce, Azerbaycanca ve Rusça dillerini destekler."
+        },
+        cloudSync: {
+            whatIsIt: "Topluluk Senkronizasyonu Nedir?",
+            whatIsItDesc: "Cloud Sync (Bulut Senkronizasyonu), diğer kullanıcıların bulduğu kusursuz ses ofsetlerinin (zamanlamalarının) bulutta saklandığı bir özelliktir. Bir başkasının daha önce senkronize ettiği bir video-ses ikilisini yüklerseniz, SynCinema bunu sizin için otomatik olarak bulur.",
+            autoApply: "Senkronizasyonu Uygulama",
+            autoApplyDesc: "Topluluğun veritabanında yüklediğiniz dosyalara uygun bir zamanlama (ofset) bulunduğunda, ekranda bir bildirim görürsünüz. 'Senk. Uygula' butonuna tıklayarak sesi anında topluluğun kusursuz zamanlamasına kaydırabilirsiniz.",
+            share: "Senkronizasyonunuzu Paylaşma",
+            shareDesc: "Eğer ofseti manuel olarak ayarlayıp mükemmel senkronizasyonu kendiniz bulursanız, ilgili ses parçasının yanındaki mavi 'Bulut Paylaşım' butonuna tıklayın. Bu, bulduğunuz doğru ayarı başkalarına yardım etmek için veritabanına ekler.",
+            trust: "Güven ve Oylama Uyarıları",
+            trustDesc: "Bir bildirim aldığınızda bildirimdeki Güvenlik oranına dikkat edin. Eğer senkronizasyon birden fazla oy almışsa 'Güvenilir' olarak gözükür. Sadece 1 oyu varsa uyarı verir, çünkü henüz başkaları tarafından doğrulanmamıştır."
         },
         urlSources: {
             youtube: 'YouTube',

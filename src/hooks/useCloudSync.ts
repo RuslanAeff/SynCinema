@@ -83,9 +83,7 @@ export function useCloudSync() {
                 }
 
                 const { error: updateError } = await supabase
-                    .from('sync_presets')
-                    .update({ votes: bestMatch.votes + 1 })
-                    .eq('id', bestMatch.id);
+                    .rpc('increment_vote', { row_id: bestMatch.id });
 
                 if (updateError) throw updateError;
 

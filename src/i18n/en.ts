@@ -165,9 +165,10 @@ export const en: Translations = {
             audioTracks: 'Audio Tracks',
             projectManagement: 'Project Management',
             keyboardShortcuts: 'Keyboard Shortcuts',
-            settings: 'Settings',
-            urlSources: 'URL Sources',
-            platformRequirements: 'Platform Requirements',
+            settings: "Settings",
+            urlSources: "URL Sources",
+            platformRequirements: "Platform Requirements",
+            cloudSync: "Community Sync ☁️"
         },
         videoControls: {
             playPause: 'Play / Pause',
@@ -227,9 +228,19 @@ export const en: Translations = {
         },
         settingsSection: {
             theme: 'Theme',
-            themeDesc: 'Switch between dark and light mode.',
-            language: 'Language',
-            languageDesc: 'Change the interface language.',
+            themeDesc: "Switch between modern Dark mode for low-light environments and crisp Light mode.",
+            language: "Language",
+            languageDesc: "Change the interface language. Currently supports English, Turkish, Azerbaijani, and Russian."
+        },
+        cloudSync: {
+            whatIsIt: "What is Community Sync?",
+            whatIsItDesc: "Community Sync Memory is a feature where the exact audio offsets found by others are saved in the cloud. If you load a video and audio pair that someone else has already perfectly synced, SynCinema will find it for you automatically.",
+            autoApply: "Applying a Sync",
+            autoApplyDesc: "When a matching offset is found in the community database, you will see a 'Cloud Sync Found' notification. Clicking 'Apply Sync' immediately shifts your audio to match the community's perfect timing.",
+            share: "Sharing Your Sync",
+            shareDesc: "If you adjust an offset manually and find the perfect synchronization, click the blue 'Cloud' button next to the audio track to share it. This adds your offset to the database to help others.",
+            trust: "Trust Ratings & Warnings",
+            trustDesc: "When applying a sync, look out for the Trust indicator. If a sync has multiple votes, it says 'Trusted'. If it only has 1 vote, it will display a warning to use cautiously, as it hasn't been verified by others yet."
         },
         urlSources: {
             youtube: 'YouTube',

@@ -165,9 +165,10 @@ export const az: Translations = {
             audioTracks: 'Səs Parçaları',
             projectManagement: 'Layihə İdarəetməsi',
             keyboardShortcuts: 'Klaviatura Qısayolları',
-            settings: 'Parametrlər',
-            urlSources: 'URL Mənbələri',
-            platformRequirements: 'Platforma Tələbləri',
+            settings: "Parametrlər",
+            urlSources: "URL Mənbələri",
+            platformRequirements: "Platforma Tələbləri",
+            cloudSync: "İcma Sinxronizasiyası ☁️"
         },
         videoControls: {
             playPause: 'Oynat / Dayandır',
@@ -227,9 +228,19 @@ export const az: Translations = {
         },
         settingsSection: {
             theme: 'Tema',
-            themeDesc: 'Tünd və açıq rejim arasında keçid edin.',
-            language: 'Dil',
-            languageDesc: 'İnterfeys dilini dəyişdirin.',
+            themeDesc: "Aşağı işıqlı mühitlər üçün müasir Qaranlıq rejim və aydın İşıqlı rejim arasında keçid edin.",
+            language: "Dil",
+            languageDesc: "İnterfeys dilini dəyişdirin. Hazırda Azərbaycan, Türk, İngilis və Rus dillərini dəstəkləyir."
+        },
+        cloudSync: {
+            whatIsIt: "İcma Sinxronizasiyası Nədir?",
+            whatIsItDesc: "Cloud Sync (Bulud Sinxronizasiyası) başqalarının tapdığı dəqiq səs zamanlamalarının buludda saxlandığı bir xüsusiyyətdir. Kimsənin daha öncə sinxronlaşdırdığı bir video və səs cütünü yükləyirsinizsə, SynCinema onu sizin üçün avtomatik tapacaq.",
+            autoApply: "Sinxronizasiyanı Tətbiq Etmək",
+            autoApplyDesc: "İcma bazasında uyğun bir zamanlama tapıldıqda ekranda bir bildiriş görəcəksiniz. 'Sinx. Tətbiq et' düyməsinə klikləyərək səsi dərhal icmanın qüsursuz zamanlamasına uyğunlaşdıra bilərsiniz.",
+            share: "Sinxronizasiyanızı Paylaşmaq",
+            shareDesc: "Əgər offseti (zamanlamanı) manual olaraq tənzimləyib mükəmməl uyğunluğu özünüz tapsanız, qonşuluqdakı səs parçasının yanındakı mavi 'Bulud' düyməsinə klikləyərək onu paylaşın. Bu, başqalarına kömək etmək üçün sizin tapıntınızı bazaya əlavə edir.",
+            trust: "Güvən Reytinqi və Xəbərdarlıqlar",
+            trustDesc: "Sinxronizasiya tətbiq edərkən Güvən göstəricisinə diqqət edin. Əgər bir neçə səs toplayıbsa 'Güvənilir' yazılır. Yalnız 1 səsi varsa ehtiyatlı olmaq üçün xəbərdarlıq edir, çünki hələ başqaları tərəfindən təsdiqlənməyib."
         },
         urlSources: {
             youtube: 'YouTube',

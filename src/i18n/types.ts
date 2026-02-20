@@ -201,6 +201,7 @@ export interface Translations {
             settings: string;
             urlSources: string;
             platformRequirements: string;
+            cloudSync: string;
         };
         // Video Controls items
         videoControls: {
@@ -269,7 +270,18 @@ export interface Translations {
             language: string;
             languageDesc: string;
         };
-        // URL Sources
+        // Cloud Sync items
+        cloudSync: {
+            whatIsIt: string;
+            whatIsItDesc: string;
+            autoApply: string;
+            autoApplyDesc: string;
+            share: string;
+            shareDesc: string;
+            trust: string;
+            trustDesc: string;
+        };
+        // URL Sources items
         urlSources: {
             youtube: string;
             youtubeDesc: string;
