@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { ShieldAlert, Trash2, RefreshCw, X, AlertCircle, CheckCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ShieldAlert, Trash2, RefreshCw, X, AlertCircle, CheckCircle, Lock } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { supabase, SyncPreset } from '../lib/supabase';
 import { useToast } from './Toast';
+
+const MAX_FAILED_ATTEMPTS = 3;
+const LOCKOUT_DURATION_MS = 30000; // 30 seconds
 
 interface AdminPanelProps {
     isOpen: boolean;
@@ -19,6 +22,31 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
     const [presets, setPresets] = useState<SyncPreset[]>([]);
     const [error, setError] = useState<string | null>(null);
 
+    // Brute-force protection
+    const [failedAttempts, setFailedAttempts] = useState(0);
+    const [lockedUntil, setLockedUntil] = useState<number>(0);
+    const [lockoutRemaining, setLockoutRemaining] = useState(0);
+    const lockoutTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    const isLocked = lockoutRemaining > 0;
+
+    // Lockout countdown timer
+    useEffect(() => {
+        if (lockedUntil > Date.now()) {
+            lockoutTimerRef.current = setInterval(() => {
+                const remaining = Math.max(0, Math.ceil((lockedUntil - Date.now()) / 1000));
+                setLockoutRemaining(remaining);
+                if (remaining <= 0 && lockoutTimerRef.current) {
+                    clearInterval(lockoutTimerRef.current);
+                    lockoutTimerRef.current = null;
+                }
+            }, 500);
+        }
+        return () => {
+            if (lockoutTimerRef.current) clearInterval(lockoutTimerRef.current);
+        };
+    }, [lockedUntil]);
+
     // Reset state when opened/closed
     useEffect(() => {
         if (!isOpen) {
@@ -26,11 +54,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
             setPassword('');
             setPresets([]);
             setError(null);
+            // Keep failedAttempts and lockedUntil across open/close to prevent reset bypass
         }
     }, [isOpen]);
 
+    const triggerLockout = () => {
+        const until = Date.now() + LOCKOUT_DURATION_MS;
+        setLockedUntil(until);
+        setLockoutRemaining(Math.ceil(LOCKOUT_DURATION_MS / 1000));
+    };
+
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (isLocked) return;
         setError(null);
         setIsLoading(true);
 
@@ -69,7 +105,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
     };
 
     const handleDelete = async (id: string) => {
-        if (!supabase) return;
+        if (!supabase || isLocked) return;
         setIsLoading(true);
         try {
             const { data, error: deleteError } = await supabase.rpc('admin_delete_preset', {
@@ -82,12 +118,24 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
             if (data === true) {
                 showToast({ message: t.adminPanel.deleteSuccess, type: 'success' });
                 setPresets(prev => prev.filter(p => p.id !== id));
+                setFailedAttempts(0); // Reset on success
             } else {
                 throw new Error(t.adminPanel.invalidPassword);
             }
         } catch (err: any) {
             console.error(err);
-            setError(err.message || t.adminPanel.deleteError);
+
+            const newFailedCount = failedAttempts + 1;
+            setFailedAttempts(newFailedCount);
+
+            if (newFailedCount >= MAX_FAILED_ATTEMPTS) {
+                triggerLockout();
+                setError(`🔒 ${MAX_FAILED_ATTEMPTS} failed attempts.Locked for ${LOCKOUT_DURATION_MS / 1000} seconds.`);
+                setIsLoggedIn(false);
+            } else {
+                setError(`${t.adminPanel.invalidPassword} (${newFailedCount}/${MAX_FAILED_ATTEMPTS})`);
+            }
+
             showToast({ message: t.adminPanel.invalidPassword, type: 'error' });
 
             // If unauthorized, you might want to kick them out
@@ -133,8 +181,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder={t.adminPanel.passwordPlaceholder}
-                                    className="px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-red-500/50 focus:border-red-500 outline-none transition-all placeholder-gray-500"
+                                    className="px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-red-500/50 focus:border-red-500 outline-none transition-all placeholder-gray-500 disabled:opacity-40"
                                     required
+                                    disabled={isLocked}
                                 />
                                 {error && (
                                     <div className="text-red-400 text-sm flex items-center gap-1.5 p-2 bg-red-400/10 rounded-lg border border-red-400/20">
@@ -144,10 +193,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
                                 )}
                                 <button
                                     type="submit"
-                                    disabled={isLoading || !password.trim()}
-                                    className="py-3 px-4 bg-red-600 hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors"
+                                    disabled={isLoading || !password.trim() || isLocked}
+                                    className="py-3 px-4 bg-red-600 hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
                                 >
-                                    {isLoading ? '...' : t.adminPanel.loginBtn}
+                                    {isLocked ? (
+                                        <><Lock size={16} /> 🔒 {lockoutRemaining}s</>
+                                    ) : isLoading ? '...' : t.adminPanel.loginBtn}
                                 </button>
                             </form>
                         </div>
