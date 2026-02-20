@@ -97,8 +97,18 @@ function App() {
   // Admin Panel State
   const [showAdmin, setShowAdmin] = useState(false);
 
-  // Secret admin shortcut: Ctrl+Shift+A
+  // Secret admin access: Ctrl+Shift+A (desktop) or ?admin=true URL param (mobile)
   useEffect(() => {
+    // Check URL parameter for mobile access
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('admin') === 'true') {
+      setShowAdmin(true);
+      // Clean URL to hide the parameter
+      const url = new URL(window.location.href);
+      url.searchParams.delete('admin');
+      window.history.replaceState({}, '', url.toString());
+    }
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.shiftKey && e.key === 'A') {
         e.preventDefault();
