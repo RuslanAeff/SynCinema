@@ -24,3 +24,7 @@ dist-ssr
 *.sw?
 
 .vercel
+
+# Scripts & Secrets
+admin_rpc.sql
+*.sql
