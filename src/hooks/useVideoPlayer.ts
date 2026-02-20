@@ -8,6 +8,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { ExtendedMediaElement } from '../types';
+import { getVideoFingerprint } from '../utils/fileFingerprint';
 
 export const useVideoPlayer = () => {
     const [videoFile, setVideoFile] = useState<File | null>(null);
@@ -179,6 +180,7 @@ export const useVideoPlayer = () => {
         handleSeek,
         setDuration,
         setIsPlaying,
-        setCurrentTime
+        setCurrentTime,
+        videoFingerprint: getVideoFingerprint(videoFile, videoObjectUrl)
     };
 };

@@ -19,6 +19,8 @@ import { useVideoPlayer } from './hooks/useVideoPlayer';
 import { useAudioTracks } from './hooks/useAudioTracks';
 import { useTheme } from './hooks/useTheme';
 import { useAnalytics } from './hooks/useAnalytics';
+import { useCloudSync } from './hooks/useCloudSync';
+import { useToast } from './components/Toast';
 import { Logo } from './components/Logo';
 import { InfoButton } from './components/HelpPanel';
 import { Sun, Moon, BarChart3 } from 'lucide-react';
@@ -53,7 +55,8 @@ function App() {
     markers,
     addMarker,
     deleteMarker,
-    loadVideoFromUrl
+    loadVideoFromUrl,
+    videoFingerprint
   } = useVideoPlayer();
 
   const {
@@ -141,6 +144,79 @@ function App() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [showWelcome, handleWelcomeComplete]);
+
+  // Cloud Sync Logic
+  const { findPreset, saveOrUpvotePreset } = useCloudSync();
+  const { showToast } = useToast();
+
+  // Track which presets we've already asked the user about to avoid spamming
+  const [askedPresets, setAskedPresets] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    const checkCloudSync = async () => {
+      // We only check if we have a video and at least one audio track
+      if (!videoFingerprint || audioTracks.length === 0) return;
+
+      // For MVP, we'll just check the first audio track against the video
+      const primaryAudio = audioTracks[0];
+      if (!primaryAudio.audioFingerprint) return;
+
+      const comboKeys = `${videoFingerprint}_${primaryAudio.audioFingerprint}`;
+      if (askedPresets.has(comboKeys)) return;
+
+      const preset = await findPreset(videoFingerprint, primaryAudio.audioFingerprint);
+
+      if (preset && Math.abs(preset.offset_ms - primaryAudio.offset) > 100) {
+        // We found a preset that's significantly different from the current offset
+        const seconds = (preset.offset_ms / 1000).toFixed(3);
+
+        showToast({
+          title: t.app.title || "Cloud Sync Found!",
+          message: `${preset.votes} user(s) synced this audio with a ${seconds}s offset. Do you want to apply it?`,
+          type: 'info',
+          duration: 10000,
+          action: {
+            label: "Apply Sync",
+            onClick: () => {
+              updateAudioTrack(primaryAudio.id, { offset: preset.offset_ms, isCloudSynced: true });
+              trackEvent('syncOffsetAdjusted');
+              showToast({
+                message: "Cloud sync applied successfully! ☁️✓",
+                type: 'success'
+              });
+            }
+          }
+        });
+      }
+
+      setAskedPresets(prev => new Set(prev).add(comboKeys));
+    };
+
+    checkCloudSync();
+  }, [videoFingerprint, audioTracks, findPreset, askedPresets, updateAudioTrack, showToast, t, trackEvent]);
+
+  const handleShareSync = useCallback(async (trackId: string, offset: number) => {
+    if (!videoFingerprint) {
+      showToast({ message: "Cannot share: Video fingerprint not found.", type: 'error' });
+      return;
+    }
+    const track = audioTracks.find(t => t.id === trackId);
+    if (!track || !track.audioFingerprint) {
+      showToast({ message: "Cannot share: Audio fingerprint not found.", type: 'error' });
+      return;
+    }
+
+    // Convert seconds to milliseconds
+    const offsetMs = Math.round(offset * 1000);
+    const success = await saveOrUpvotePreset(videoFingerprint, track.audioFingerprint, offsetMs);
+
+    if (success) {
+      showToast({ message: "Community sync shared successfully! 🎉", type: 'success' });
+      updateAudioTrack(trackId, { isCloudSynced: true });
+    } else {
+      showToast({ message: "Failed to share sync preset.", type: 'error' });
+    }
+  }, [videoFingerprint, audioTracks, saveOrUpvotePreset, showToast, updateAudioTrack]);
 
   // Drag and Drop State
   const [isDragging, setIsDragging] = useState(false);
@@ -372,6 +448,7 @@ function App() {
         onAudioUrlLoad={handleAudioFromUrl}
         onStatisticsOpen={() => setShowStatistics(true)}
         onTrackEvent={trackEvent as (event: string) => void}
+        onShareSync={handleShareSync}
       />
 
       {/* Help Panel - at App level to overlay everything */}

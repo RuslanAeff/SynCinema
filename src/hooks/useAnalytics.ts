@@ -24,6 +24,7 @@ export interface AnalyticsData {
     markersAdded: number;
     fullscreenToggles: number;
     detachOpened: number;
+    syncOffsetAdjusted: number;
     firstUsed: string; // ISO date string
     lastUsed: string; // ISO date string
 }
@@ -45,6 +46,7 @@ const getDefaultAnalytics = (): AnalyticsData => ({
     markersAdded: 0,
     fullscreenToggles: 0,
     detachOpened: 0,
+    syncOffsetAdjusted: 0,
     firstUsed: new Date().toISOString(),
     lastUsed: new Date().toISOString(),
 });

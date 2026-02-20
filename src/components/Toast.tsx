@@ -7,18 +7,31 @@
  */
 
 import React, { useState, useEffect, useCallback, createContext, useContext, ReactNode } from 'react';
-import { CheckCircle, AlertCircle, X } from 'lucide-react';
+import { CheckCircle, AlertCircle, Info, X } from 'lucide-react';
+import { Button } from './Button';
 
-type ToastType = 'success' | 'error';
+type ToastType = 'success' | 'error' | 'info';
 
-interface ToastMessage {
+export interface ToastOptions {
+    message?: string;
+    text?: string; // backwards compatibility
+    title?: string;
+    type?: ToastType;
+    duration?: number;
+    action?: {
+        label: string;
+        onClick: () => void;
+    };
+}
+
+interface ToastMessage extends ToastOptions {
     id: number;
     text: string;
     type: ToastType;
 }
 
 interface ToastContextType {
-    showToast: (text: string, type?: ToastType) => void;
+    showToast: (options: string | ToastOptions, type?: ToastType) => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
@@ -28,9 +41,22 @@ let nextId = 0;
 export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
-    const showToast = useCallback((text: string, type: ToastType = 'success') => {
+    const showToast = useCallback((options: string | ToastOptions, type: ToastType = 'success') => {
         const id = nextId++;
-        setToasts(prev => [...prev, { id, text, type }]);
+        let toastObj: ToastMessage;
+
+        if (typeof options === 'string') {
+            toastObj = { id, text: options, message: options, type };
+        } else {
+            toastObj = {
+                id,
+                text: options.message || options.text || '',
+                type: options.type || type,
+                ...options
+            };
+        }
+
+        setToasts(prev => [...prev, toastObj]);
     }, []);
 
     const dismiss = useCallback((id: number) => {
@@ -57,39 +83,68 @@ const ToastItem: React.FC<{ toast: ToastMessage; onDismiss: (id: number) => void
         // Animate in
         requestAnimationFrame(() => setIsVisible(true));
 
-        // Auto dismiss after 4s
+        // Auto dismiss
+        const duration = toast.duration || 4000;
         const timer = setTimeout(() => {
             setIsVisible(false);
             setTimeout(() => onDismiss(toast.id), 300);
-        }, 4000);
+        }, duration);
 
         return () => clearTimeout(timer);
-    }, [toast.id, onDismiss]);
+    }, [toast.id, toast.duration, onDismiss]);
 
     const isSuccess = toast.type === 'success';
+    const isError = toast.type === 'error';
+    const isInfo = toast.type === 'info';
 
     return (
         <div
-            className={`pointer-events-auto flex items-start gap-3 max-w-sm px-4 py-3 rounded-xl shadow-2xl border backdrop-blur-md transition-all duration-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+            className={`pointer-events-auto flex flex-col gap-2 max-w-sm px-4 py-3 rounded-xl shadow-2xl border backdrop-blur-md transition-all duration-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                 } ${isSuccess
                     ? 'bg-gray-900/90 border-green-500/30 text-white'
-                    : 'bg-gray-900/90 border-red-500/30 text-white'
+                    : isError ? 'bg-gray-900/90 border-red-500/30 text-white'
+                        : 'bg-gray-900/90 border-blue-500/30 text-white'
                 }`}
         >
-            {isSuccess
-                ? <CheckCircle size={18} className="text-green-400 mt-0.5 shrink-0" />
-                : <AlertCircle size={18} className="text-red-400 mt-0.5 shrink-0" />
-            }
-            <p className="text-sm leading-relaxed whitespace-pre-line flex-1">{toast.text}</p>
-            <button
-                onClick={() => {
-                    setIsVisible(false);
-                    setTimeout(() => onDismiss(toast.id), 300);
-                }}
-                className="text-gray-500 hover:text-white transition-colors shrink-0 mt-0.5"
-            >
-                <X size={14} />
-            </button>
+            <div className="flex items-start gap-3">
+                {isSuccess && <CheckCircle size={18} className="text-green-400 mt-0.5 shrink-0" />}
+                {isError && <AlertCircle size={18} className="text-red-400 mt-0.5 shrink-0" />}
+                {isInfo && <Info size={18} className="text-blue-400 mt-0.5 shrink-0" />}
+
+                <div className="flex-1">
+                    {toast.title && <h4 className="font-semibold text-sm mb-1">{toast.title}</h4>}
+                    <p className="text-sm leading-relaxed whitespace-pre-line text-gray-200">
+                        {toast.text || toast.message}
+                    </p>
+                </div>
+
+                <button
+                    onClick={() => {
+                        setIsVisible(false);
+                        setTimeout(() => onDismiss(toast.id), 300);
+                    }}
+                    className="text-gray-500 hover:text-white transition-colors shrink-0 mt-0.5"
+                >
+                    <X size={14} />
+                </button>
+            </div>
+
+            {toast.action && (
+                <div className="mt-2 flex justify-end">
+                    <Button
+                        size="sm"
+                        variant="primary"
+                        className="!py-1 !px-3 text-xs w-auto bg-indigo-500 hover:bg-indigo-600 border-indigo-400"
+                        onClick={() => {
+                            toast.action?.onClick();
+                            setIsVisible(false);
+                            setTimeout(() => onDismiss(toast.id), 300);
+                        }}
+                    >
+                        {toast.action.label}
+                    </Button>
+                </div>
+            )}
         </div>
     );
 };

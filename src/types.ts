@@ -19,6 +19,8 @@ export interface AudioTrack {
     high: number;
   };
   useCompressor: boolean;
+  audioFingerprint: string | null;
+  isCloudSynced?: boolean;
 }
 
 export interface AudioDevice {

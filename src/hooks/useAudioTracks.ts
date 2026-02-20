@@ -9,6 +9,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { AudioTrack, AudioDevice } from '../types';
 import { useToast } from '../components/Toast';
+import { getAudioFingerprint } from '../utils/fileFingerprint';
 
 export const useAudioTracks = () => {
     const [audioTracks, setAudioTracks] = useState<AudioTrack[]>([]);
@@ -71,7 +72,8 @@ export const useAudioTracks = () => {
                 volume: 1,
                 isMuted: false,
                 eq: saved.eq || { low: 0, mid: 0, high: 0 },
-                useCompressor: saved.useCompressor || false
+                useCompressor: saved.useCompressor || false,
+                audioFingerprint: getAudioFingerprint(file, null)
             };
         });
         setAudioTracks(prev => [...prev, ...newTracks]);
@@ -93,7 +95,8 @@ export const useAudioTracks = () => {
             volume: 1,
             isMuted: false,
             eq: saved.eq || { low: 0, mid: 0, high: 0 },
-            useCompressor: saved.useCompressor || false
+            useCompressor: saved.useCompressor || false,
+            audioFingerprint: getAudioFingerprint(null, url)
         };
 
         setAudioTracks(prev => [...prev, newTrack]);

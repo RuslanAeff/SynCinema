@@ -56,6 +56,7 @@ interface SidebarProps {
     onAudioUrlLoad: (url: string, filename: string) => void;
     onStatisticsOpen: () => void;
     onTrackEvent?: (event: string) => void;
+    onShareSync?: (trackId: string, offset: number) => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -97,6 +98,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     onAudioUrlLoad,
     onStatisticsOpen,
     onTrackEvent,
+    onShareSync,
 }) => {
     const { t, language } = useI18n();
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -564,6 +566,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                         syncThreshold={0.2}
                                         masterVolume={masterVolume}
                                         onTrackEvent={onTrackEvent}
+                                        onShareSync={onShareSync}
                                     />
                                 ))
                             )}
