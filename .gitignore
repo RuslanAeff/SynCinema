@@ -28,3 +28,7 @@ dist-ssr
 # Scripts & Secrets
 admin_rpc.sql
 *.sql
+.env
+.env.*
+.env.local
+.env.production
