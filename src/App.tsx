@@ -97,6 +97,18 @@ function App() {
   // Admin Panel State
   const [showAdmin, setShowAdmin] = useState(false);
 
+  // Secret admin shortcut: Ctrl+Shift+A
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+        e.preventDefault();
+        setShowAdmin(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   // URL Loader Modal State
   const [showUrlLoader, setShowUrlLoader] = useState(false);
 
@@ -392,13 +404,6 @@ function App() {
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setShowAdmin(true)}
-            className="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
-            title={t.adminPanel?.title || "Admin"}
-          >
-            <ShieldAlert size={18} />
-          </button>
-          <button
             onClick={() => setShowStatistics(true)}
             className="p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border border-purple-500/30 text-purple-400 hover:text-purple-300 transition-colors"
             title="Statistics"
@@ -484,7 +489,7 @@ function App() {
         onUrlLoaderOpen={() => setShowUrlLoader(true)}
         onAudioUrlLoad={handleAudioFromUrl}
         onStatisticsOpen={() => setShowStatistics(true)}
-        onAdminOpen={() => setShowAdmin(true)}
+
         onTrackEvent={trackEvent as (event: string) => void}
         onShareSync={handleShareSync}
       />
