@@ -204,7 +204,8 @@ export const ru: Translations = {
             settings: "Настройки",
             urlSources: "Источники URL",
             platformRequirements: "Системные требования",
-            cloudSync: "Синхронизация сообщества ☁️"
+            cloudSync: "Синхронизация сообщества ☁️",
+            bookmarklet: "Bookmarklet"
         },
         videoControls: {
             playPause: 'Воспроизведение / Пауза',
@@ -301,6 +302,16 @@ export const ru: Translations = {
             mobileWhyDesc: 'Мобильные браузеры не поддерживают Web Audio API "setSinkId", который позволяет выбирать устройства вывода звука.',
             mobileWorks: 'Что Работает на Мобильных',
             mobileWorksDesc: 'Воспроизведение видео, добавление аудиодорожек, настройка смещения/синхронизации, эквалайзер и управление громкостью.',
+        },
+        bookmarklet: {
+            whatIsIt: 'Что такое Bookmarklet?',
+            whatIsItDesc: 'Bookmarklet — это маленькая кнопка в панели закладок вашего браузера. Нажмите её на любой странице с видео, и оно мгновенно откроется в SynCinema — без установки расширения!',
+            howToInstall: 'Как установить',
+            howToInstallDesc: 'Перетащите светящуюся кнопку ниже на панель закладок браузера. Одноразовая настройка, разрешения не требуются.',
+            howToUse: 'Как использовать',
+            howToUseDesc: 'Перейдите на любую страницу с видео. Нажмите закладку "Open in SynCinema". Видео автоматически откроется в SynCinema со всеми функциями.',
+            dragInstruction: '👇 Перетащите эту кнопку на панель закладок',
+            note: 'Работает в Chrome, Firefox, Edge, Opera и Brave.',
         },
     },
 

@@ -205,7 +205,8 @@ export const en: Translations = {
             settings: "Settings",
             urlSources: "URL Sources",
             platformRequirements: "Platform Requirements",
-            cloudSync: "Community Sync ☁️"
+            cloudSync: "Community Sync ☁️",
+            bookmarklet: "Bookmarklet"
         },
         videoControls: {
             playPause: 'Play / Pause',
@@ -302,6 +303,16 @@ export const en: Translations = {
             mobileWhyDesc: 'Mobile browsers don\'t support the "setSinkId" Web Audio API that allows selecting audio output devices.',
             mobileWorks: 'What Works on Mobile',
             mobileWorksDesc: 'Video playback, adding audio tracks, offset/sync adjustments, EQ and volume controls.',
+        },
+        bookmarklet: {
+            whatIsIt: 'What is a Bookmarklet?',
+            whatIsItDesc: 'A bookmarklet is a small button that lives in your browser\'s bookmarks bar. Click it on any page with a video, and it instantly opens that video in SynCinema — no extension needed!',
+            howToInstall: 'How to Install',
+            howToInstallDesc: 'Drag the glowing button below to your browser\'s bookmarks bar. That\'s it! One-time setup, no permissions required.',
+            howToUse: 'How to Use',
+            howToUseDesc: 'Navigate to any page with a video. Click the "Open in SynCinema" bookmark. The video will automatically open in SynCinema with all features ready.',
+            dragInstruction: '👇 Drag this button to your bookmarks bar',
+            note: 'Works on Chrome, Firefox, Edge, Opera, and Brave browsers.',
         },
     },
 

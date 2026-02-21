@@ -243,6 +243,7 @@ export interface Translations {
             urlSources: string;
             platformRequirements: string;
             cloudSync: string;
+            bookmarklet: string;
         };
         // Video Controls items
         videoControls: {
@@ -347,6 +348,17 @@ export interface Translations {
             mobileWhyDesc: string;
             mobileWorks: string;
             mobileWorksDesc: string;
+        };
+        // Bookmarklet
+        bookmarklet: {
+            whatIsIt: string;
+            whatIsItDesc: string;
+            howToInstall: string;
+            howToInstallDesc: string;
+            howToUse: string;
+            howToUseDesc: string;
+            dragInstruction: string;
+            note: string;
         };
     };
 

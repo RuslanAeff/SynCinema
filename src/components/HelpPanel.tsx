@@ -35,7 +35,8 @@ import {
     Monitor,
     Cloud,
     ShieldCheck,
-    Palette
+    Palette,
+    Bookmark
 } from 'lucide-react';
 import { Translations } from '../i18n';
 import { useI18n } from '../context/I18nContext';
@@ -316,6 +317,31 @@ const getHelpSections = (t: Translations): HelpSection[] => [
                 description: t.help.platform.mobileWorksDesc,
             }
         ]
+    },
+    {
+        id: 'bookmarklet',
+        title: t.help.sections.bookmarklet || 'Bookmarklet',
+        icon: <Bookmark size={20} />,
+        items: [
+            {
+                name: t.help.bookmarklet?.whatIsIt || 'What is a Bookmarklet?',
+                icon: <Bookmark size={16} />,
+                iconColor: 'bg-amber-500/20 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400',
+                description: t.help.bookmarklet?.whatIsItDesc || 'A bookmarklet is a small button that lives in your browser\'s bookmarks bar. Click it on any page with a video, and it instantly opens that video in SynCinema — no extension needed!',
+            },
+            {
+                name: t.help.bookmarklet?.howToInstall || 'How to Install',
+                icon: <Upload size={16} />,
+                iconColor: 'bg-primary-500/20 text-primary-600 dark:bg-primary-500/20 dark:text-primary-400',
+                description: t.help.bookmarklet?.howToInstallDesc || 'Drag the button below to your browser\'s bookmarks bar. That\'s it! One-time setup, no permissions required.',
+            },
+            {
+                name: t.help.bookmarklet?.howToUse || 'How to Use',
+                icon: <Film size={16} />,
+                iconColor: 'bg-secondary-500/20 text-secondary-600 dark:bg-secondary-500/20 dark:text-secondary-400',
+                description: t.help.bookmarklet?.howToUseDesc || 'Navigate to any page with a video. Click the "Open in SynCinema" bookmark. The video will automatically open in SynCinema with all features ready.',
+            }
+        ]
     }
 ];
 
@@ -520,6 +546,31 @@ export const HelpPanel: React.FC<HelpPanelProps> = ({ isOpen, onClose, accentThe
                                 </div>
                             ))}
                         </div>
+
+                        {/* Bookmarklet Drag Button - Only shown when bookmarklet section is active */}
+                        {activeSection.id === 'bookmarklet' && (
+                            <div className="mt-6 p-5 rounded-xl bg-gradient-to-br from-primary-500/10 via-secondary-500/10 to-amber-500/10 border border-primary-500/30 backdrop-blur-sm">
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 text-center">
+                                    {t.help.bookmarklet?.dragInstruction || '👇 Drag this button to your bookmarks bar'}
+                                </p>
+                                <div className="flex justify-center">
+                                    <a
+                                        href={`javascript:void(function(){var v=document.querySelector('video');var u=v?(v.currentSrc||v.src):window.location.href;if(u){window.open('${window.location.origin}?video='+encodeURIComponent(u),'_blank')}else{alert('No video found on this page')}})()`}
+                                        onClick={(e) => e.preventDefault()}
+                                        className="group relative inline-flex items-center gap-2.5 px-6 py-3 bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-500 hover:to-secondary-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 transition-all hover:scale-105 cursor-grab active:cursor-grabbing border border-primary-400/30"
+                                        title={t.help.bookmarklet?.dragInstruction || 'Drag to bookmarks bar'}
+                                    >
+                                        <Bookmark size={18} className="group-hover:animate-bounce" />
+                                        <span>Open in SynCinema</span>
+                                        {/* Glow effect */}
+                                        <div className="absolute inset-0 rounded-xl bg-primary-400/20 opacity-0 group-hover:opacity-100 blur-md transition-opacity -z-10" />
+                                    </a>
+                                </div>
+                                <p className="text-[10px] text-gray-500 dark:text-gray-500 mt-3 text-center">
+                                    {t.help.bookmarklet?.note || 'Works on Chrome, Firefox, Edge, Opera, and Brave browsers.'}
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

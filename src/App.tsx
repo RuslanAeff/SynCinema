@@ -180,6 +180,34 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [showWelcome, handleWelcomeComplete]);
 
+  // Bookmarklet: Auto-load video from ?video= query parameter
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const videoParam = params.get('video');
+    if (videoParam) {
+      try {
+        const decodedUrl = decodeURIComponent(videoParam);
+        // Skip welcome screen
+        setShowWelcome(false);
+        sessionStorage.setItem('syncinema_welcome_seen', 'true');
+        sessionStorage.setItem('syncinema_tour_completed', 'true');
+
+        // Check if it's YouTube
+        const ytMatch = decodedUrl.match(/(?:youtube\.com\/watch\?.*v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/);
+        if (ytMatch) {
+          setYoutubeVideoId(ytMatch[1]);
+        } else {
+          loadVideoFromUrl(decodedUrl, 'Bookmarklet Video');
+        }
+
+        // Clean URL bar (remove ?video= param)
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } catch (e) {
+        console.error('[SynCinema Bookmarklet] Failed to load video from URL param:', e);
+      }
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Cloud Sync Logic
   const { findPreset, saveOrUpvotePreset } = useCloudSync();
   const { showToast } = useToast();

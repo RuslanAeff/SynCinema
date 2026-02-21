@@ -204,7 +204,8 @@ export const tr: Translations = {
             settings: 'Ayarlar',
             urlSources: 'URL Kaynakları',
             platformRequirements: 'Platform Gereksinimleri',
-            cloudSync: "Topluluk Senkronizasyonu ☁️"
+            cloudSync: "Topluluk Senkronizasyonu ☁️",
+            bookmarklet: "Bookmarklet"
         },
         videoControls: {
             playPause: 'Oynat / Duraklat',
@@ -301,6 +302,16 @@ export const tr: Translations = {
             mobileWhyDesc: 'Mobil tarayıcılar ses çıkış cihazlarını seçmeye izin veren "setSinkId" Web Audio API\'sini desteklemiyor.',
             mobileWorks: 'Mobilde Çalışanlar',
             mobileWorksDesc: 'Video oynatma, ses parçası ekleme, ofset/senkron ayarları, EQ ve ses kontrolleri.',
+        },
+        bookmarklet: {
+            whatIsIt: 'Bookmarklet Nedir?',
+            whatIsItDesc: 'Bookmarklet, tarayıcınızın yer imleri çubuğunda yaşayan küçük bir butondur. Herhangi bir sayfada videoya tıklayın ve o videoyu anında SynCinema\'da açın — eklenti gerekmez!',
+            howToInstall: 'Nasıl Kurulur',
+            howToInstallDesc: 'Aşağıdaki parlayan butonu tarayıcınızın yer imleri çubuğuna sürükleyin. Tek seferlik kurulum, izin gerekmez.',
+            howToUse: 'Nasıl Kullanılır',
+            howToUseDesc: 'Video içeren herhangi bir sayfaya gidin. "Open in SynCinema" yer imine tıklayın. Video otomatik olarak tüm özelliklerle birlikte SynCinema\'da açılacaktır.',
+            dragInstruction: '👇 Bu butonu yer imleri çubuğunuza sürükleyin',
+            note: 'Chrome, Firefox, Edge, Opera ve Brave tarayıcılarında çalışır.',
         },
     },
 

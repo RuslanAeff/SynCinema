@@ -204,7 +204,8 @@ export const az: Translations = {
             settings: "Parametrlər",
             urlSources: "URL Mənbələri",
             platformRequirements: "Platforma Tələbləri",
-            cloudSync: "İcma Sinxronizasiyası ☁️"
+            cloudSync: "İcma Sinxronizasiyası ☁️",
+            bookmarklet: "Bookmarklet"
         },
         videoControls: {
             playPause: 'Oynat / Dayandır',
@@ -301,6 +302,16 @@ export const az: Translations = {
             mobileWhyDesc: 'Mobil brauzerlər səs çıxış cihazlarını seçməyə imkan verən "setSinkId" Web Audio API-ni dəstəkləmir.',
             mobileWorks: 'Mobild Nə İşləyir',
             mobileWorksDesc: 'Video oynatma, səs parçası əlavə etmə, ofset/sinxron tənzimləmələri, EQ və səs idarəetmələri.',
+        },
+        bookmarklet: {
+            whatIsIt: 'Bookmarklet Nədir?',
+            whatIsItDesc: 'Bookmarklet, brauzerinizin zərlər panelində yaxaşan kiçik bir düymədir. Hər hansı bir səhifədə videoya klikləyin və o videonu anında SynCinema-da açın — genişləndirmə lazım deyil!',
+            howToInstall: 'Necə Quraşdırılır',
+            howToInstallDesc: 'Aşağıdakı parlayan düyməni brauzerinizin zərlər panelinə sürükləyin. Birlik kurulum, icazə lazım deyil.',
+            howToUse: 'Necə İstifadə Olunur',
+            howToUseDesc: 'Video olan istənilən səhifəyə daxil olun. "Open in SynCinema" zərfinə klikləyin. Video avtomatik olaraq bütün funksiyalarla SynCinema-da açılacaq.',
+            dragInstruction: '👇 Bu düyməni zərlər panelinizə sürükləyin',
+            note: 'Chrome, Firefox, Edge, Opera və Brave brauzrlərində işləyir.',
         },
     },
 
