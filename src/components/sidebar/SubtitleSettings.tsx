@@ -125,18 +125,22 @@ export const SubtitleSettings: React.FC<SubtitleSettingsProps> = ({
                                 <label className="text-[10px] text-gray-400 flex items-center gap-1"><Palette size={10} /> Text</label>
                                 <div className="relative" ref={colorPickerRef}>
                                     <button
+                                        type="button"
                                         onClick={() => setIsColorPickerOpen(!isColorPickerOpen)}
                                         className="w-8 h-5 rounded overflow-hidden border border-gray-600 hover:border-primary-500 transition-colors shadow-inner flex items-center justify-center cursor-pointer"
                                         style={{ backgroundColor: safeStyle.color }}
                                     />
                                     {isColorPickerOpen && (
                                         <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 p-3 bg-gray-800 border border-gray-600 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] z-50 w-52 flex flex-col gap-3 backdrop-blur-md">
-                                            <div className="text-[10px] text-gray-400 font-medium tracking-wide uppercase">Preset Colors</div>
+                                            <div className="text-[10px] text-gray-400 font-medium tracking-wide uppercase">{t.sidebar.presetColors}</div>
                                             <div className="grid grid-cols-5 gap-2">
                                                 {PRESET_COLORS.map(c => (
                                                     <button
                                                         key={c}
-                                                        onClick={() => {
+                                                        type="button"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
                                                             setLocalColor(c);
                                                             onSubtitleStyleChange({ ...safeStyle, color: c });
                                                             setIsColorPickerOpen(false);
@@ -149,7 +153,7 @@ export const SubtitleSettings: React.FC<SubtitleSettingsProps> = ({
                                             </div>
                                             <div className="pt-2 border-t border-gray-700/80 flex flex-col gap-2">
                                                 <div className="flex items-center gap-2">
-                                                    <span className="text-[10px] text-gray-400">HEX</span>
+                                                    <span className="text-[10px] text-gray-400">{t.sidebar.hexCode}</span>
                                                     <input
                                                         type="text"
                                                         value={localColor}
@@ -189,7 +193,10 @@ export const SubtitleSettings: React.FC<SubtitleSettingsProps> = ({
 
                                                 {/* Apply Button */}
                                                 <button
-                                                    onClick={() => {
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
                                                         let finalColor = localColor.trim();
                                                         if (!finalColor.startsWith('#')) {
                                                             finalColor = '#' + finalColor;
@@ -206,7 +213,7 @@ export const SubtitleSettings: React.FC<SubtitleSettingsProps> = ({
                                                     }}
                                                     className="mt-1 w-full bg-primary-600 hover:bg-primary-500 text-white text-[11px] font-bold py-1.5 rounded-md transition-colors border border-primary-500/50 shadow-[0_0_10px_rgba(var(--color-primary-500),0.3)]"
                                                 >
-                                                    UYGULA (APPLY)
+                                                    {t.sidebar.applyColors}
                                                 </button>
                                             </div>
                                         </div>

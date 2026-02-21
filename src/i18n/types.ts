@@ -84,6 +84,9 @@ export interface Translations {
         addFromFile: string;
         addFromUrl: string;
         unknownDevice: string;
+        applyColors: string;
+        presetColors: string;
+        hexCode: string;
     };
 
     // URL Loader Modal

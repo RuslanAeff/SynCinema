@@ -11,6 +11,7 @@ import { Play, Pause, RotateCcw, Film, Maximize, Minimize, Volume2 } from 'lucid
 import { formatTime } from '../utils/formatTime';
 import { Translations } from '../i18n';
 import { useI18n } from '../context/I18nContext';
+import { SubtitleStyle } from '../types';
 
 interface VideoPlayerProps {
     videoFile: File | null;
@@ -26,6 +27,7 @@ interface VideoPlayerProps {
     setDuration: (duration: number) => void;
     subtitleCues?: { id: string, startTime: number, endTime: number, text: string }[];
     subtitleOffset?: number;
+    subtitleStyle?: SubtitleStyle;
     onTrackEvent?: (event: string) => void;
     onTrackWatchTime?: (seconds: number) => void;
 }
@@ -44,6 +46,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     setDuration,
     subtitleCues = [],
     subtitleOffset = 0,
+    subtitleStyle,
     onTrackEvent,
     onTrackWatchTime,
 }) => {
@@ -70,7 +73,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         isPlaying,
         duration,
         subtitleCues,
-        subtitleOffset
+        subtitleOffset,
+        subtitleStyle
     });
 
     // Keep refs updated
@@ -81,9 +85,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             isPlaying,
             duration,
             subtitleCues,
-            subtitleOffset
+            subtitleOffset,
+            subtitleStyle
         };
-    }, [videoObjectUrl, currentTime, isPlaying, duration, subtitleCues, subtitleOffset]);
+    }, [videoObjectUrl, currentTime, isPlaying, duration, subtitleCues, subtitleOffset, subtitleStyle]);
 
     // Track watch time when video is playing
     useEffect(() => {
@@ -134,7 +139,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                     if (state.subtitleCues.length > 0) {
                         channel.postMessage({
                             type: 'SYNC_SUBTITLES',
-                            payload: { cues: state.subtitleCues, offset: state.subtitleOffset },
+                            payload: { cues: state.subtitleCues, offset: state.subtitleOffset, style: state.subtitleStyle },
                             token: sessionToken,
                             timestamp: Date.now()
                         });
@@ -507,11 +512,26 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                     <div className="absolute bottom-24 left-0 right-0 text-center pointer-events-none p-4">
                         {subtitleCues
                             .filter(cue => currentTime >= (cue.startTime + subtitleOffset) && currentTime <= (cue.endTime + subtitleOffset))
-                            .map(cue => (
-                                <div key={cue.id} className="bg-black/60 text-white text-lg md:text-2xl px-3 py-1 rounded inline-block mx-auto backdrop-blur-sm shadow-lg whitespace-pre-wrap">
-                                    {cue.text}
-                                </div>
-                            ))
+                            .map(cue => {
+                                const sizeClass =
+                                    subtitleStyle?.fontSize === 'small' ? 'text-base md:text-lg' :
+                                        subtitleStyle?.fontSize === 'large' ? 'text-xl md:text-3xl' :
+                                            subtitleStyle?.fontSize === 'xlarge' ? 'text-2xl md:text-4xl font-bold' :
+                                                'text-lg md:text-2xl';
+
+                                return (
+                                    <div
+                                        key={cue.id}
+                                        className={`px-3 py-1 rounded inline-block mx-auto backdrop-blur-sm whitespace-pre-wrap ${sizeClass} ${subtitleStyle?.textShadow ? 'drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]' : ''}`}
+                                        style={{
+                                            color: subtitleStyle?.color || '#ffffff',
+                                            backgroundColor: subtitleStyle?.backgroundColor || 'rgba(0,0,0,0.6)',
+                                        }}
+                                    >
+                                        {cue.text}
+                                    </div>
+                                );
+                            })
                         }
                     </div>
                 )}

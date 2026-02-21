@@ -26,6 +26,7 @@ import { Logo } from './components/Logo';
 import { InfoButton } from './components/HelpPanel';
 import { Sun, Moon, BarChart3, ShieldAlert } from 'lucide-react';
 import { useI18n } from './context/I18nContext';
+import { SubtitleStyle } from './types';
 
 
 function App() {
@@ -96,6 +97,14 @@ function App() {
 
   // Admin Panel State
   const [showAdmin, setShowAdmin] = useState(false);
+
+  // Subtitle Style State
+  const [subtitleStyle, setSubtitleStyle] = useState<SubtitleStyle>({
+    color: '#ffffff',
+    backgroundColor: 'rgba(0, 0, 0, 0)',
+    fontSize: 'medium',
+    textShadow: true,
+  });
 
   // Secret admin access: Ctrl+Shift+A (desktop) or ?admin=true URL param (mobile)
   useEffect(() => {
@@ -455,6 +464,7 @@ function App() {
           setDuration={setDuration}
           subtitleCues={subtitleCues}
           subtitleOffset={subtitleOffset}
+          subtitleStyle={subtitleStyle}
           onTrackEvent={trackEvent as (event: string) => void}
           onTrackWatchTime={trackWatchTime}
         />
@@ -478,6 +488,8 @@ function App() {
         onSubtitleUpload={handleSubtitleUpload}
         subtitleOffset={subtitleOffset}
         onSubtitleOffsetChange={setSubtitleOffset}
+        subtitleStyle={subtitleStyle}
+        onSubtitleStyleChange={setSubtitleStyle}
         hasSubtitles={subtitleCues.length > 0}
         masterVolume={masterVolume}
         onMasterVolumeChange={setMasterVolume}

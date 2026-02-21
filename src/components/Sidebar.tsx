@@ -14,7 +14,7 @@ import { MarkerSection } from './sidebar/MarkerSection';
 import { AudioSection } from './sidebar/AudioSection';
 import { MasterVolume } from './sidebar/MasterVolume';
 import { LanguageSelector } from './LanguageSelector';
-import { AudioTrack, AudioDevice } from '../types';
+import { AudioTrack, AudioDevice, SubtitleStyle } from '../types';
 import { useI18n } from '../context/I18nContext';
 
 interface SidebarProps {
@@ -34,6 +34,8 @@ interface SidebarProps {
     onSubtitleUpload: (file: File) => void;
     subtitleOffset: number;
     onSubtitleOffsetChange: (offset: number) => void;
+    subtitleStyle: SubtitleStyle;
+    onSubtitleStyleChange: (style: SubtitleStyle) => void;
     hasSubtitles: boolean;
     masterVolume: number;
     onMasterVolumeChange: (volume: number) => void;
@@ -78,6 +80,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     onSubtitleUpload,
     subtitleOffset,
     onSubtitleOffsetChange,
+    subtitleStyle,
+    onSubtitleStyleChange,
     hasSubtitles,
     masterVolume,
     onMasterVolumeChange,
@@ -158,6 +162,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         hasSubtitles={hasSubtitles}
                         subtitleOffset={subtitleOffset}
                         onSubtitleOffsetChange={onSubtitleOffsetChange}
+                        subtitleStyle={subtitleStyle}
+                        onSubtitleStyleChange={onSubtitleStyleChange}
                         subtitleInputRef={subtitleInputRef}
                         handleSubtitleLoad={handleSubtitleLoad}
                     />

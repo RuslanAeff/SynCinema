@@ -23,6 +23,13 @@ export interface AudioTrack {
   isCloudSynced?: boolean;
 }
 
+export interface SubtitleStyle {
+  color: string;
+  backgroundColor: string;
+  fontSize: 'small' | 'medium' | 'large' | 'xlarge';
+  textShadow: boolean;
+}
+
 export interface AudioDevice {
   deviceId: string;
   label: string;

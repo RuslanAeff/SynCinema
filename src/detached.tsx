@@ -12,6 +12,7 @@ import './index.css';
 import { Play, Pause, Maximize, Minimize, Volume2, VolumeX } from 'lucide-react';
 import { formatTime } from './utils/formatTime';
 import { I18nProvider, useI18n } from './context/I18nContext';
+import { SubtitleStyle } from './types';
 
 interface SubtitleCue {
     start: number;
@@ -37,6 +38,7 @@ const DetachedPlayer: React.FC = () => {
     const [isMuted, setIsMuted] = useState(true);
     const [subtitleCues, setSubtitleCues] = useState<SubtitleCue[]>([]);
     const [subtitleOffset, setSubtitleOffset] = useState(0);
+    const [subtitleStyle, setSubtitleStyle] = useState<SubtitleStyle | null>(null);
     const [isConnected, setIsConnected] = useState(false);
     const [showControls, setShowControls] = useState(true);
 
@@ -149,6 +151,7 @@ const DetachedPlayer: React.FC = () => {
                     if (payload) {
                         setSubtitleCues(payload.cues || []);
                         setSubtitleOffset(payload.offset || 0);
+                        if (payload.style) setSubtitleStyle(payload.style);
                     }
                     break;
             }
@@ -310,15 +313,26 @@ const DetachedPlayer: React.FC = () => {
                         {/* Subtitle Overlay */}
                         {activeSubtitles.length > 0 && (
                             <div className="absolute bottom-20 left-0 right-0 text-center pointer-events-none">
-                                {activeSubtitles.map((cue, i) => (
-                                    <div
-                                        key={i}
-                                        className="inline-block bg-black/80 text-white text-lg md:text-2xl px-4 py-2 rounded-lg mb-1"
-                                        style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}
-                                    >
-                                        {cue.text}
-                                    </div>
-                                ))}
+                                {activeSubtitles.map((cue, i) => {
+                                    const sizeClass =
+                                        subtitleStyle?.fontSize === 'small' ? 'text-base md:text-lg' :
+                                            subtitleStyle?.fontSize === 'large' ? 'text-xl md:text-3xl' :
+                                                subtitleStyle?.fontSize === 'xlarge' ? 'text-2xl md:text-4xl font-bold' :
+                                                    'text-lg md:text-2xl';
+
+                                    return (
+                                        <div
+                                            key={i}
+                                            className={`inline-block px-4 py-2 rounded-lg mb-1 whitespace-pre-wrap ${sizeClass} ${subtitleStyle?.textShadow ? 'drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]' : ''}`}
+                                            style={{
+                                                color: subtitleStyle?.color || '#ffffff',
+                                                backgroundColor: subtitleStyle?.backgroundColor || 'rgba(0,0,0,0.8)',
+                                            }}
+                                        >
+                                            {cue.text}
+                                        </div>
+                                    );
+                                })}
                             </div>
                         )}
 
