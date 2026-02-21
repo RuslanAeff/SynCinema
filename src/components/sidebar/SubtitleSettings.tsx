@@ -136,7 +136,11 @@ export const SubtitleSettings: React.FC<SubtitleSettingsProps> = ({
                                                 {PRESET_COLORS.map(c => (
                                                     <button
                                                         key={c}
-                                                        onClick={() => { onSubtitleStyleChange({ ...safeStyle, color: c }); setIsColorPickerOpen(false); }}
+                                                        onClick={() => {
+                                                            setLocalColor(c);
+                                                            onSubtitleStyleChange({ ...safeStyle, color: c });
+                                                            setIsColorPickerOpen(false);
+                                                        }}
                                                         className={`w-6 h-6 rounded-md border ${safeStyle.color === c ? 'border-primary-500 scale-110 shadow-primary-500/50' : 'border-gray-500 hover:scale-105 hover:border-gray-300'} transition-all shadow-sm`}
                                                         style={{ backgroundColor: c }}
                                                         title={c}
@@ -150,18 +154,7 @@ export const SubtitleSettings: React.FC<SubtitleSettingsProps> = ({
                                                         type="text"
                                                         value={localColor}
                                                         onChange={(e) => {
-                                                            const val = e.target.value;
-                                                            setLocalColor(val);
-                                                            // Only commit to global state if it's a potentially valid hex
-                                                            if (/^#[0-9A-Fa-f]{3,6}$/i.test(val)) {
-                                                                onSubtitleStyleChange({ ...safeStyle, color: val });
-                                                            }
-                                                        }}
-                                                        onBlur={() => {
-                                                            // Force revert to last valid global color if they leave it a mess
-                                                            if (!/^#[0-9A-Fa-f]{3,6}$/i.test(localColor)) {
-                                                                setLocalColor(safeStyle.color);
-                                                            }
+                                                            setLocalColor(e.target.value);
                                                         }}
                                                         className="flex-1 bg-gray-900 border border-gray-600 rounded-md px-2 py-1 text-xs text-white focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 font-mono transition-shadow h-7"
                                                         placeholder="#ffffff"
@@ -185,16 +178,36 @@ export const SubtitleSettings: React.FC<SubtitleSettingsProps> = ({
                                                         onChange={(e) => {
                                                             const val = e.target.value;
                                                             setLocalColor(val);
-                                                            if (val) onSubtitleStyleChange({ ...safeStyle, color: val });
                                                         }}
                                                         onInput={(e) => {
                                                             const val = (e.target as HTMLInputElement).value;
                                                             setLocalColor(val);
-                                                            if (val) onSubtitleStyleChange({ ...safeStyle, color: val });
                                                         }}
                                                         className="relative w-full h-full opacity-0 cursor-pointer block"
                                                     />
                                                 </div>
+
+                                                {/* Apply Button */}
+                                                <button
+                                                    onClick={() => {
+                                                        let finalColor = localColor.trim();
+                                                        if (!finalColor.startsWith('#')) {
+                                                            finalColor = '#' + finalColor;
+                                                        }
+                                                        if (/^#[0-9A-Fa-f]{3,6}$/i.test(finalColor)) {
+                                                            if (finalColor.length === 4) {
+                                                                finalColor = '#' + finalColor[1] + finalColor[1] + finalColor[2] + finalColor[2] + finalColor[3] + finalColor[3];
+                                                            }
+                                                            onSubtitleStyleChange({ ...safeStyle, color: finalColor });
+                                                            setIsColorPickerOpen(false);
+                                                        } else {
+                                                            setLocalColor(safeStyle.color); // Revert on invalid
+                                                        }
+                                                    }}
+                                                    className="mt-1 w-full bg-primary-600 hover:bg-primary-500 text-white text-[11px] font-bold py-1.5 rounded-md transition-colors border border-primary-500/50 shadow-[0_0_10px_rgba(var(--color-primary-500),0.3)]"
+                                                >
+                                                    UYGULA (APPLY)
+                                                </button>
                                             </div>
                                         </div>
                                     )}
