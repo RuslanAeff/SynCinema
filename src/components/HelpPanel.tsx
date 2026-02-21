@@ -549,7 +549,7 @@ export const HelpPanel: React.FC<HelpPanelProps> = ({ isOpen, onClose, accentThe
 
                         {/* Bookmarklet Drag Button - Only shown when bookmarklet section is active */}
                         {activeSection.id === 'bookmarklet' && (() => {
-                            const bookmarkletCode = `javascript:void(function(){var v=document.querySelector('video');var u=v?(v.currentSrc||v.src):window.location.href;if(u){window.open('${window.location.origin}?video='+encodeURIComponent(u),'_blank')}else{alert('No video found on this page')}})()`;
+                            const bookmarkletCode = `javascript:void(function(){var h=window.location.href;var isYT=h.indexOf('youtube.com')!==-1||h.indexOf('youtu.be')!==-1;if(isYT){window.open('${window.location.origin}?video='+encodeURIComponent(h),'_blank');return}var v=document.querySelector('video');var u=v?(v.currentSrc||v.src):'';if(u&&u.indexOf('blob:')===0)u=h;if(!u)u=h;window.open('${window.location.origin}?video='+encodeURIComponent(u),'_blank')})()`;
                             return (
                                 <div className="mt-6 p-5 rounded-xl bg-gradient-to-br from-primary-500/10 via-secondary-500/10 to-amber-500/10 border border-primary-500/30 backdrop-blur-sm">
                                     <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 text-center">
