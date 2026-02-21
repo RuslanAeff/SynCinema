@@ -25,8 +25,6 @@ export const SubtitleSettings: React.FC<SubtitleSettingsProps> = ({
     const { t } = useI18n();
     const [isSettingsCollapsed, setIsSettingsCollapsed] = useState(false);
     const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
-    const [advancedPickerKey, setAdvancedPickerKey] = useState(0);
-    const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
     const colorPickerRef = useRef<HTMLDivElement>(null);
 
     const safeStyle = subtitleStyle || {
@@ -35,6 +33,12 @@ export const SubtitleSettings: React.FC<SubtitleSettingsProps> = ({
         fontSize: 'medium',
         textShadow: true,
     };
+
+    const [localColor, setLocalColor] = useState(safeStyle.color);
+
+    useEffect(() => {
+        setLocalColor(safeStyle.color);
+    }, [safeStyle.color]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -144,45 +148,51 @@ export const SubtitleSettings: React.FC<SubtitleSettingsProps> = ({
                                                     <span className="text-[10px] text-gray-400">HEX</span>
                                                     <input
                                                         type="text"
-                                                        value={safeStyle.color}
+                                                        value={localColor}
                                                         onChange={(e) => {
-                                                            const newColor = e.target.value;
-                                                            onSubtitleStyleChange({ ...safeStyle, color: newColor });
+                                                            const val = e.target.value;
+                                                            setLocalColor(val);
+                                                            // Only commit to global state if it's a potentially valid hex
+                                                            if (/^#[0-9A-Fa-f]{3,6}$/i.test(val)) {
+                                                                onSubtitleStyleChange({ ...safeStyle, color: val });
+                                                            }
+                                                        }}
+                                                        onBlur={() => {
+                                                            // Force revert to last valid global color if they leave it a mess
+                                                            if (!/^#[0-9A-Fa-f]{3,6}$/i.test(localColor)) {
+                                                                setLocalColor(safeStyle.color);
+                                                            }
                                                         }}
                                                         className="flex-1 bg-gray-900 border border-gray-600 rounded-md px-2 py-1 text-xs text-white focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 font-mono transition-shadow h-7"
                                                         placeholder="#ffffff"
                                                     />
                                                 </div>
 
-                                                <div className="relative h-7 rounded-md overflow-hidden mt-1 group shrink-0 border border-gray-600 hover:border-primary-400 transition-colors shadow-sm">
-                                                    <div className="absolute inset-0 bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 opacity-60 group-hover:opacity-100 transition-opacity" />
-                                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-black/40 group-hover:bg-black/20 transition-colors">
-                                                        <span className="text-[10px] font-bold text-white drop-shadow-md tracking-wider">
-                                                            {isAdvancedOpen ? 'CLOSE PALETTE' : '+ MORE COLORS'}
-                                                        </span>
+                                                <div className="relative h-7 rounded-md mt-1 group shrink-0 shadow-sm">
+                                                    {/* Visual Button */}
+                                                    <div className="absolute inset-0 rounded-md overflow-hidden border border-gray-600 group-hover:border-primary-400 transition-colors pointer-events-none">
+                                                        <div className="absolute inset-0 bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 opacity-60 group-hover:opacity-100 transition-opacity" />
+                                                        <div className="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/20 transition-colors">
+                                                            <span className="text-[10px] font-bold text-white drop-shadow-md tracking-wider">
+                                                                + MORE COLORS
+                                                            </span>
+                                                        </div>
                                                     </div>
+                                                    {/* True Native Trigger */}
                                                     <input
-                                                        key={advancedPickerKey}
                                                         type="color"
-                                                        value={safeStyle.color.length === 7 ? safeStyle.color : '#ffffff'} // Native pickers require exact 7 char hex
+                                                        value={localColor.length === 7 ? localColor : '#ffffff'}
                                                         onChange={(e) => {
                                                             const val = e.target.value;
+                                                            setLocalColor(val);
                                                             if (val) onSubtitleStyleChange({ ...safeStyle, color: val });
                                                         }}
                                                         onInput={(e) => {
                                                             const val = (e.target as HTMLInputElement).value;
+                                                            setLocalColor(val);
                                                             if (val) onSubtitleStyleChange({ ...safeStyle, color: val });
                                                         }}
-                                                        onClick={(e) => {
-                                                            if (isAdvancedOpen) {
-                                                                e.preventDefault();
-                                                                setIsAdvancedOpen(false);
-                                                                setAdvancedPickerKey(k => k + 1);
-                                                            } else {
-                                                                setIsAdvancedOpen(true);
-                                                            }
-                                                        }}
-                                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                                        className="relative w-full h-full opacity-0 cursor-pointer block"
                                                     />
                                                 </div>
                                             </div>
