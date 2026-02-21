@@ -6,13 +6,13 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import React, { useRef, useState, useEffect } from 'react';
-import { RotateCcw, AlertCircle, Film, Upload, Sun, Moon, Volume2, VolumeX, ChevronDown, Link, Headphones, Check, BarChart3, ShieldAlert, Palette } from 'lucide-react';
-import { getDeviceIcon } from '../utils/getDeviceIcon';
-import { Button } from './Button';
-import { AudioTrackRow } from './AudioTrackRow';
-import { Logo } from './Logo';
-import { InfoButton } from './HelpPanel';
+import React, { useRef } from 'react';
+import { SidebarHeader } from './sidebar/SidebarHeader';
+import { VideoSettings } from './sidebar/VideoSettings';
+import { SubtitleSettings } from './sidebar/SubtitleSettings';
+import { MarkerSection } from './sidebar/MarkerSection';
+import { AudioSection } from './sidebar/AudioSection';
+import { MasterVolume } from './sidebar/MasterVolume';
 import { LanguageSelector } from './LanguageSelector';
 import { AudioTrack, AudioDevice } from '../types';
 import { useI18n } from '../context/I18nContext';
@@ -82,9 +82,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     masterVolume,
     onMasterVolumeChange,
     theme,
-    accentTheme,
     onThemeToggle,
-    onAccentThemeToggle,
     videoVolume,
     videoMuted,
     onVideoVolumeChange,
@@ -95,55 +93,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
     onSeekToMarker,
     videoDeviceId,
     onVideoDeviceChange,
-    isHelpOpen,
     onHelpOpen,
-    onHelpClose,
     onUrlLoaderOpen,
     onAudioUrlLoad,
     onStatisticsOpen,
     onTrackEvent,
     onShareSync,
 }) => {
-    const { t, language } = useI18n();
+    const { t } = useI18n();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const audioInputRef = useRef<HTMLInputElement>(null);
     const projectInputRef = useRef<HTMLInputElement>(null);
     const subtitleInputRef = useRef<HTMLInputElement>(null);
     const videoDeviceDropdownRef = useRef<HTMLDivElement>(null);
-
-    // Collapsible sections state
-    const [isMarkersCollapsed, setIsMarkersCollapsed] = useState(false);
-    const [isAudioTracksCollapsed, setIsAudioTracksCollapsed] = useState(false);
-    const [isMasterVolumeCollapsed, setIsMasterVolumeCollapsed] = useState(false);
-    const [showAudioUrlInput, setShowAudioUrlInput] = useState(false);
-    const [audioUrlInput, setAudioUrlInput] = useState('');
-    const [isVideoDeviceDropdownOpen, setIsVideoDeviceDropdownOpen] = useState(false);
-
-    // Get device icon based on label
-
-
-    // Close dropdown when clicking outside
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (videoDeviceDropdownRef.current && !videoDeviceDropdownRef.current.contains(event.target as Node)) {
-                setIsVideoDeviceDropdownOpen(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    const handleSubtitleLoad = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) onSubtitleUpload(file);
-        if (subtitleInputRef.current) subtitleInputRef.current.value = '';
-    };
-
-    const handleProjectLoad = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) onLoadProject(file);
-        if (projectInputRef.current) projectInputRef.current.value = '';
-    };
 
     const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -155,428 +117,79 @@ export const Sidebar: React.FC<SidebarProps> = ({
         if (audioInputRef.current) audioInputRef.current.value = '';
     };
 
+    const handleSubtitleLoad = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) onSubtitleUpload(file);
+        if (subtitleInputRef.current) subtitleInputRef.current.value = '';
+    };
+
     return (
         <div data-tour="sidebar" className="w-full lg:w-[450px] flex-shrink-0 bg-gray-50 dark:bg-gray-900 lg:border-r border-t lg:border-t-0 border-gray-200 dark:border-gray-800 flex flex-col h-auto lg:h-full z-10 shadow-2xl transition-colors duration-300">
-            <div className="hidden lg:block p-6 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 transition-colors duration-300">
-                <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-3">
-                        <Logo size={48} className="drop-shadow-[0_0_15px_rgba(16,185,129,0.6)]" />
-                        <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">SynCinema</h1>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <InfoButton onClick={onHelpOpen} />
-                        <button
-                            onClick={onStatisticsOpen}
-                            className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                            title={t.statistics?.title || 'Statistics'}
-                        >
-                            <BarChart3 size={20} className="text-primary-500" />
-                        </button>
-                        <button
-                            onClick={onThemeToggle}
-                            className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                            title={theme === 'dark' ? t.sidebar.switchToLight : t.sidebar.switchToDark}
-                        >
-                            {theme === 'dark' ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-primary-600" />}
-                        </button>
-                    </div>
-                </div>
-                <p className="text-xs font-bold tracking-wide text-gray-800 dark:text-gray-400 uppercase opacity-100">{t.app.subtitle}</p>
-                <div className="flex gap-2 mt-4">
-                    <Button size="sm" variant="secondary" onClick={onSaveProject}>{t.sidebar.saveProject}</Button>
-                    <Button size="sm" variant="secondary" onClick={() => projectInputRef.current?.click()}>{t.sidebar.loadProject}</Button>
-                    <input type="file" accept=".sync,.json" className="hidden" ref={projectInputRef} onChange={handleProjectLoad} />
-                </div>
-                {!permissionsGranted && (
-                    <div className="mt-4 p-3 bg-yellow-900/20 border border-yellow-700/50 rounded-lg flex items-start gap-3">
-                        <AlertCircle className="text-yellow-500 shrink-0 mt-0.5" size={16} />
-                        <div>
-                            <p className="text-xs text-yellow-200 mb-2">{t.sidebar.micPermission}</p>
-                            <Button size="sm" variant="secondary" onClick={onRefreshDevices}>{t.sidebar.grantPermission}</Button>
-                        </div>
-                    </div>
-                )}
-            </div>
+            <SidebarHeader
+                theme={theme}
+                onThemeToggle={onThemeToggle}
+                onHelpOpen={onHelpOpen}
+                onStatisticsOpen={onStatisticsOpen}
+                onSaveProject={onSaveProject}
+                onLoadProject={onLoadProject}
+                permissionsGranted={permissionsGranted}
+                onRefreshDevices={onRefreshDevices}
+                projectInputRef={projectInputRef}
+            />
 
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                <div className="p-4 rounded-xl border border-dashed border-gray-700 bg-gray-800/30">
-                    <h2 className="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2"><Film size={16} /> {t.sidebar.mainVideoSource}</h2>
-                    {videoFile ? (
-                        <div className="flex items-center justify-between bg-gray-800 p-3 rounded-lg">
-                            <span className="text-sm truncate max-w-[200px]">{videoFile.name}</span>
-                            <div className="flex items-center gap-2">
-                                <button onClick={onUrlLoaderOpen} className="text-xs text-primary-400 hover:text-primary-300">URL</button>
-                                <button onClick={() => fileInputRef.current?.click()} className="text-xs text-primary-400 hover:text-primary-300">{t.sidebar.change}</button>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="flex gap-2">
-                            <button onClick={() => fileInputRef.current?.click()} className="flex-1 py-6 flex flex-col items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors rounded-lg border-2 border-transparent hover:border-primary-500/30">
-                                <Upload size={20} className="mb-1" />
-                                <span className="text-xs">{t.sidebar.selectFile}</span>
-                            </button>
-                            <button onClick={onUrlLoaderOpen} className="flex-1 py-6 flex flex-col items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors rounded-lg border-2 border-transparent hover:border-secondary-500/30">
-                                <Link size={20} className="mb-1" />
-                                <span className="text-xs">{t.sidebar.loadUrl}</span>
-                            </button>
-                        </div>
-                    )}
-                    <input type="file" accept="video/*, .mkv" className="hidden" ref={fileInputRef} onChange={handleVideoChange} />
-
-                    {/* Video Audio Control */}
-                    {videoFile && (
-                        <div className="mt-3 pt-3 border-t border-gray-700/50">
-                            <div className="flex items-center justify-between mb-2">
-                                <span className="text-xs font-medium text-gray-500 flex items-center gap-1">
-                                    {videoMuted ? <VolumeX size={12} /> : <Volume2 size={12} />}
-                                    {t.sidebar.videoVolume}
-                                </span>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-xs font-mono text-primary-400">{Math.round(videoVolume * 100)}%</span>
-                                    <button
-                                        onClick={() => onVideoMutedChange(!videoMuted)}
-                                        className={`text-[10px] px-2 py-0.5 rounded ${videoMuted ? 'bg-red-500/20 text-red-400' : 'bg-gray-700 text-gray-400 hover:bg-gray-600'}`}
-                                    >
-                                        {videoMuted ? t.sidebar.muted : t.sidebar.mute}
-                                    </button>
-                                </div>
-                            </div>
-                            <input
-                                type="range"
-                                min="0"
-                                max="1"
-                                step="0.01"
-                                value={videoVolume}
-                                onChange={(e) => onVideoVolumeChange(parseFloat(e.target.value))}
-                                className={`w-full h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary-500 ${videoMuted ? 'opacity-50' : ''}`}
-                            />
-                        </div>
-                    )}
-
-                    {/* Video Output Device */}
-                    {videoFile && (
-                        <div className="mt-3 pt-3 border-t border-gray-700/50">
-                            <label className="text-xs font-medium text-gray-500 flex items-center gap-1 mb-2">
-                                🔊 {t.sidebar.videoAudioOutput || 'Video Audio Output'}
-                            </label>
-                            <div className="relative" ref={videoDeviceDropdownRef}>
-                                <button
-                                    onClick={() => setIsVideoDeviceDropdownOpen(!isVideoDeviceDropdownOpen)}
-                                    className={`w-full flex items-center gap-3 px-3 py-2.5 bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 rounded-xl transition-all text-left ${isVideoDeviceDropdownOpen ? 'border-primary-500/50 ring-1 ring-primary-500/20' : ''}`}
-                                >
-                                    <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-white dark:bg-gray-700 border border-gray-200 dark:border-transparent text-gray-500 dark:text-gray-300 shadow-sm dark:shadow-none">
-                                        {videoDeviceId ? getDeviceIcon(audioDevices.find(d => d.deviceId === videoDeviceId)?.label || '') : <Volume2 size={14} />}
-                                    </div>
-                                    <span className="flex-1 text-sm text-gray-700 dark:text-gray-200 truncate font-medium">
-                                        {videoDeviceId
-                                            ? (audioDevices.find(d => d.deviceId === videoDeviceId)?.label || t.sidebar.unknownDevice).slice(0, 30)
-                                            : t.sidebar.defaultOutput}
-                                    </span>
-                                    <ChevronDown size={14} className={`text-gray-400 transition-transform ${isVideoDeviceDropdownOpen ? 'rotate-180' : ''}`} />
-                                </button>
-
-                                {/* Dropdown Menu - iOS Liquid Design */}
-                                {isVideoDeviceDropdownOpen && (
-                                    <div className="absolute top-full left-0 right-0 mt-2 py-2 bg-white/80 dark:bg-gray-800/90 backdrop-blur-2xl border border-white/20 dark:border-gray-600/50 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)] z-[9999] max-h-56 overflow-y-auto">
-                                        {/* Default Option */}
-                                        <button
-                                            onClick={() => {
-                                                onVideoDeviceChange('');
-                                                setIsVideoDeviceDropdownOpen(false);
-                                            }}
-                                            className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all duration-200 ${!videoDeviceId
-                                                ? 'bg-primary-500/20 dark:bg-primary-500/30'
-                                                : 'hover:bg-gray-100/80 dark:hover:bg-gray-700/50'
-                                                }`}
-                                        >
-                                            <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${!videoDeviceId
-                                                ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30'
-                                                : 'bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-300'
-                                                }`}>
-                                                <Volume2 size={16} />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <div className={`text-sm font-semibold ${!videoDeviceId ? 'text-primary-600 dark:text-primary-300' : 'text-gray-700 dark:text-gray-200'}`}>
-                                                    {t.sidebar.defaultOutput}
-                                                </div>
-                                            </div>
-                                            {!videoDeviceId && (
-                                                <div className="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center">
-                                                    <Check size={12} className="text-white" />
-                                                </div>
-                                            )}
-                                        </button>
-
-                                        {/* Divider */}
-                                        {audioDevices.length > 0 && (
-                                            <div className="border-t border-gray-200/50 dark:border-gray-600/50 my-1 mx-3" />
-                                        )}
-
-                                        {/* Device Options */}
-                                        {audioDevices.map(device => (
-                                            <button
-                                                key={device.deviceId}
-                                                onClick={() => {
-                                                    onVideoDeviceChange(device.deviceId);
-                                                    setIsVideoDeviceDropdownOpen(false);
-                                                }}
-                                                className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all duration-200 ${videoDeviceId === device.deviceId
-                                                    ? 'bg-primary-500/20 dark:bg-primary-500/30'
-                                                    : 'hover:bg-gray-100/80 dark:hover:bg-gray-700/50'
-                                                    }`}
-                                            >
-                                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${videoDeviceId === device.deviceId
-                                                    ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30'
-                                                    : 'bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-300'
-                                                    }`}>
-                                                    {getDeviceIcon(device.label || '')}
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <div className={`text-sm font-medium truncate ${videoDeviceId === device.deviceId ? 'text-primary-600 dark:text-primary-300' : 'text-gray-700 dark:text-gray-200'}`}>
-                                                        {device.label || t.sidebar.unknownDevice}
-                                                    </div>
-                                                </div>
-                                                {videoDeviceId === device.deviceId && (
-                                                    <div className="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center flex-shrink-0">
-                                                        <Check size={12} className="text-white" />
-                                                    </div>
-                                                )}
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Subtitles */}
-                    <div className="mt-3 pt-3 border-t border-gray-700/50">
-                        <div className="flex items-center justify-between">
-                            <span className="text-xs font-medium text-gray-500">{t.sidebar.subtitles} (.srt)</span>
-                            {!hasSubtitles ? (
-                                <button onClick={() => subtitleInputRef.current?.click()} className="text-xs text-primary-400 hover:text-primary-300 flex items-center gap-1">
-                                    <Upload size={12} /> {t.sidebar.load}
-                                </button>
-                            ) : (
-                                <div className="flex items-center gap-3">
-                                    <span className="text-xs text-secondary-500">{t.sidebar.active}</span>
-                                    <div className="flex items-center gap-1">
-                                        <span className="text-[10px] text-gray-500">{t.sidebar.offset}</span>
-                                        <input
-                                            type="number"
-                                            step="0.1"
-                                            value={subtitleOffset}
-                                            onChange={(e) => onSubtitleOffsetChange(parseFloat(e.target.value) || 0)}
-                                            className="w-14 bg-gray-900 border border-gray-700 rounded text-xs p-0.5 text-center focus:ring-1 focus:ring-primary-500"
-                                        />
-                                    </div>
-                                    <button onClick={() => subtitleInputRef.current?.click()} className="text-[10px] text-gray-400 hover:text-white">Replace</button>
-                                </div>
-                            )}
-                        </div>
-                        <input type="file" accept=".srt" className="hidden" ref={subtitleInputRef} onChange={handleSubtitleLoad} />
-                    </div>
+                {/* Composite block for Video Settings + Subtitles */}
+                <div className="space-y-3 p-4 rounded-xl border border-dashed border-gray-700 bg-gray-800/30">
+                    <VideoSettings
+                        videoFile={videoFile}
+                        audioDevices={audioDevices}
+                        videoVolume={videoVolume}
+                        videoMuted={videoMuted}
+                        onVideoVolumeChange={onVideoVolumeChange}
+                        onVideoMutedChange={onVideoMutedChange}
+                        videoDeviceId={videoDeviceId}
+                        onVideoDeviceChange={onVideoDeviceChange}
+                        onUrlLoaderOpen={onUrlLoaderOpen}
+                        fileInputRef={fileInputRef}
+                        videoDeviceDropdownRef={videoDeviceDropdownRef}
+                        handleVideoChange={handleVideoChange}
+                    />
+                    <SubtitleSettings
+                        hasSubtitles={hasSubtitles}
+                        subtitleOffset={subtitleOffset}
+                        onSubtitleOffsetChange={onSubtitleOffsetChange}
+                        subtitleInputRef={subtitleInputRef}
+                        handleSubtitleLoad={handleSubtitleLoad}
+                    />
                 </div>
 
-                {/* Markers - Collapsible */}
-                {videoFile && (
-                    <div className="rounded-xl border border-dashed border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800/30 overflow-hidden">
-                        {/* Collapsible Header */}
-                        <button
-                            onClick={() => setIsMarkersCollapsed(!isMarkersCollapsed)}
-                            className="w-full p-4 flex items-center justify-between hover:bg-gray-200/50 dark:hover:bg-gray-800/50 transition-colors"
-                        >
-                            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                                🔖 {t.sidebar.markers}
-                                <span className="text-xs font-normal text-gray-500 dark:text-gray-500">({markers.length})</span>
-                            </h2>
-                            <div className="flex items-center gap-2">
-                                <span
-                                    onClick={(e) => { e.stopPropagation(); onAddMarker(); }}
-                                    className="text-xs bg-primary-600 hover:bg-primary-700 text-white px-2 py-1 rounded transition-colors"
-                                >
-                                    + Add
-                                </span>
-                                <ChevronDown
-                                    size={16}
-                                    className={`text-gray-500 dark:text-gray-400 transition-transform duration-300 ${isMarkersCollapsed ? '-rotate-90' : 'rotate-0'}`}
-                                />
-                            </div>
-                        </button>
+                <MarkerSection
+                    videoFile={videoFile}
+                    markers={markers}
+                    onAddMarker={onAddMarker}
+                    onDeleteMarker={onDeleteMarker}
+                    onSeekToMarker={onSeekToMarker}
+                />
 
-                        {/* Collapsible Content */}
-                        <div
-                            className={`transition-all duration-300 ease-in-out overflow-hidden ${isMarkersCollapsed ? 'max-h-0 opacity-0' : 'max-h-96 opacity-100'}`}
-                        >
-                            <div className="px-4 pb-4">
-                                {markers.length === 0 ? (
-                                    <p className="text-xs text-gray-500 dark:text-gray-500 text-center py-2">{t.sidebar.noMarkers}</p>
-                                ) : (
-                                    <div className="space-y-1 max-h-32 overflow-y-auto">
-                                        {markers.map((marker) => {
-                                            const time = marker.time || 0;
-                                            const minutes = Math.floor(time / 60);
-                                            const seconds = Math.floor(time % 60);
-                                            const timeStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-                                            return (
-                                                <div key={marker.id} className="flex items-center justify-between bg-gray-900/50 rounded p-2 group">
-                                                    <button
-                                                        onClick={() => onSeekToMarker(marker.time)}
-                                                        className="flex items-center gap-2 text-left hover:text-primary-400 transition-colors flex-1"
-                                                    >
-                                                        <span className="text-xs font-mono text-primary-400">{timeStr}</span>
-                                                        <span className="text-xs text-gray-300 truncate">{marker.label}</span>
-                                                    </button>
-                                                    <button
-                                                        onClick={() => onDeleteMarker(marker.id)}
-                                                        className="text-gray-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity text-xs"
-                                                    >
-                                                        ✕
-                                                    </button>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Audio Tracks - Collapsible */}
-                <div data-tour="audio-tracks" className="rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800/20 overflow-hidden">
-                    {/* Collapsible Header */}
-                    <button
-                        onClick={() => setIsAudioTracksCollapsed(!isAudioTracksCollapsed)}
-                        className="w-full p-4 flex items-center justify-between hover:bg-gray-200/50 dark:hover:bg-gray-800/50 transition-colors border-b border-gray-300 dark:border-gray-800"
-                    >
-                        <h2 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider flex items-center gap-2">
-                            🎵 {t.sidebar.audioTracks}
-                            <span className="text-xs font-normal text-gray-500 dark:text-gray-500">({audioTracks.length})</span>
-                        </h2>
-                        <div className="flex items-center gap-1.5">
-                            <span
-                                onClick={(e) => { e.stopPropagation(); audioInputRef.current?.click(); }}
-                                className="text-xs bg-primary-500 hover:bg-primary-600 dark:bg-primary-600 dark:hover:bg-primary-700 text-white px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 shadow-sm cursor-pointer border border-primary-600 dark:border-transparent"
-                                title={t.sidebar.addFromFile}
-                            >
-                                <Upload size={12} />
-                            </span>
-                            <span
-                                onClick={(e) => { e.stopPropagation(); setShowAudioUrlInput(!showAudioUrlInput); setIsAudioTracksCollapsed(false); }}
-                                className="text-xs bg-secondary-500 hover:bg-secondary-600 dark:bg-secondary-600 dark:hover:bg-secondary-700 text-white px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 shadow-sm cursor-pointer border border-secondary-600 dark:border-transparent"
-                                title={t.sidebar.addFromUrl}
-                            >
-                                <Link size={12} />
-                            </span>
-                            <ChevronDown
-                                size={16}
-                                className={`text-gray-500 dark:text-gray-400 transition-transform duration-300 ${isAudioTracksCollapsed ? '-rotate-90' : 'rotate-0'}`}
-                            />
-                        </div>
-                    </button>
-                    <input type="file" accept="audio/*" multiple className="hidden" ref={audioInputRef} onChange={handleAudioChange} />
-
-                    {/* Collapsible Content */}
-                    <div
-                        className={`transition-all duration-300 ease-in-out overflow-hidden ${isAudioTracksCollapsed ? 'max-h-0 opacity-0' : 'max-h-[2000px] opacity-100'}`}
-                    >
-                        {/* Audio URL Input */}
-                        {showAudioUrlInput && (
-                            <div className="p-3 m-3 rounded-lg bg-gray-100 dark:bg-gray-800/80 border border-gray-200 dark:border-primary-500/30 shadow-inner dark:shadow-none">
-                                <div className="flex flex-col gap-2">
-                                    <label className="text-xs font-semibold text-primary-700 dark:text-primary-400 uppercase tracking-wider flex items-center gap-1">
-                                        <Link size={12} /> {t.sidebar.audioUrlLabel}
-                                    </label>
-                                    <input
-                                        type="url"
-                                        value={audioUrlInput}
-                                        onChange={(e) => setAudioUrlInput(e.target.value)}
-                                        placeholder={t.sidebar.audioUrlPlaceholder}
-                                        className="w-full px-3 py-2 bg-white dark:bg-gray-900/50 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                                    />
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={() => {
-                                                if (audioUrlInput.trim()) {
-                                                    // Extract filename from URL or use default
-                                                    const urlParts = audioUrlInput.split('/');
-                                                    const filename = urlParts[urlParts.length - 1]?.split('?')[0] || 'audio_track.mp3';
-                                                    onAudioUrlLoad(audioUrlInput, filename);
-                                                    setAudioUrlInput('');
-                                                    setShowAudioUrlInput(false);
-                                                }
-                                            }}
-                                            disabled={!audioUrlInput.trim()}
-                                            className="flex-1 py-2 px-3 bg-primary-600 hover:bg-primary-500 disabled:bg-gray-300 dark:disabled:bg-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed text-white text-xs font-medium rounded-lg transition-colors"
-                                        >
-                                            {t.sidebar.addAudioTrackBtn}
-                                        </button>
-                                        <button
-                                            onClick={() => { setShowAudioUrlInput(false); setAudioUrlInput(''); }}
-                                            className="px-3 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-xs rounded-lg transition-colors"
-                                        >
-                                            {t.sidebar.cancelBtn}
-                                        </button>
-                                    </div>
-                                    <p className="text-[10px] text-gray-500 dark:text-gray-400">
-                                        {t.sidebar.audioSupports}
-                                    </p>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Master Volume - Collapsible */}
-                        <div className="p-3 m-3 rounded-lg bg-gradient-to-r from-primary-900/30 to-secondary-900/30 border border-primary-500/30 overflow-hidden">
-                            <button
-                                onClick={() => setIsMasterVolumeCollapsed(!isMasterVolumeCollapsed)}
-                                className="w-full flex items-center justify-between"
-                            >
-                                <span className="text-xs font-semibold text-primary-300 uppercase tracking-wider">🎚️ {t.sidebar.masterVolume}</span>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-xs font-mono text-primary-400">{Math.round(masterVolume * 100)}%</span>
-                                    <ChevronDown
-                                        size={14}
-                                        className={`text-primary-400 transition-transform duration-300 ${isMasterVolumeCollapsed ? '-rotate-90' : 'rotate-0'}`}
-                                    />
-                                </div>
-                            </button>
-                            <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isMasterVolumeCollapsed ? 'max-h-0 opacity-0 mt-0' : 'max-h-20 opacity-100 mt-2'}`}>
-                                <input
-                                    type="range"
-                                    min="0"
-                                    max="1"
-                                    step="0.01"
-                                    value={masterVolume}
-                                    onChange={(e) => onMasterVolumeChange(parseFloat(e.target.value))}
-                                    className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary-500"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="space-y-4 px-3 pb-4">
-                            {audioTracks.length === 0 ? (
-                                <div className="text-center py-6 text-gray-600"><p>{t.sidebar.noAudioTracks}</p></div>
-                            ) : (
-                                audioTracks.map(track => (
-                                    <AudioTrackRow
-                                        key={track.id}
-                                        track={track}
-                                        availableDevices={audioDevices}
-                                        videoCurrentTime={videoCurrentTime}
-                                        isVideoPlaying={isVideoPlaying}
-                                        onUpdate={onTrackUpdate}
-                                        onDelete={onTrackDelete}
-                                        syncThreshold={0.2}
-                                        masterVolume={masterVolume}
-                                        onTrackEvent={onTrackEvent}
-                                        onShareSync={onShareSync}
-                                    />
-                                ))
-                            )}
-                        </div>
-                    </div>
-                </div>
+                <AudioSection
+                    audioTracks={audioTracks}
+                    audioDevices={audioDevices}
+                    videoCurrentTime={videoCurrentTime}
+                    isVideoPlaying={isVideoPlaying}
+                    masterVolume={masterVolume}
+                    onTrackUpdate={onTrackUpdate}
+                    onTrackDelete={onTrackDelete}
+                    onAudioUrlLoad={onAudioUrlLoad}
+                    audioInputRef={audioInputRef}
+                    handleAudioChange={handleAudioChange}
+                    onTrackEvent={onTrackEvent}
+                    onShareSync={onShareSync}
+                >
+                    <MasterVolume
+                        masterVolume={masterVolume}
+                        onMasterVolumeChange={onMasterVolumeChange}
+                    />
+                </AudioSection>
             </div>
 
             {/* Language Selector */}
