@@ -29,6 +29,13 @@ export const SubtitleSettings: React.FC<SubtitleSettingsProps> = ({
     const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
     const colorPickerRef = useRef<HTMLDivElement>(null);
 
+    const safeStyle = subtitleStyle || {
+        color: '#ffffff',
+        backgroundColor: 'rgba(0, 0, 0, 0)',
+        fontSize: 'medium',
+        textShadow: true,
+    };
+
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (colorPickerRef.current && !colorPickerRef.current.contains(event.target as Node)) {
@@ -87,8 +94,8 @@ export const SubtitleSettings: React.FC<SubtitleSettingsProps> = ({
                             <div className="flex-1 flex items-center justify-between">
                                 <label className="text-[10px] text-gray-400 flex items-center gap-1"><Type size={10} /> Size</label>
                                 <select
-                                    value={subtitleStyle.fontSize}
-                                    onChange={(e) => onSubtitleStyleChange({ ...subtitleStyle, fontSize: e.target.value as any })}
+                                    value={safeStyle.fontSize}
+                                    onChange={(e) => onSubtitleStyleChange({ ...safeStyle, fontSize: e.target.value as any })}
                                     className="bg-gray-800 border border-gray-700 text-[10px] text-gray-300 rounded px-1 py-0.5"
                                 >
                                     <option value="small">Small</option>
@@ -101,8 +108,8 @@ export const SubtitleSettings: React.FC<SubtitleSettingsProps> = ({
                                 <label className="text-[10px] text-gray-400">Shadow</label>
                                 <input
                                     type="checkbox"
-                                    checked={subtitleStyle.textShadow}
-                                    onChange={(e) => onSubtitleStyleChange({ ...subtitleStyle, textShadow: e.target.checked })}
+                                    checked={safeStyle.textShadow}
+                                    onChange={(e) => onSubtitleStyleChange({ ...safeStyle, textShadow: e.target.checked })}
                                     className="rounded text-primary-500 bg-gray-800 border-gray-700 focus:ring-primary-500"
                                 />
                             </div>
@@ -116,7 +123,7 @@ export const SubtitleSettings: React.FC<SubtitleSettingsProps> = ({
                                     <button
                                         onClick={() => setIsColorPickerOpen(!isColorPickerOpen)}
                                         className="w-8 h-5 rounded overflow-hidden border border-gray-600 hover:border-primary-500 transition-colors shadow-inner flex items-center justify-center cursor-pointer"
-                                        style={{ backgroundColor: subtitleStyle.color }}
+                                        style={{ backgroundColor: safeStyle.color }}
                                     />
                                     {isColorPickerOpen && (
                                         <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 p-3 bg-gray-800 border border-gray-600 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] z-50 w-52 flex flex-col gap-3 backdrop-blur-md">
@@ -125,8 +132,8 @@ export const SubtitleSettings: React.FC<SubtitleSettingsProps> = ({
                                                 {PRESET_COLORS.map(c => (
                                                     <button
                                                         key={c}
-                                                        onClick={() => { onSubtitleStyleChange({ ...subtitleStyle, color: c }); setIsColorPickerOpen(false); }}
-                                                        className={`w-6 h-6 rounded-md border ${subtitleStyle.color === c ? 'border-primary-500 scale-110 shadow-primary-500/50' : 'border-gray-500 hover:scale-105 hover:border-gray-300'} transition-all shadow-sm`}
+                                                        onClick={() => { onSubtitleStyleChange({ ...safeStyle, color: c }); setIsColorPickerOpen(false); }}
+                                                        className={`w-6 h-6 rounded-md border ${safeStyle.color === c ? 'border-primary-500 scale-110 shadow-primary-500/50' : 'border-gray-500 hover:scale-105 hover:border-gray-300'} transition-all shadow-sm`}
                                                         style={{ backgroundColor: c }}
                                                         title={c}
                                                     />
@@ -137,8 +144,8 @@ export const SubtitleSettings: React.FC<SubtitleSettingsProps> = ({
                                                     <span className="text-[10px] text-gray-400">HEX</span>
                                                     <input
                                                         type="text"
-                                                        value={subtitleStyle.color}
-                                                        onChange={(e) => onSubtitleStyleChange({ ...subtitleStyle, color: e.target.value })}
+                                                        value={safeStyle.color}
+                                                        onChange={(e) => onSubtitleStyleChange({ ...safeStyle, color: e.target.value })}
                                                         className="flex-1 bg-gray-900 border border-gray-600 rounded-md px-2 py-1 text-xs text-white focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 font-mono transition-shadow h-7"
                                                         placeholder="#ffffff"
                                                     />
@@ -154,9 +161,9 @@ export const SubtitleSettings: React.FC<SubtitleSettingsProps> = ({
                                                     <input
                                                         key={advancedPickerKey}
                                                         type="color"
-                                                        value={subtitleStyle.color}
+                                                        value={safeStyle.color}
                                                         onChange={(e) => {
-                                                            onSubtitleStyleChange({ ...subtitleStyle, color: e.target.value });
+                                                            onSubtitleStyleChange({ ...safeStyle, color: e.target.value });
                                                         }}
                                                         onClick={(e) => {
                                                             if (isAdvancedOpen) {
@@ -179,8 +186,8 @@ export const SubtitleSettings: React.FC<SubtitleSettingsProps> = ({
                             <div className="flex-1 flex items-center justify-between pl-4 border-l border-gray-700/50">
                                 <label className="text-[10px] text-gray-400">Backdrop</label>
                                 <select
-                                    value={subtitleStyle.backgroundColor}
-                                    onChange={(e) => onSubtitleStyleChange({ ...subtitleStyle, backgroundColor: e.target.value })}
+                                    value={safeStyle.backgroundColor}
+                                    onChange={(e) => onSubtitleStyleChange({ ...safeStyle, backgroundColor: e.target.value })}
                                     className="bg-gray-800 border border-gray-700 text-[10px] text-gray-300 rounded px-1 py-0.5"
                                 >
                                     <option value="rgba(0, 0, 0, 0)">None</option>
