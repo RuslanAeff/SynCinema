@@ -67,7 +67,7 @@ export const VuMeter: React.FC<VuMeterProps> = ({ audioElement }) => {
         if (level >= threshold) {
             if (threshold >= 0.9) return 'bg-red-500';
             if (threshold >= 0.7) return 'bg-yellow-500';
-            return 'bg-green-500';
+            return 'bg-secondary-500';
         }
         return 'bg-gray-700';
     };

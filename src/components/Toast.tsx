@@ -99,7 +99,7 @@ const ToastItem: React.FC<{ toast: ToastMessage; onDismiss: (id: number) => void
     const isWarning = toast.type === 'warning';
 
     const getToastStyle = () => {
-        if (isSuccess) return 'bg-gray-900/90 border-green-500/30 text-white';
+        if (isSuccess) return 'bg-gray-900/90 border-secondary-500/30 text-white';
         if (isError) return 'bg-gray-900/90 border-red-500/30 text-white';
         if (isWarning) return 'bg-gray-900/90 border-yellow-500/30 text-white';
         return 'bg-gray-900/90 border-blue-500/30 text-white';
@@ -110,7 +110,7 @@ const ToastItem: React.FC<{ toast: ToastMessage; onDismiss: (id: number) => void
             className={`pointer-events-auto flex flex-col gap-2 max-w-sm px-4 py-3 rounded-xl shadow-2xl border backdrop-blur-md transition-all duration-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'} ${getToastStyle()}`}
         >
             <div className="flex items-start gap-3">
-                {isSuccess && <CheckCircle size={18} className="text-green-400 mt-0.5 shrink-0" />}
+                {isSuccess && <CheckCircle size={18} className="text-secondary-400 mt-0.5 shrink-0" />}
                 {isError && <AlertCircle size={18} className="text-red-400 mt-0.5 shrink-0" />}
                 {isInfo && <Info size={18} className="text-blue-400 mt-0.5 shrink-0" />}
                 {isWarning && <AlertCircle size={18} className="text-yellow-400 mt-0.5 shrink-0" />}
@@ -138,7 +138,7 @@ const ToastItem: React.FC<{ toast: ToastMessage; onDismiss: (id: number) => void
                     <Button
                         size="sm"
                         variant="primary"
-                        className="!py-1 !px-3 text-xs w-auto bg-indigo-500 hover:bg-indigo-600 border-indigo-400"
+                        className="!py-1 !px-3 text-xs w-auto bg-primary-500 hover:bg-primary-600 border-primary-400"
                         onClick={() => {
                             toast.action?.onClick();
                             setIsVisible(false);

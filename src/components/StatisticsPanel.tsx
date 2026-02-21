@@ -115,10 +115,10 @@ export const StatisticsPanel: React.FC<StatisticsPanelProps> = ({
     // Calculate most used features
     const featureStats = useMemo(() => {
         const features = [
-            { key: 'playPause', icon: <Play size={14} />, label: t.statistics?.playPause || 'Play/Pause', count: analytics.playPauseCount, colorClass: 'bg-indigo-500', iconColorClass: 'text-indigo-600 dark:text-indigo-400' },
+            { key: 'playPause', icon: <Play size={14} />, label: t.statistics?.playPause || 'Play/Pause', count: analytics.playPauseCount, colorClass: 'bg-primary-500', iconColorClass: 'text-primary-600 dark:text-primary-400' },
             { key: 'volume', icon: <Volume2 size={14} />, label: t.statistics?.volumeAdjust || 'Volume Adjust', count: analytics.volumeAdjustments, colorClass: 'bg-blue-500', iconColorClass: 'text-blue-600 dark:text-blue-400' },
-            { key: 'seek', icon: <FastForward size={14} />, label: t.statistics?.seek || 'Seek', count: analytics.seekCount, colorClass: 'bg-purple-500', iconColorClass: 'text-purple-600 dark:text-purple-400' },
-            { key: 'eq', icon: <Sliders size={14} />, label: t.statistics?.eqAdjust || 'EQ Adjust', count: analytics.eqAdjustments, colorClass: 'bg-pink-500', iconColorClass: 'text-pink-600 dark:text-pink-400' },
+            { key: 'seek', icon: <FastForward size={14} />, label: t.statistics?.seek || 'Seek', count: analytics.seekCount, colorClass: 'bg-secondary-500', iconColorClass: 'text-secondary-600 dark:text-secondary-400' },
+            { key: 'eq', icon: <Sliders size={14} />, label: t.statistics?.eqAdjust || 'EQ Adjust', count: analytics.eqAdjustments, colorClass: 'bg-tertiary-500', iconColorClass: 'text-tertiary-600 dark:text-tertiary-400' },
             { key: 'fullscreen', icon: <Maximize size={14} />, label: t.statistics?.fullscreen || 'Fullscreen', count: analytics.fullscreenToggles, colorClass: 'bg-orange-500', iconColorClass: 'text-orange-600 dark:text-orange-400' },
             { key: 'detach', icon: <MonitorPlay size={14} />, label: t.statistics?.detach || 'Detach', count: analytics.detachOpened, colorClass: 'bg-cyan-500', iconColorClass: 'text-cyan-600 dark:text-cyan-400' },
         ].sort((a, b) => b.count - a.count);
@@ -154,7 +154,7 @@ export const StatisticsPanel: React.FC<StatisticsPanelProps> = ({
                     bg-white dark:bg-gray-900
                     border-b border-gray-200 dark:border-gray-800">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600">
+                        <div className="p-2 rounded-xl bg-gradient-to-br from-primary-500 to-secondary-600">
                             <BarChart3 size={20} className="text-white" />
                         </div>
                         <div>
@@ -183,8 +183,8 @@ export const StatisticsPanel: React.FC<StatisticsPanelProps> = ({
                             icon={<Clock size={20} />}
                             label={t.statistics?.totalWatchTime || 'Total Watch Time'}
                             value={formatWatchTime(analytics.totalWatchTime)}
-                            colorClass="bg-purple-500"
-                            iconColorClass="text-purple-600 dark:text-purple-400"
+                            colorClass="bg-primary-500"
+                            iconColorClass="text-primary-600 dark:text-primary-400"
                             large
                         />
                         <StatCard
@@ -198,22 +198,22 @@ export const StatisticsPanel: React.FC<StatisticsPanelProps> = ({
                             icon={<Film size={18} />}
                             label={t.statistics?.videosLoaded || 'Videos Loaded'}
                             value={analytics.videosLoaded}
-                            colorClass="bg-indigo-500"
-                            iconColorClass="text-indigo-600 dark:text-indigo-400"
+                            colorClass="bg-secondary-500"
+                            iconColorClass="text-secondary-600 dark:text-secondary-400"
                         />
                         <StatCard
                             icon={<Music size={18} />}
                             label={t.statistics?.audioTracksAdded || 'Audio Tracks Added'}
                             value={analytics.audioTracksAdded}
-                            colorClass="bg-pink-500"
-                            iconColorClass="text-pink-600 dark:text-pink-400"
+                            colorClass="bg-tertiary-500"
+                            iconColorClass="text-tertiary-600 dark:text-tertiary-400"
                         />
                         <StatCard
                             icon={<Save size={18} />}
                             label={t.statistics?.projectsSaved || 'Projects Saved'}
                             value={analytics.projectsSaved}
-                            colorClass="bg-green-500"
-                            iconColorClass="text-green-600 dark:text-green-400"
+                            colorClass="bg-secondary-500"
+                            iconColorClass="text-secondary-600 dark:text-secondary-400"
                         />
                         <StatCard
                             icon={<FolderOpen size={18} />}
@@ -241,7 +241,7 @@ export const StatisticsPanel: React.FC<StatisticsPanelProps> = ({
                     {/* Most Used Features */}
                     <div className="rounded-2xl p-4 bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50">
                         <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4 flex items-center gap-2">
-                            <BarChart3 size={16} className="text-indigo-500 dark:text-indigo-400" />
+                            <BarChart3 size={16} className="text-primary-500 dark:text-primary-400" />
                             {t.statistics?.mostUsedFeatures || 'Most Used Features'}
                         </h3>
                         <div className="space-y-3">

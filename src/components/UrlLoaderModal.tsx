@@ -291,7 +291,7 @@ export const UrlLoaderModal: React.FC<UrlLoaderModalProps> = ({
                 <div className="p-6 border-b border-gray-200 dark:border-gray-800">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-secondary-600 flex items-center justify-center">
                                 <Link size={20} className="text-white" />
                             </div>
                             <div>
@@ -320,10 +320,10 @@ export const UrlLoaderModal: React.FC<UrlLoaderModalProps> = ({
                                 value={videoUrl}
                                 onChange={(e) => handleVideoUrlChange(e.target.value)}
                                 placeholder={t.urlLoader.placeholder}
-                                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                             />
                             {videoValidation.message && (
-                                <div className={`mt-2 flex items-center gap-2 text-sm ${videoValidation.isValid ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                                <div className={`mt-2 flex items-center gap-2 text-sm ${videoValidation.isValid ? 'text-secondary-600 dark:text-secondary-400' : 'text-red-600 dark:text-red-400'
                                     }`}>
                                     {videoValidation.isValid ? (
                                         <CheckCircle size={14} />
@@ -338,7 +338,7 @@ export const UrlLoaderModal: React.FC<UrlLoaderModalProps> = ({
                         <button
                             onClick={handleLoadVideo}
                             disabled={!videoValidation.isValid || isLoading}
-                            className="w-full py-3 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:from-gray-300 disabled:to-gray-300 dark:disabled:from-gray-700 dark:disabled:to-gray-700 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-all flex items-center justify-center gap-2"
+                            className="w-full py-3 px-4 bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-500 hover:to-secondary-500 disabled:from-gray-300 disabled:to-gray-300 dark:disabled:from-gray-700 dark:disabled:to-gray-700 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-all flex items-center justify-center gap-2"
                         >
                             {isLoading ? (
                                 <>

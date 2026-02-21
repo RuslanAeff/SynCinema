@@ -7,7 +7,7 @@
  */
 
 import React, { useRef, useState, useEffect } from 'react';
-import { RotateCcw, AlertCircle, Film, Upload, Sun, Moon, Volume2, VolumeX, ChevronDown, Link, Headphones, Check, BarChart3, ShieldAlert } from 'lucide-react';
+import { RotateCcw, AlertCircle, Film, Upload, Sun, Moon, Volume2, VolumeX, ChevronDown, Link, Headphones, Check, BarChart3, ShieldAlert, Palette } from 'lucide-react';
 import { getDeviceIcon } from '../utils/getDeviceIcon';
 import { Button } from './Button';
 import { AudioTrackRow } from './AudioTrackRow';
@@ -38,7 +38,9 @@ interface SidebarProps {
     masterVolume: number;
     onMasterVolumeChange: (volume: number) => void;
     theme: 'dark' | 'light';
+    accentTheme: 'green' | 'purple';
     onThemeToggle: () => void;
+    onAccentThemeToggle: () => void;
     videoVolume: number;
     videoMuted: boolean;
     onVideoVolumeChange: (volume: number) => void;
@@ -80,7 +82,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
     masterVolume,
     onMasterVolumeChange,
     theme,
+    accentTheme,
     onThemeToggle,
+    onAccentThemeToggle,
     videoVolume,
     videoMuted,
     onVideoVolumeChange,
@@ -156,7 +160,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div className="hidden lg:block p-6 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 transition-colors duration-300">
                 <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-3">
-                        <Logo size={48} className="drop-shadow-[0_0_15px_rgba(99,102,241,0.6)]" />
+                        <Logo size={48} className="drop-shadow-[0_0_15px_rgba(16,185,129,0.6)]" />
                         <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">SynCinema</h1>
                     </div>
                     <div className="flex items-center gap-2">
@@ -166,14 +170,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                             title={t.statistics?.title || 'Statistics'}
                         >
-                            <BarChart3 size={20} className="text-indigo-500" />
+                            <BarChart3 size={20} className="text-primary-500" />
                         </button>
                         <button
                             onClick={onThemeToggle}
                             className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                             title={theme === 'dark' ? t.sidebar.switchToLight : t.sidebar.switchToDark}
                         >
-                            {theme === 'dark' ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-indigo-600" />}
+                            {theme === 'dark' ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-primary-600" />}
                         </button>
                     </div>
                 </div>
@@ -201,17 +205,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         <div className="flex items-center justify-between bg-gray-800 p-3 rounded-lg">
                             <span className="text-sm truncate max-w-[200px]">{videoFile.name}</span>
                             <div className="flex items-center gap-2">
-                                <button onClick={onUrlLoaderOpen} className="text-xs text-purple-400 hover:text-purple-300">URL</button>
-                                <button onClick={() => fileInputRef.current?.click()} className="text-xs text-indigo-400 hover:text-indigo-300">{t.sidebar.change}</button>
+                                <button onClick={onUrlLoaderOpen} className="text-xs text-primary-400 hover:text-primary-300">URL</button>
+                                <button onClick={() => fileInputRef.current?.click()} className="text-xs text-primary-400 hover:text-primary-300">{t.sidebar.change}</button>
                             </div>
                         </div>
                     ) : (
                         <div className="flex gap-2">
-                            <button onClick={() => fileInputRef.current?.click()} className="flex-1 py-6 flex flex-col items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors rounded-lg border-2 border-transparent hover:border-indigo-500/30">
+                            <button onClick={() => fileInputRef.current?.click()} className="flex-1 py-6 flex flex-col items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors rounded-lg border-2 border-transparent hover:border-primary-500/30">
                                 <Upload size={20} className="mb-1" />
                                 <span className="text-xs">{t.sidebar.selectFile}</span>
                             </button>
-                            <button onClick={onUrlLoaderOpen} className="flex-1 py-6 flex flex-col items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors rounded-lg border-2 border-transparent hover:border-purple-500/30">
+                            <button onClick={onUrlLoaderOpen} className="flex-1 py-6 flex flex-col items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors rounded-lg border-2 border-transparent hover:border-secondary-500/30">
                                 <Link size={20} className="mb-1" />
                                 <span className="text-xs">{t.sidebar.loadUrl}</span>
                             </button>
@@ -228,7 +232,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                     {t.sidebar.videoVolume}
                                 </span>
                                 <div className="flex items-center gap-2">
-                                    <span className="text-xs font-mono text-indigo-400">{Math.round(videoVolume * 100)}%</span>
+                                    <span className="text-xs font-mono text-primary-400">{Math.round(videoVolume * 100)}%</span>
                                     <button
                                         onClick={() => onVideoMutedChange(!videoMuted)}
                                         className={`text-[10px] px-2 py-0.5 rounded ${videoMuted ? 'bg-red-500/20 text-red-400' : 'bg-gray-700 text-gray-400 hover:bg-gray-600'}`}
@@ -244,7 +248,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                 step="0.01"
                                 value={videoVolume}
                                 onChange={(e) => onVideoVolumeChange(parseFloat(e.target.value))}
-                                className={`w-full h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-indigo-500 ${videoMuted ? 'opacity-50' : ''}`}
+                                className={`w-full h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary-500 ${videoMuted ? 'opacity-50' : ''}`}
                             />
                         </div>
                     )}
@@ -258,7 +262,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             <div className="relative" ref={videoDeviceDropdownRef}>
                                 <button
                                     onClick={() => setIsVideoDeviceDropdownOpen(!isVideoDeviceDropdownOpen)}
-                                    className={`w-full flex items-center gap-3 px-3 py-2.5 bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 rounded-xl transition-all text-left ${isVideoDeviceDropdownOpen ? 'border-purple-500/50 ring-1 ring-purple-500/20' : ''}`}
+                                    className={`w-full flex items-center gap-3 px-3 py-2.5 bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 rounded-xl transition-all text-left ${isVideoDeviceDropdownOpen ? 'border-primary-500/50 ring-1 ring-primary-500/20' : ''}`}
                                 >
                                     <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-white dark:bg-gray-700 border border-gray-200 dark:border-transparent text-gray-500 dark:text-gray-300 shadow-sm dark:shadow-none">
                                         {videoDeviceId ? getDeviceIcon(audioDevices.find(d => d.deviceId === videoDeviceId)?.label || '') : <Volume2 size={14} />}
@@ -281,23 +285,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                                 setIsVideoDeviceDropdownOpen(false);
                                             }}
                                             className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all duration-200 ${!videoDeviceId
-                                                ? 'bg-purple-500/20 dark:bg-purple-500/30'
+                                                ? 'bg-primary-500/20 dark:bg-primary-500/30'
                                                 : 'hover:bg-gray-100/80 dark:hover:bg-gray-700/50'
                                                 }`}
                                         >
                                             <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${!videoDeviceId
-                                                ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/30'
+                                                ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30'
                                                 : 'bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-300'
                                                 }`}>
                                                 <Volume2 size={16} />
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <div className={`text-sm font-semibold ${!videoDeviceId ? 'text-purple-600 dark:text-purple-300' : 'text-gray-700 dark:text-gray-200'}`}>
+                                                <div className={`text-sm font-semibold ${!videoDeviceId ? 'text-primary-600 dark:text-primary-300' : 'text-gray-700 dark:text-gray-200'}`}>
                                                     {t.sidebar.defaultOutput}
                                                 </div>
                                             </div>
                                             {!videoDeviceId && (
-                                                <div className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center">
+                                                <div className="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center">
                                                     <Check size={12} className="text-white" />
                                                 </div>
                                             )}
@@ -317,23 +321,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                                     setIsVideoDeviceDropdownOpen(false);
                                                 }}
                                                 className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all duration-200 ${videoDeviceId === device.deviceId
-                                                    ? 'bg-purple-500/20 dark:bg-purple-500/30'
+                                                    ? 'bg-primary-500/20 dark:bg-primary-500/30'
                                                     : 'hover:bg-gray-100/80 dark:hover:bg-gray-700/50'
                                                     }`}
                                             >
                                                 <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${videoDeviceId === device.deviceId
-                                                    ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/30'
+                                                    ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30'
                                                     : 'bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-300'
                                                     }`}>
                                                     {getDeviceIcon(device.label || '')}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <div className={`text-sm font-medium truncate ${videoDeviceId === device.deviceId ? 'text-purple-600 dark:text-purple-300' : 'text-gray-700 dark:text-gray-200'}`}>
+                                                    <div className={`text-sm font-medium truncate ${videoDeviceId === device.deviceId ? 'text-primary-600 dark:text-primary-300' : 'text-gray-700 dark:text-gray-200'}`}>
                                                         {device.label || t.sidebar.unknownDevice}
                                                     </div>
                                                 </div>
                                                 {videoDeviceId === device.deviceId && (
-                                                    <div className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center flex-shrink-0">
+                                                    <div className="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center flex-shrink-0">
                                                         <Check size={12} className="text-white" />
                                                     </div>
                                                 )}
@@ -350,12 +354,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         <div className="flex items-center justify-between">
                             <span className="text-xs font-medium text-gray-500">{t.sidebar.subtitles} (.srt)</span>
                             {!hasSubtitles ? (
-                                <button onClick={() => subtitleInputRef.current?.click()} className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+                                <button onClick={() => subtitleInputRef.current?.click()} className="text-xs text-primary-400 hover:text-primary-300 flex items-center gap-1">
                                     <Upload size={12} /> {t.sidebar.load}
                                 </button>
                             ) : (
                                 <div className="flex items-center gap-3">
-                                    <span className="text-xs text-green-500">{t.sidebar.active}</span>
+                                    <span className="text-xs text-secondary-500">{t.sidebar.active}</span>
                                     <div className="flex items-center gap-1">
                                         <span className="text-[10px] text-gray-500">{t.sidebar.offset}</span>
                                         <input
@@ -363,7 +367,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                             step="0.1"
                                             value={subtitleOffset}
                                             onChange={(e) => onSubtitleOffsetChange(parseFloat(e.target.value) || 0)}
-                                            className="w-14 bg-gray-900 border border-gray-700 rounded text-xs p-0.5 text-center focus:ring-1 focus:ring-indigo-500"
+                                            className="w-14 bg-gray-900 border border-gray-700 rounded text-xs p-0.5 text-center focus:ring-1 focus:ring-primary-500"
                                         />
                                     </div>
                                     <button onClick={() => subtitleInputRef.current?.click()} className="text-[10px] text-gray-400 hover:text-white">Replace</button>
@@ -389,7 +393,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             <div className="flex items-center gap-2">
                                 <span
                                     onClick={(e) => { e.stopPropagation(); onAddMarker(); }}
-                                    className="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-1 rounded transition-colors"
+                                    className="text-xs bg-primary-600 hover:bg-primary-700 text-white px-2 py-1 rounded transition-colors"
                                 >
                                     + Add
                                 </span>
@@ -418,9 +422,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                                 <div key={marker.id} className="flex items-center justify-between bg-gray-900/50 rounded p-2 group">
                                                     <button
                                                         onClick={() => onSeekToMarker(marker.time)}
-                                                        className="flex items-center gap-2 text-left hover:text-indigo-400 transition-colors flex-1"
+                                                        className="flex items-center gap-2 text-left hover:text-primary-400 transition-colors flex-1"
                                                     >
-                                                        <span className="text-xs font-mono text-indigo-400">{timeStr}</span>
+                                                        <span className="text-xs font-mono text-primary-400">{timeStr}</span>
                                                         <span className="text-xs text-gray-300 truncate">{marker.label}</span>
                                                     </button>
                                                     <button
@@ -453,14 +457,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         <div className="flex items-center gap-1.5">
                             <span
                                 onClick={(e) => { e.stopPropagation(); audioInputRef.current?.click(); }}
-                                className="text-xs bg-indigo-500 hover:bg-indigo-600 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 shadow-sm cursor-pointer border border-indigo-600 dark:border-transparent"
+                                className="text-xs bg-primary-500 hover:bg-primary-600 dark:bg-primary-600 dark:hover:bg-primary-700 text-white px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 shadow-sm cursor-pointer border border-primary-600 dark:border-transparent"
                                 title={t.sidebar.addFromFile}
                             >
                                 <Upload size={12} />
                             </span>
                             <span
                                 onClick={(e) => { e.stopPropagation(); setShowAudioUrlInput(!showAudioUrlInput); setIsAudioTracksCollapsed(false); }}
-                                className="text-xs bg-purple-500 hover:bg-purple-600 dark:bg-purple-600 dark:hover:bg-purple-700 text-white px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 shadow-sm cursor-pointer border border-purple-600 dark:border-transparent"
+                                className="text-xs bg-secondary-500 hover:bg-secondary-600 dark:bg-secondary-600 dark:hover:bg-secondary-700 text-white px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 shadow-sm cursor-pointer border border-secondary-600 dark:border-transparent"
                                 title={t.sidebar.addFromUrl}
                             >
                                 <Link size={12} />
@@ -479,9 +483,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     >
                         {/* Audio URL Input */}
                         {showAudioUrlInput && (
-                            <div className="p-3 m-3 rounded-lg bg-gray-100 dark:bg-gray-800/80 border border-gray-200 dark:border-purple-500/30 shadow-inner dark:shadow-none">
+                            <div className="p-3 m-3 rounded-lg bg-gray-100 dark:bg-gray-800/80 border border-gray-200 dark:border-primary-500/30 shadow-inner dark:shadow-none">
                                 <div className="flex flex-col gap-2">
-                                    <label className="text-xs font-semibold text-purple-700 dark:text-purple-400 uppercase tracking-wider flex items-center gap-1">
+                                    <label className="text-xs font-semibold text-primary-700 dark:text-primary-400 uppercase tracking-wider flex items-center gap-1">
                                         <Link size={12} /> {t.sidebar.audioUrlLabel}
                                     </label>
                                     <input
@@ -489,7 +493,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                         value={audioUrlInput}
                                         onChange={(e) => setAudioUrlInput(e.target.value)}
                                         placeholder={t.sidebar.audioUrlPlaceholder}
-                                        className="w-full px-3 py-2 bg-white dark:bg-gray-900/50 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                        className="w-full px-3 py-2 bg-white dark:bg-gray-900/50 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                                     />
                                     <div className="flex gap-2">
                                         <button
@@ -504,7 +508,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                                 }
                                             }}
                                             disabled={!audioUrlInput.trim()}
-                                            className="flex-1 py-2 px-3 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-300 dark:disabled:bg-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed text-white text-xs font-medium rounded-lg transition-colors"
+                                            className="flex-1 py-2 px-3 bg-primary-600 hover:bg-primary-500 disabled:bg-gray-300 dark:disabled:bg-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed text-white text-xs font-medium rounded-lg transition-colors"
                                         >
                                             {t.sidebar.addAudioTrackBtn}
                                         </button>
@@ -523,17 +527,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         )}
 
                         {/* Master Volume - Collapsible */}
-                        <div className="p-3 m-3 rounded-lg bg-gradient-to-r from-indigo-900/30 to-purple-900/30 border border-indigo-500/30 overflow-hidden">
+                        <div className="p-3 m-3 rounded-lg bg-gradient-to-r from-primary-900/30 to-secondary-900/30 border border-primary-500/30 overflow-hidden">
                             <button
                                 onClick={() => setIsMasterVolumeCollapsed(!isMasterVolumeCollapsed)}
                                 className="w-full flex items-center justify-between"
                             >
-                                <span className="text-xs font-semibold text-indigo-300 uppercase tracking-wider">🎚️ {t.sidebar.masterVolume}</span>
+                                <span className="text-xs font-semibold text-primary-300 uppercase tracking-wider">🎚️ {t.sidebar.masterVolume}</span>
                                 <div className="flex items-center gap-2">
-                                    <span className="text-xs font-mono text-indigo-400">{Math.round(masterVolume * 100)}%</span>
+                                    <span className="text-xs font-mono text-primary-400">{Math.round(masterVolume * 100)}%</span>
                                     <ChevronDown
                                         size={14}
-                                        className={`text-indigo-400 transition-transform duration-300 ${isMasterVolumeCollapsed ? '-rotate-90' : 'rotate-0'}`}
+                                        className={`text-primary-400 transition-transform duration-300 ${isMasterVolumeCollapsed ? '-rotate-90' : 'rotate-0'}`}
                                     />
                                 </div>
                             </button>
@@ -545,7 +549,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                     step="0.01"
                                     value={masterVolume}
                                     onChange={(e) => onMasterVolumeChange(parseFloat(e.target.value))}
-                                    className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                                    className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary-500"
                                 />
                             </div>
                         </div>
@@ -586,14 +590,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {/* Designer Signature Footer */}
             <div className="p-4 border-t border-gray-200 dark:border-gray-800/50 bg-gradient-to-r from-gray-100 dark:from-gray-900 to-gray-100/80 dark:to-gray-900/80">
                 <div className="flex items-center justify-center gap-2 opacity-70 hover:opacity-100 transition-opacity">
-                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent"></div>
+                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary-500/30 to-transparent"></div>
                     <div className="flex items-center gap-2 px-3">
                         <span className="text-[10px] uppercase tracking-[0.2em] text-gray-500">{t.app.createdBy}</span>
-                        <span className="text-xs font-semibold bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                        <span className="text-xs font-semibold bg-gradient-to-r from-primary-400 via-secondary-400 to-tertiary-400 bg-clip-text text-transparent">
                             Ruslan Aliyev
                         </span>
                     </div>
-                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent"></div>
+                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary-500/30 to-transparent"></div>
                 </div>
                 <div className="text-center mt-1">
                     <span className="text-[9px] text-gray-600">© 2025-2026 • SynCinema v2.0.1</span>

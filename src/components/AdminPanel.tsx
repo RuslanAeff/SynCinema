@@ -262,7 +262,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
                                                         <td className="px-4 py-2 font-mono text-xs text-gray-300 truncate max-w-[150px]" title={preset.audio_id}>
                                                             {preset.audio_id}
                                                         </td>
-                                                        <td className="px-4 py-2 text-right text-indigo-300 font-medium">
+                                                        <td className="px-4 py-2 text-right text-primary-300 font-medium">
                                                             {preset.offset_ms > 0 ? '+' : ''}{preset.offset_ms}ms
                                                         </td>
                                                         <td className="px-4 py-2 text-center">

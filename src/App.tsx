@@ -76,7 +76,7 @@ function App() {
   } = useAudioTracks();
 
   // Theme
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, accentTheme, toggleAccentTheme } = useTheme();
 
   // Analytics
   const { analytics, trackEvent, trackWatchTime, resetAnalytics, formatWatchTime } = useAnalytics();
@@ -380,7 +380,7 @@ function App() {
 
   return (
     <div
-      className={`flex flex-col lg:flex-row-reverse h-dvh lg:h-screen bg-gray-950 text-gray-100 font-sans relative transition-all lg:overflow-hidden overflow-y-auto overflow-x-hidden ${isDragging ? 'ring-4 ring-inset ring-indigo-500' : ''}`}
+      className={`flex flex-col lg:flex-row-reverse h-dvh lg:h-screen bg-gray-950 text-gray-100 font-sans relative transition-all lg:overflow-hidden overflow-y-auto overflow-x-hidden ${isDragging ? 'ring-4 ring-inset ring-primary-500' : ''}`}
       onDragEnter={handleDragEnter}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -397,11 +397,11 @@ function App() {
 
       {/* Drop Overlay */}
       {isDragging && (
-        <div className="absolute inset-0 bg-indigo-900/50 backdrop-blur-sm z-50 flex items-center justify-center pointer-events-none">
+        <div className="absolute inset-0 bg-primary-900/50 backdrop-blur-sm z-50 flex items-center justify-center pointer-events-none">
           <div className="text-center">
             <div className="text-6xl mb-4">📂</div>
             <h2 className="text-2xl font-bold text-white">{t.dragDrop.title}</h2>
-            <p className="text-indigo-300 mt-2">{t.dragDrop.subtitle}</p>
+            <p className="text-primary-300 mt-2">{t.dragDrop.subtitle}</p>
           </div>
         </div>
       )}
@@ -409,13 +409,13 @@ function App() {
       {/* Mobile Header - Visible only on mobile */}
       <div className="lg:hidden p-4 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Logo size={32} className="drop-shadow-[0_0_10px_rgba(99,102,241,0.5)]" />
+          <Logo size={32} className="drop-shadow-[0_0_10px_rgba(var(--color-primary-500),0.5)]" />
           <h1 className="text-xl font-extrabold tracking-tight text-gray-900 dark:text-white">SynCinema</h1>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowStatistics(true)}
-            className="p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border border-purple-500/30 text-purple-400 hover:text-purple-300 transition-colors"
+            className="p-2 rounded-lg bg-gradient-to-br from-primary-500/20 to-secondary-500/20 border border-primary-500/30 text-primary-400 hover:text-primary-300 transition-colors"
             title="Statistics"
           >
             <BarChart3 size={18} />
@@ -425,7 +425,7 @@ function App() {
             onClick={toggleTheme}
             className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
           >
-            {theme === 'dark' ? <Sun size={18} className="text-yellow-400" /> : <Moon size={18} className="text-indigo-600" />}
+            {theme === 'dark' ? <Sun size={18} className="text-yellow-400" /> : <Moon size={18} className="text-primary-600" />}
           </button>
         </div>
       </div>
@@ -482,7 +482,9 @@ function App() {
         masterVolume={masterVolume}
         onMasterVolumeChange={setMasterVolume}
         theme={theme}
+        accentTheme={accentTheme}
         onThemeToggle={toggleTheme}
+        onAccentThemeToggle={toggleAccentTheme}
         videoVolume={videoVolume}
         videoMuted={videoMuted}
         onVideoVolumeChange={setVideoVolume}
@@ -505,7 +507,12 @@ function App() {
       />
 
       {/* Help Panel - at App level to overlay everything */}
-      <HelpPanel isOpen={showHelp} onClose={() => setShowHelp(false)} />
+      <HelpPanel
+        isOpen={showHelp}
+        onClose={() => setShowHelp(false)}
+        accentTheme={accentTheme}
+        onAccentThemeToggle={toggleAccentTheme}
+      />
 
       {/* Admin Panel */}
       <AdminPanel isOpen={showAdmin} onClose={() => setShowAdmin(false)} />

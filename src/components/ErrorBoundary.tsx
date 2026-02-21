@@ -73,7 +73,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
                     <button
                         onClick={() => window.location.reload()}
                         style={{
-                            backgroundColor: '#6366f1',
+                            backgroundColor: 'rgb(var(--color-primary-500))',
                             color: '#fff',
                             border: 'none',
                             padding: '0.75rem 1.5rem',

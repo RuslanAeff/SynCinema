@@ -48,8 +48,8 @@ export const Logo: React.FC<{ size?: number, className?: string }> = ({ size = 3
                     </feMerge>
                 </filter>
                 <linearGradient id={`neon-grad-${uniqueId}`} x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style={{ stopColor: '#6366f1', stopOpacity: 1 }} />
-                    <stop offset="100%" style={{ stopColor: '#d946ef', stopOpacity: 1 }} />
+                    <stop offset="0%" style={{ stopColor: 'rgb(var(--color-primary-500))', stopOpacity: 1 }} />
+                    <stop offset="100%" style={{ stopColor: 'rgb(var(--color-primary-400))', stopOpacity: 1 }} />
                 </linearGradient>
                 {/* Santa hat gradient */}
                 <linearGradient id={`santa-red-${uniqueId}`} x1="0%" y1="0%" x2="0%" y2="100%">
@@ -123,7 +123,7 @@ export const Logo: React.FC<{ size?: number, className?: string }> = ({ size = 3
             <path
                 d="M42 34 L 66 50 L 42 66 Z"
                 fill="white"
-                stroke="#d946ef"
+                stroke="rgb(var(--color-primary-400))"
                 strokeWidth="2.5"
                 strokeLinejoin="round"
                 style={{ filter: `url(#neon-glow-strong-${uniqueId})` }}

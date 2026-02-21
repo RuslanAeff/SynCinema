@@ -34,7 +34,8 @@ import {
     Smartphone,
     Monitor,
     Cloud,
-    ShieldCheck
+    ShieldCheck,
+    Palette
 } from 'lucide-react';
 import { Translations } from '../i18n';
 import { useI18n } from '../context/I18nContext';
@@ -42,6 +43,8 @@ import { useI18n } from '../context/I18nContext';
 interface HelpPanelProps {
     isOpen: boolean;
     onClose: () => void;
+    accentTheme: 'green' | 'purple';
+    onAccentThemeToggle: () => void;
 }
 
 interface HelpSection {
@@ -67,7 +70,7 @@ const getHelpSections = (t: Translations): HelpSection[] => [
             {
                 name: t.help.videoControls.playPause,
                 icon: <Play size={16} />,
-                iconColor: 'bg-green-500/20 text-green-500 dark:bg-green-500/20 dark:text-green-400',
+                iconColor: 'bg-secondary-500/20 text-secondary-500 dark:bg-secondary-500/20 dark:text-secondary-400',
                 description: t.help.videoControls.playPauseDesc,
                 shortcut: 'Space / K'
             },
@@ -92,14 +95,14 @@ const getHelpSections = (t: Translations): HelpSection[] => [
             {
                 name: t.help.videoControls.volume,
                 icon: <Volume2 size={16} />,
-                iconColor: 'bg-purple-500/20 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400',
+                iconColor: 'bg-secondary-500/20 text-secondary-600 dark:bg-secondary-500/20 dark:text-secondary-400',
                 description: t.help.videoControls.volumeDesc,
                 shortcut: '↑ / ↓'
             },
             {
                 name: t.help.videoControls.fullscreen,
                 icon: <Maximize size={16} />,
-                iconColor: 'bg-indigo-500/20 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400',
+                iconColor: 'bg-primary-500/20 text-primary-600 dark:bg-primary-500/20 dark:text-primary-400',
                 description: t.help.videoControls.fullscreenDesc,
                 shortcut: 'F'
             },
@@ -117,7 +120,7 @@ const getHelpSections = (t: Translations): HelpSection[] => [
             {
                 name: t.help.audioTracks.addAudio,
                 icon: <Upload size={16} />,
-                iconColor: 'bg-emerald-500/20 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400',
+                iconColor: 'bg-primary-500/20 text-primary-600 dark:bg-primary-500/20 dark:text-primary-400',
                 description: t.help.audioTracks.addAudioDesc,
             },
             {
@@ -141,7 +144,7 @@ const getHelpSections = (t: Translations): HelpSection[] => [
             {
                 name: t.help.audioTracks.volume,
                 icon: <Volume2 size={16} />,
-                iconColor: 'bg-purple-500/20 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400',
+                iconColor: 'bg-secondary-500/20 text-secondary-600 dark:bg-secondary-500/20 dark:text-secondary-400',
                 description: t.help.audioTracks.volumeDesc,
             },
             {
@@ -208,7 +211,7 @@ const getHelpSections = (t: Translations): HelpSection[] => [
             {
                 name: t.help.settingsSection.theme,
                 icon: <Moon size={16} />,
-                iconColor: 'bg-violet-500/20 text-violet-600 dark:bg-violet-500/20 dark:text-violet-400',
+                iconColor: 'bg-tertiary-500/20 text-tertiary-600 dark:bg-tertiary-500/20 dark:text-tertiary-400',
                 description: t.help.settingsSection.themeDesc,
             },
             {
@@ -225,13 +228,13 @@ const getHelpSections = (t: Translations): HelpSection[] => [
             {
                 name: t.help.cloudSync.whatIsIt,
                 icon: <Cloud size={16} />,
-                iconColor: 'bg-indigo-500/20 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400',
+                iconColor: 'bg-primary-500/20 text-primary-600 dark:bg-primary-500/20 dark:text-primary-400',
                 description: t.help.cloudSync.whatIsItDesc,
             },
             {
                 name: t.help.cloudSync.autoApply,
                 icon: <RotateCcw size={16} className="rotate-180" />,
-                iconColor: 'bg-green-500/20 text-green-600 dark:bg-green-500/20 dark:text-green-400',
+                iconColor: 'bg-secondary-500/20 text-secondary-600 dark:bg-secondary-500/20 dark:text-secondary-400',
                 description: t.help.cloudSync.autoApplyDesc,
             },
             {
@@ -256,7 +259,7 @@ const getHelpSections = (t: Translations): HelpSection[] => [
             {
                 name: t.help.urlSources.directLinks,
                 icon: <Link size={16} />,
-                iconColor: 'bg-green-500/20 text-green-600 dark:bg-green-500/20 dark:text-green-400',
+                iconColor: 'bg-secondary-500/20 text-secondary-600 dark:bg-secondary-500/20 dark:text-secondary-400',
                 description: t.help.urlSources.directLinksDesc,
             },
             {
@@ -295,7 +298,7 @@ const getHelpSections = (t: Translations): HelpSection[] => [
             {
                 name: '✅ ' + t.help.platform.desktop,
                 icon: <Monitor size={16} />,
-                iconColor: 'bg-green-500/20 text-green-600 dark:bg-green-500/20 dark:text-green-400',
+                iconColor: 'bg-secondary-500/20 text-secondary-600 dark:bg-secondary-500/20 dark:text-secondary-400',
                 description: t.help.platform.desktopDesc,
             },
             {
@@ -316,7 +319,7 @@ const getHelpSections = (t: Translations): HelpSection[] => [
     }
 ];
 
-export const HelpPanel: React.FC<HelpPanelProps> = ({ isOpen, onClose }) => {
+export const HelpPanel: React.FC<HelpPanelProps> = ({ isOpen, onClose, accentTheme, onAccentThemeToggle }) => {
     const { t } = useI18n();
     const [selectedSection, setSelectedSection] = useState<string>('video-controls');
     const [isVisible, setIsVisible] = useState(false);
@@ -368,12 +371,12 @@ export const HelpPanel: React.FC<HelpPanelProps> = ({ isOpen, onClose }) => {
                         onClick={() => setShowMobileMenu(!showMobileMenu)}
                         className="flex items-center gap-3 flex-1"
                     >
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-secondary-600 flex items-center justify-center flex-shrink-0">
                             <Info size={20} className="text-white" />
                         </div>
                         <div className="text-left flex-1">
                             <h2 className="text-base font-bold text-gray-900 dark:text-white">{t.help.title}</h2>
-                            <p className="text-xs text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+                            <p className="text-xs text-primary-600 dark:text-primary-400 flex items-center gap-1">
                                 {activeSection.icon}
                                 <span>{activeSection.title}</span>
                                 <ChevronRight size={14} className={`transition-transform ${showMobileMenu ? 'rotate-90' : ''}`} />
@@ -399,14 +402,14 @@ export const HelpPanel: React.FC<HelpPanelProps> = ({ isOpen, onClose }) => {
                                     setShowMobileMenu(false);
                                 }}
                                 className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all border-b border-gray-100 dark:border-gray-800 last:border-b-0 ${selectedSection === section.id
-                                    ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
+                                    ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
                                     : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
                                     }`}
                             >
-                                <span className={selectedSection === section.id ? 'text-indigo-600 dark:text-indigo-400' : ''}>{section.icon}</span>
+                                <span className={selectedSection === section.id ? 'text-primary-600 dark:text-primary-400' : ''}>{section.icon}</span>
                                 <span className="text-sm font-medium">{section.title}</span>
                                 {selectedSection === section.id && (
-                                    <ChevronRight size={16} className="ml-auto text-indigo-500" />
+                                    <ChevronRight size={16} className="ml-auto text-primary-500" />
                                 )}
                             </button>
                         ))}
@@ -418,7 +421,7 @@ export const HelpPanel: React.FC<HelpPanelProps> = ({ isOpen, onClose }) => {
                     {/* Header */}
                     <div className="p-6 border-b border-gray-200 dark:border-gray-800">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-secondary-600 flex items-center justify-center">
                                 <Info size={20} className="text-white" />
                             </div>
                             <div>
@@ -435,11 +438,11 @@ export const HelpPanel: React.FC<HelpPanelProps> = ({ isOpen, onClose }) => {
                                 key={section.id}
                                 onClick={() => setSelectedSection(section.id)}
                                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${selectedSection === section.id
-                                    ? 'bg-indigo-100 dark:bg-indigo-600 text-indigo-700 dark:text-white border border-indigo-200 dark:border-transparent shadow-sm'
+                                    ? 'bg-primary-100 dark:bg-primary-600 text-primary-700 dark:text-white border border-primary-200 dark:border-transparent shadow-sm'
                                     : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white border border-transparent'
                                     }`}
                             >
-                                <span className={selectedSection === section.id ? 'text-indigo-600 dark:text-white' : ''}>{section.icon}</span>
+                                <span className={selectedSection === section.id ? 'text-primary-600 dark:text-white' : ''}>{section.icon}</span>
                                 <span className="text-sm font-medium">{section.title}</span>
                                 {selectedSection === section.id && (
                                     <ChevronRight size={16} className="ml-auto" />
@@ -448,11 +451,23 @@ export const HelpPanel: React.FC<HelpPanelProps> = ({ isOpen, onClose }) => {
                         ))}
                     </nav>
 
-                    {/* Footer */}
-                    <div className="p-4 border-t border-gray-200 dark:border-gray-800">
-                        <p className="text-xs text-gray-500 dark:text-gray-600 text-center">
-                            Press Esc to close
-                        </p>
+                    {/* Footer with Theme Toggle */}
+                    <div className="p-4 border-t border-gray-200 dark:border-gray-800 flex flex-col gap-3">
+                        <button
+                            onClick={onAccentThemeToggle}
+                            className="w-full p-2.5 rounded-xl bg-gray-100 dark:bg-gray-800/50 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors flex items-center justify-between group"
+                            title="Toggle Accent Theme"
+                        >
+                            <div className="flex items-center gap-3">
+                                <div className={`p-1.5 rounded-lg transition-colors ${accentTheme === 'green' ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400' : 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400'}`}>
+                                    <Palette size={16} />
+                                </div>
+                                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Theme</span>
+                            </div>
+                            <span className="text-xs font-semibold px-2 py-1 rounded bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 shadow-sm border border-gray-200 dark:border-gray-700 group-hover:border-primary-500/30 transition-colors">
+                                {accentTheme === 'green' ? 'Green' : 'Purple'}
+                            </span>
+                        </button>
                     </div>
                 </div>
 
@@ -461,7 +476,7 @@ export const HelpPanel: React.FC<HelpPanelProps> = ({ isOpen, onClose }) => {
                     {/* Content Header - Hidden on mobile (integrated in mobile header) */}
                     <div className="hidden lg:flex p-6 border-b border-gray-200 dark:border-gray-800 items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-indigo-500/20 text-indigo-600 dark:text-indigo-400">
+                            <div className="p-2 rounded-lg bg-primary-500/20 text-primary-600 dark:text-primary-400">
                                 {activeSection.icon}
                             </div>
                             <h3 className="text-xl font-bold text-gray-900 dark:text-white">{activeSection.title}</h3>
@@ -517,16 +532,15 @@ export const InfoButton: React.FC<{ onClick: () => void }> = ({ onClick }) => {
     return (
         <button
             onClick={onClick}
-            className="relative group p-2 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 hover:border-indigo-400 text-indigo-400 hover:text-indigo-300 transition-all hover:scale-105"
+            className="relative group p-2 rounded-xl bg-gradient-to-br from-primary-500/20 to-secondary-500/20 border border-primary-500/30 hover:border-primary-400 text-primary-400 hover:text-primary-300 transition-all hover:scale-105"
             title="Help & Documentation"
         >
             {/* Stylized "i" icon */}
             <div className="w-5 h-5 flex items-center justify-center">
                 <span className="text-lg font-serif font-bold italic">i</span>
             </div>
-
             {/* Glow effect on hover */}
-            <div className="absolute inset-0 rounded-xl bg-indigo-500/20 opacity-0 group-hover:opacity-100 blur-sm transition-opacity" />
+            <div className="absolute inset-0 rounded-xl bg-primary-500/20 opacity-0 group-hover:opacity-100 blur-sm transition-opacity" />
         </button>
     );
 };

@@ -54,15 +54,15 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                     border border-white/10 dark:border-white/5
                     hover:from-white/10 hover:to-white/5
                     dark:hover:from-white/10 dark:hover:to-white/5
-                    hover:border-indigo-400/30
+                    hover:border-primary-400/30
                     transition-all duration-200 ease-out
                     ${compact ? 'text-[10px]' : 'text-xs'}
-                    ${isOpen ? 'ring-1 ring-indigo-500/20 bg-white/10' : ''}
+                    ${isOpen ? 'ring-1 ring-primary-500/20 bg-white/10' : ''}
                 `}
             >
                 <Globe
                     size={compact ? 12 : 14}
-                    className="text-indigo-400 group-hover:text-indigo-300 transition-colors"
+                    className="text-primary-400 group-hover:text-primary-300 transition-colors"
                 />
                 <span className="text-sm font-medium leading-none flex items-center mt-[-2px]">{currentLang.flag}</span>
                 {!compact && (
@@ -70,7 +70,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                 )}
                 <ChevronDown
                     size={12}
-                    className={`text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180 text-indigo-400' : ''}`}
+                    className={`text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180 text-primary-400' : ''}`}
                 />
             </button>
 
@@ -92,12 +92,12 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                     }}
                 >
                     {/* Gradient Overlay for Glass Effect */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-indigo-500/5 dark:from-white/5 to-transparent pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-b from-primary-500/5 dark:from-white/5 to-transparent pointer-events-none" />
 
                     {/* Header */}
                     <div className="relative px-4 py-3 border-b border-gray-200 dark:border-white/10">
                         <div className="flex items-center gap-2">
-                            <Globe size={12} className="text-indigo-500 dark:text-indigo-400" />
+                            <Globe size={12} className="text-primary-500 dark:text-primary-400" />
                             <p className="text-[10px] uppercase tracking-[0.15em] text-gray-600 dark:text-gray-400 font-semibold">
                                 Select Language
                             </p>
@@ -115,7 +115,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                                     text-left text-sm
                                     transition-all duration-200
                                     ${currentLanguage === lang.code
-                                        ? 'bg-gradient-to-r from-indigo-100 dark:from-indigo-600/30 to-purple-100 dark:to-purple-600/20 border border-indigo-300 dark:border-indigo-500/30'
+                                        ? 'bg-gradient-to-r from-primary-100 dark:from-primary-600/30 to-secondary-100 dark:to-secondary-600/20 border border-primary-300 dark:border-primary-500/30'
                                         : 'hover:bg-gray-100 dark:hover:bg-white/5 border border-transparent'
                                     }
                                 `}
@@ -125,14 +125,14 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                             >
                                 <span className="text-2xl drop-shadow-sm">{lang.flag}</span>
                                 <div className="flex-1">
-                                    <p className={`font-semibold ${currentLanguage === lang.code ? 'text-indigo-700 dark:text-white' : 'text-gray-800 dark:text-gray-200'}`}>
+                                    <p className={`font-semibold ${currentLanguage === lang.code ? 'text-primary-700 dark:text-white' : 'text-gray-800 dark:text-gray-200'}`}>
                                         {lang.nativeName}
                                     </p>
                                     <p className="text-[10px] text-gray-500 mt-0.5">{lang.name}</p>
                                 </div>
                                 {currentLanguage === lang.code && (
-                                    <div className="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-500/20 dark:bg-indigo-500/30 border border-indigo-400/50">
-                                        <Check size={14} className="text-indigo-600 dark:text-indigo-300" />
+                                    <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary-500/20 dark:bg-primary-500/30 border border-primary-400/50">
+                                        <Check size={14} className="text-primary-600 dark:text-primary-300" />
                                     </div>
                                 )}
                             </button>
@@ -140,7 +140,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                     </div>
 
                     {/* Bottom Glow */}
-                    <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-indigo-600/5 to-transparent pointer-events-none" />
+                    <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-primary-600/5 to-transparent pointer-events-none" />
                 </div>
             )}
 

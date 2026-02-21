@@ -581,7 +581,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                             max={duration || 100}
                             value={currentTime}
                             onChange={(e) => handleSeek(parseFloat(e.target.value))}
-                            className="w-full h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 transition-all pointer-events-none"
+                            className="w-full h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary-500 hover:accent-primary-400 transition-all pointer-events-none"
                         />
                     </div>
 
@@ -626,7 +626,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                                 step="0.05"
                                 defaultValue="1"
                                 onChange={(e) => { if (videoRef.current) videoRef.current.volume = parseFloat(e.target.value); onTrackEvent?.('volumeAdjustments'); }}
-                                className="w-12 sm:w-20 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                                className="w-12 sm:w-20 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer accent-primary-500"
                             />
                         </div>
 

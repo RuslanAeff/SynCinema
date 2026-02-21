@@ -186,7 +186,7 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
           {/* Icon */}
           <div className={`p-2.5 rounded-xl transition-colors ${driftWarning
             ? 'bg-yellow-500/20 text-yellow-400'
-            : 'bg-indigo-500/20 text-indigo-400'
+            : 'bg-primary-500/20 text-primary-400'
             }`}>
             <Volume2 size={20} />
           </div>
@@ -205,7 +205,7 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
                   ? 'opacity-50 cursor-wait'
                   : 'hover:bg-gray-700/50 cursor-pointer'
                   } ${isDeviceDropdownOpen
-                    ? 'bg-gray-700/50 text-indigo-400'
+                    ? 'bg-gray-700/50 text-primary-400'
                     : 'text-gray-400'
                   }`}
               >
@@ -231,24 +231,24 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
                       setIsDeviceDropdownOpen(false);
                     }}
                     className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all duration-200 ${!track.deviceId
-                      ? 'bg-purple-500/20 dark:bg-purple-500/30'
+                      ? 'bg-primary-500/20 dark:bg-primary-500/30'
                       : 'hover:bg-gray-100/80 dark:hover:bg-gray-700/50'
                       }`}
                   >
                     <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${!track.deviceId
-                      ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/30'
+                      ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30'
                       : 'bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-300'
                       }`}>
                       <Volume2 size={16} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className={`text-sm font-semibold ${!track.deviceId ? 'text-purple-600 dark:text-purple-300' : 'text-gray-700 dark:text-gray-200'}`}>
+                      <div className={`text-sm font-semibold ${!track.deviceId ? 'text-primary-600 dark:text-primary-300' : 'text-gray-700 dark:text-gray-200'}`}>
                         {t.audioTrack.defaultDevice}
                       </div>
                       <div className="text-[11px] text-gray-500 dark:text-gray-400">{t.audioTrack.systemDefaultDevice}</div>
                     </div>
                     {!track.deviceId && (
-                      <div className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center">
+                      <div className="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center">
                         <Check size={12} className="text-white" />
                       </div>
                     )}
@@ -268,23 +268,23 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
                         setIsDeviceDropdownOpen(false);
                       }}
                       className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all duration-200 ${track.deviceId === device.deviceId
-                        ? 'bg-purple-500/20 dark:bg-purple-500/30'
+                        ? 'bg-primary-500/20 dark:bg-primary-500/30'
                         : 'hover:bg-gray-100/80 dark:hover:bg-gray-700/50'
                         }`}
                     >
                       <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${track.deviceId === device.deviceId
-                        ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/30'
+                        ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30'
                         : 'bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-300'
                         }`}>
                         {getDeviceIcon(device.label || '')}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className={`text-sm font-medium truncate ${track.deviceId === device.deviceId ? 'text-purple-600 dark:text-purple-300' : 'text-gray-700 dark:text-gray-200'}`}>
+                        <div className={`text-sm font-medium truncate ${track.deviceId === device.deviceId ? 'text-primary-600 dark:text-primary-300' : 'text-gray-700 dark:text-gray-200'}`}>
                           {device.label || 'Unknown Device'}
                         </div>
                       </div>
                       {track.deviceId === device.deviceId && (
-                        <div className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center flex-shrink-0">
+                        <div className="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center flex-shrink-0">
                           <Check size={12} className="text-white" />
                         </div>
                       )}
@@ -320,13 +320,13 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
         {/* Sync Timecode Display */}
         <div className="mb-2 flex items-center justify-between text-[11px] font-mono text-gray-500 dark:text-gray-500">
           <div className="flex items-center gap-3">
-            {/* Audio Time - Purple Hover */}
+            {/* Audio Time - Green Hover */}
             <div className="group relative flex items-center gap-1 cursor-help">
-              <span className="absolute bottom-full left-0 mb-0.5 hidden group-hover:block whitespace-nowrap text-[10px] font-sans font-bold text-purple-600 dark:text-purple-400 animate-in fade-in slide-in-from-bottom-1 duration-200">
+              <span className="absolute bottom-full left-0 mb-0.5 hidden group-hover:block whitespace-nowrap text-[10px] font-sans font-bold text-primary-600 dark:text-primary-400 animate-in fade-in slide-in-from-bottom-1 duration-200">
                 {t.audioTrack.audioTime}
               </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
-              <span className="text-gray-600 dark:text-gray-400 transition-colors group-hover:text-purple-600 dark:group-hover:text-purple-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary-500"></span>
+              <span className="text-gray-600 dark:text-gray-400 transition-colors group-hover:text-primary-600 dark:group-hover:text-primary-400">
                 {formatTime(Math.max(0, videoCurrentTime - track.offset))}
               </span>
             </div>
@@ -335,7 +335,7 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
 
             {/* Video Time - Teal Hover */}
             <div className="group relative flex items-center gap-1 cursor-help">
-              <span className="absolute bottom-full left-0 mb-0.5 hidden group-hover:block whitespace-nowrap text-[10px] font-sans font-bold text-teal-600 dark:text-teal-400 animate-in fade-in slide-in-from-bottom-1 duration-200">
+              <span className="absolute bottom-full left-0 mb-0.5 hidden group-hover:block whitespace-nowrap text-[10px] font-sans font-bold text-tertiary-600 dark:text-tertiary-400 animate-in fade-in slide-in-from-bottom-1 duration-200">
                 {t.audioTrack.videoTime}
               </span>
               <span className="w-1.5 h-1.5 rounded-full bg-teal-500"></span>
@@ -345,7 +345,7 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
             </div>
           </div>
           <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${Math.abs(track.offset) < 0.1
-            ? 'bg-green-500/10 text-green-600 dark:text-green-400'
+            ? 'bg-secondary-500/10 text-secondary-600 dark:text-secondary-400'
             : Math.abs(track.offset) < 0.5
               ? 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400'
               : 'bg-red-500/10 text-red-500 dark:text-red-400'
@@ -360,7 +360,7 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
             onClick={() => onUpdate(track.id, { isMuted: !track.isMuted })}
             className={`p-1.5 rounded-lg transition-colors ${track.isMuted
               ? 'bg-red-500/20 text-red-400'
-              : 'text-gray-400 hover:text-indigo-400'
+              : 'text-gray-400 hover:text-primary-400'
               }`}
           >
             {track.isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
@@ -380,15 +380,15 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
                   onUpdate(track.id, { isMuted: false });
                 }
               }}
-              className={`w-full h-2 rounded-lg appearance-none cursor-pointer accent-indigo-500 ${track.isMuted ? 'opacity-40' : ''
+              className={`w-full h-2 rounded-lg appearance-none cursor-pointer accent-primary-500 ${track.isMuted ? 'opacity-40' : ''
                 }`}
               style={{
-                background: `linear-gradient(to right, #6366f1 0%, #6366f1 ${(track.isMuted ? 0 : track.volume) * 100}%, rgba(107,114,128,0.3) ${(track.isMuted ? 0 : track.volume) * 100}%, rgba(107,114,128,0.3) 100%)`
+                background: `linear-gradient(to right, rgb(var(--color-primary-500)) 0%, rgb(var(--color-primary-500)) ${(track.isMuted ? 0 : track.volume) * 100}%, rgba(107,114,128,0.3) ${(track.isMuted ? 0 : track.volume) * 100}%, rgba(107,114,128,0.3) 100%)`
               }}
             />
           </div>
 
-          <span className="text-sm font-mono text-indigo-400 w-12 text-right">
+          <span className="text-sm font-mono text-primary-400 w-12 text-right">
             {Math.round(track.volume * 100)}%
           </span>
         </div>
@@ -465,7 +465,7 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
         {/* Expand/Collapse Toggle */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full mt-3 pt-3 border-t border-gray-200 dark:border-gray-700/30 flex items-center justify-center gap-2 text-xs text-gray-500 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
+          className="w-full mt-3 pt-3 border-t border-gray-200 dark:border-gray-700/30 flex items-center justify-center gap-2 text-xs text-gray-500 hover:text-primary-500 dark:hover:text-primary-400 transition-colors"
         >
           {isExpanded ? (
             <>
@@ -493,7 +493,7 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
               {track.offset !== 0 && (
                 <button
                   onClick={() => onUpdate(track.id, { offset: 0 })}
-                  className="flex items-center gap-1 text-[10px] text-gray-500 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
+                  className="flex items-center gap-1 text-[10px] text-gray-500 hover:text-primary-500 dark:hover:text-primary-400 transition-colors"
                 >
                   <RotateCcw size={10} />
                   {t.audioTrack.reset}
@@ -507,7 +507,7 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
               <div className="flex justify-between text-[9px] text-gray-400 dark:text-gray-600 mb-2">
                 <span>-5s</span>
                 <span>-2.5s</span>
-                <span className="text-indigo-500 dark:text-indigo-400">0</span>
+                <span className="text-primary-500 dark:text-primary-400">0</span>
                 <span>+2.5s</span>
                 <span>+5s</span>
               </div>
@@ -515,13 +515,13 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
               {/* Track with center indicator */}
               <div className="relative h-8 bg-gray-200 dark:bg-gray-800 rounded-lg overflow-hidden">
                 {/* Center line (zero point) */}
-                <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-indigo-500/50 -translate-x-1/2" />
+                <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-primary-500/50 -translate-x-1/2" />
 
                 {/* Offset indicator bar */}
                 <div
                   className={`absolute top-1 bottom-1 rounded transition-all duration-150 ${track.offset >= 0
-                    ? 'bg-gradient-to-r from-indigo-500 to-indigo-400'
-                    : 'bg-gradient-to-l from-indigo-500 to-indigo-400'
+                    ? 'bg-gradient-to-r from-primary-500 to-primary-400'
+                    : 'bg-gradient-to-l from-primary-500 to-primary-400'
                     }`}
                   style={{
                     left: track.offset >= 0 ? '50%' : `${50 + (track.offset / 5) * 50}%`,
@@ -531,7 +531,7 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
 
                 {/* Current position marker */}
                 <div
-                  className="absolute top-0 bottom-0 w-1 bg-indigo-600 dark:bg-white rounded shadow-[0_0_10px_rgba(99,102,241,0.5)] dark:shadow-[0_0_10px_rgba(255,255,255,0.5)] transition-all duration-150"
+                  className="absolute top-0 bottom-0 w-1 bg-primary-600 dark:bg-white rounded shadow-[0_0_10px_rgba(var(--color-primary-500),0.5)] dark:shadow-[0_0_10px_rgba(255,255,255,0.5)] transition-all duration-150"
                   style={{ left: `${50 + (track.offset / 5) * 50}%`, transform: 'translateX(-50%)' }}
                 />
               </div>
@@ -544,7 +544,7 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
                 step="0.1"
                 value={track.offset}
                 onChange={(e) => onUpdate(track.id, { offset: parseFloat(e.target.value) })}
-                className="w-full h-2 mt-3 bg-transparent rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                className="w-full h-2 mt-3 bg-transparent rounded-lg appearance-none cursor-pointer accent-primary-500"
                 style={{
                   background: 'linear-gradient(to right, rgba(107,114,128,0.3) 0%, rgba(107,114,128,0.3) 100%)'
                 }}
@@ -563,7 +563,7 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
           {/* EQ Controls */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-medium text-teal-600 dark:text-teal-400 uppercase tracking-wider">{t.audioTrack.eq3Band}</span>
+              <span className="text-xs font-medium text-tertiary-600 dark:text-tertiary-400 uppercase tracking-wider">{t.audioTrack.eq3Band}</span>
               <div className="flex items-center gap-2">
                 {/* Preset Dropdown */}
                 <select
@@ -575,7 +575,7 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
                       onTrackEvent?.('eqAdjustments');
                     }
                   }}
-                  className="text-[10px] px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-1 focus:ring-teal-500 cursor-pointer"
+                  className="text-[10px] px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-1 focus:ring-tertiary-500 cursor-pointer"
                 >
                   <option value="" disabled>{t.audioTrack.eqPresets.label}</option>
                   {eqPresets.map(preset => (
@@ -587,7 +587,7 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
                 {(track.eq?.low !== 0 || track.eq?.mid !== 0 || track.eq?.high !== 0) && (
                   <button
                     onClick={() => onUpdate(track.id, { eq: { low: 0, mid: 0, high: 0 } })}
-                    className="flex items-center gap-1 text-[10px] text-gray-500 hover:text-teal-500 dark:hover:text-teal-400 transition-colors"
+                    className="flex items-center gap-1 text-[10px] text-gray-500 hover:text-tertiary-500 dark:hover:text-tertiary-400 transition-colors"
                   >
                     <RotateCcw size={10} />
                     {t.audioTrack.reset}
@@ -597,9 +597,9 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
             </div>
             <div className="grid grid-cols-3 gap-4">
               {[
-                { key: 'low', label: 'LOW', color: 'from-teal-500 to-teal-600' },
-                { key: 'mid', label: 'MID', color: 'from-purple-500 to-purple-600' },
-                { key: 'high', label: 'HIGH', color: 'from-pink-500 to-pink-600' }
+                { key: 'low', label: 'LOW', color: 'from-tertiary-500 to-tertiary-600' },
+                { key: 'mid', label: 'MID', color: 'from-secondary-500 to-secondary-600' },
+                { key: 'high', label: 'HIGH', color: 'from-tertiary-400 to-tertiary-500' }
               ].map(band => (
                 <div key={band.key} className="text-center">
                   <div className="relative h-24 flex items-center justify-center mb-2">
@@ -613,7 +613,7 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
                       style={{
                         writingMode: 'vertical-lr',
                         direction: 'rtl',
-                        background: `linear-gradient(to top, #14b8a6 0%, #14b8a6 ${((track.eq?.[band.key as keyof typeof track.eq] || 0) + 12) / 24 * 100}%, rgba(107,114,128,0.3) ${((track.eq?.[band.key as keyof typeof track.eq] || 0) + 12) / 24 * 100}%, rgba(107,114,128,0.3) 100%)`
+                        background: `linear-gradient(to top, rgb(var(--color-tertiary-500)) 0%, rgb(var(--color-tertiary-500)) ${((track.eq?.[band.key as keyof typeof track.eq] || 0) + 12) / 24 * 100}%, rgba(107,114,128,0.3) ${((track.eq?.[band.key as keyof typeof track.eq] || 0) + 12) / 24 * 100}%, rgba(107,114,128,0.3) 100%)`
                       }}
                     />
                   </div>
@@ -632,7 +632,7 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
             <button
               onClick={() => onUpdate(track.id, { useCompressor: !track.useCompressor })}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${track.useCompressor
-                ? 'bg-teal-500/20 border border-teal-500 text-teal-600 dark:text-teal-400 shadow-[0_0_15px_rgba(20,184,166,0.2)]'
+                ? 'bg-tertiary-500/20 border border-tertiary-500 text-tertiary-600 dark:text-tertiary-400 shadow-[0_0_15px_rgba(var(--color-tertiary-500),0.2)]'
                 : 'bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500'
                 }`}
             >

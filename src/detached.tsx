@@ -335,7 +335,7 @@ const DetachedPlayer: React.FC = () => {
                         )}
 
                         {/* Connection Status */}
-                        <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-medium transition-opacity ${showControls ? 'opacity-100' : 'opacity-0'} ${isConnected ? 'bg-green-500/80' : 'bg-yellow-500/80'}`}>
+                        <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-medium transition-opacity ${showControls ? 'opacity-100' : 'opacity-0'} ${isConnected ? 'bg-secondary-500/80' : 'bg-yellow-500/80'}`}>
                             {isConnected ? t.detached.connected : t.detached.waiting}
                         </div>
 
@@ -368,7 +368,7 @@ const DetachedPlayer: React.FC = () => {
                         max={duration || 100}
                         value={currentTime}
                         onChange={(e) => handleLocalSeek(parseFloat(e.target.value))}
-                        className="flex-1 h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                        className="flex-1 h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary-500"
                     />
                     <span className="text-xs font-mono text-gray-400 w-12">{formatTime(duration)}</span>
                 </div>

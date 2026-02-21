@@ -291,12 +291,12 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({ onComplete, onSk
                             width: spotlightStyle.width + 6,
                             height: spotlightStyle.height + 6,
                             opacity: isVisible ? 1 : 0,
-                            border: '3px solid #a78bfa',
+                            border: '3px solid #34d399',
                             borderRadius: '12px',
                             boxShadow: `
-                                0 0 15px 2px rgba(167, 139, 250, 0.7),
-                                0 0 40px 5px rgba(167, 139, 250, 0.4),
-                                inset 0 0 15px 2px rgba(167, 139, 250, 0.1)
+                                0 0 15px 2px rgba(16, 185, 129, 0.7),
+                                0 0 40px 5px rgba(16, 185, 129, 0.4),
+                                inset 0 0 15px 2px rgba(16, 185, 129, 0.1)
                             `
                         }}
                     />
@@ -309,47 +309,47 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({ onComplete, onSk
                     }`}
                 style={{
                     ...getTooltipStyle(),
-                    backgroundColor: '#1e1b4b',
-                    border: '1px solid #4c1d95',
-                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 40px rgba(139, 92, 246, 0.3)'
+                    backgroundColor: '#022c22',
+                    border: '1px solid #064e3b',
+                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 40px rgba(5, 150, 105, 0.3)'
                 }}
             >
                 {/* Close button */}
                 <button
                     onClick={onSkip}
-                    className="absolute top-3 right-3 p-1.5 rounded-lg hover:bg-purple-900/50 transition-colors"
+                    className="absolute top-3 right-3 p-1.5 rounded-lg hover:bg-primary-900/50 transition-colors"
                     title="Skip Tour"
                 >
-                    <X size={18} style={{ color: '#a78bfa' }} />
+                    <X size={18} style={{ color: '#34d399' }} />
                 </button>
 
                 {/* Progress bar - with right margin to avoid X button */}
-                <div className="h-1.5 rounded-full mb-4 overflow-hidden mr-10" style={{ backgroundColor: '#4c1d95' }}>
+                <div className="h-1.5 rounded-full mb-4 overflow-hidden mr-10" style={{ backgroundColor: '#064e3b' }}>
                     <div
                         className="h-full rounded-full transition-all duration-500"
                         style={{
                             width: `${progress}%`,
-                            background: 'linear-gradient(90deg, #8b5cf6, #a78bfa)'
+                            background: 'linear-gradient(90deg, #10b981, #34d399)'
                         }}
                     />
                 </div>
 
                 {/* Step counter */}
-                <div className="text-xs mb-3 font-medium" style={{ color: '#a78bfa' }}>
+                <div className="text-xs mb-3 font-medium" style={{ color: '#34d399' }}>
                     Step {currentStep + 1} of {activeSteps.length}
                 </div>
 
                 {/* Content */}
                 <h3 className="text-xl font-bold mb-3" style={{ color: '#ffffff' }}>{step.title}</h3>
-                <p className="text-sm leading-relaxed mb-6" style={{ color: '#e9d5ff' }}>{step.description}</p>
+                <p className="text-sm leading-relaxed mb-6" style={{ color: '#d1fae5' }}>{step.description}</p>
 
                 {/* Navigation */}
                 <div className="flex items-center justify-between gap-3">
                     {/* Skip button */}
                     <button
                         onClick={onSkip}
-                        className="flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg hover:bg-purple-900/50 transition-colors"
-                        style={{ color: '#c4b5fd' }}
+                        className="flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg hover:bg-primary-900/50 transition-colors"
+                        style={{ color: '#6ee7b7' }}
                     >
                         <SkipForward size={14} />
                         <span>Skip</span>
@@ -362,7 +362,7 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({ onComplete, onSk
                                 onClick={handlePrev}
                                 className="flex items-center gap-1 px-4 py-2.5 text-sm rounded-lg transition-colors"
                                 style={{
-                                    backgroundColor: '#4c1d95',
+                                    backgroundColor: '#064e3b',
                                     color: '#ffffff'
                                 }}
                             >
@@ -376,9 +376,9 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({ onComplete, onSk
                             onClick={handleNext}
                             className="flex items-center gap-1 px-5 py-2.5 text-sm font-semibold rounded-lg transition-all hover:scale-105"
                             style={{
-                                background: 'linear-gradient(135deg, #8b5cf6, #a78bfa)',
+                                background: 'linear-gradient(135deg, #10b981, #34d399)',
                                 color: '#ffffff',
-                                boxShadow: '0 4px 20px rgba(139, 92, 246, 0.5)'
+                                boxShadow: '0 4px 20px rgba(5, 150, 105, 0.5)'
                             }}
                         >
                             {isLastStep ? (
@@ -397,7 +397,7 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({ onComplete, onSk
                 </div>
 
                 {/* Keyboard hint */}
-                <div className="mt-4 pt-3 text-xs text-center" style={{ borderTop: '1px solid #4c1d95', color: '#7c3aed' }}>
+                <div className="mt-4 pt-3 text-xs text-center" style={{ borderTop: '1px solid #064e3b', color: '#059669' }}>
                     Use ← → arrow keys to navigate
                 </div>
             </div>
