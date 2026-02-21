@@ -145,7 +145,10 @@ export const SubtitleSettings: React.FC<SubtitleSettingsProps> = ({
                                                     <input
                                                         type="text"
                                                         value={safeStyle.color}
-                                                        onChange={(e) => onSubtitleStyleChange({ ...safeStyle, color: e.target.value })}
+                                                        onChange={(e) => {
+                                                            const newColor = e.target.value;
+                                                            onSubtitleStyleChange({ ...safeStyle, color: newColor });
+                                                        }}
                                                         className="flex-1 bg-gray-900 border border-gray-600 rounded-md px-2 py-1 text-xs text-white focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 font-mono transition-shadow h-7"
                                                         placeholder="#ffffff"
                                                     />
@@ -161,9 +164,14 @@ export const SubtitleSettings: React.FC<SubtitleSettingsProps> = ({
                                                     <input
                                                         key={advancedPickerKey}
                                                         type="color"
-                                                        value={safeStyle.color}
+                                                        value={safeStyle.color.length === 7 ? safeStyle.color : '#ffffff'} // Native pickers require exact 7 char hex
                                                         onChange={(e) => {
-                                                            onSubtitleStyleChange({ ...safeStyle, color: e.target.value });
+                                                            const val = e.target.value;
+                                                            if (val) onSubtitleStyleChange({ ...safeStyle, color: val });
+                                                        }}
+                                                        onInput={(e) => {
+                                                            const val = (e.target as HTMLInputElement).value;
+                                                            if (val) onSubtitleStyleChange({ ...safeStyle, color: val });
                                                         }}
                                                         onClick={(e) => {
                                                             if (isAdvancedOpen) {
@@ -174,7 +182,6 @@ export const SubtitleSettings: React.FC<SubtitleSettingsProps> = ({
                                                                 setIsAdvancedOpen(true);
                                                             }
                                                         }}
-                                                        onBlur={() => setIsAdvancedOpen(false)}
                                                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                                     />
                                                 </div>
