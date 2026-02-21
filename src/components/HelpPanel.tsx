@@ -548,29 +548,43 @@ export const HelpPanel: React.FC<HelpPanelProps> = ({ isOpen, onClose, accentThe
                         </div>
 
                         {/* Bookmarklet Drag Button - Only shown when bookmarklet section is active */}
-                        {activeSection.id === 'bookmarklet' && (
-                            <div className="mt-6 p-5 rounded-xl bg-gradient-to-br from-primary-500/10 via-secondary-500/10 to-amber-500/10 border border-primary-500/30 backdrop-blur-sm">
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 text-center">
-                                    {t.help.bookmarklet?.dragInstruction || '👇 Drag this button to your bookmarks bar'}
-                                </p>
-                                <div className="flex justify-center">
-                                    <a
-                                        href={`javascript:void(function(){var v=document.querySelector('video');var u=v?(v.currentSrc||v.src):window.location.href;if(u){window.open('${window.location.origin}?video='+encodeURIComponent(u),'_blank')}else{alert('No video found on this page')}})()`}
-                                        onClick={(e) => e.preventDefault()}
-                                        className="group relative inline-flex items-center gap-2.5 px-6 py-3 bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-500 hover:to-secondary-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 transition-all hover:scale-105 cursor-grab active:cursor-grabbing border border-primary-400/30"
-                                        title={t.help.bookmarklet?.dragInstruction || 'Drag to bookmarks bar'}
-                                    >
-                                        <Bookmark size={18} className="group-hover:animate-bounce" />
-                                        <span>Open in SynCinema</span>
-                                        {/* Glow effect */}
-                                        <div className="absolute inset-0 rounded-xl bg-primary-400/20 opacity-0 group-hover:opacity-100 blur-md transition-opacity -z-10" />
-                                    </a>
+                        {activeSection.id === 'bookmarklet' && (() => {
+                            const bookmarkletCode = `javascript:void(function(){var v=document.querySelector('video');var u=v?(v.currentSrc||v.src):window.location.href;if(u){window.open('${window.location.origin}?video='+encodeURIComponent(u),'_blank')}else{alert('No video found on this page')}})()`;
+                            return (
+                                <div className="mt-6 p-5 rounded-xl bg-gradient-to-br from-primary-500/10 via-secondary-500/10 to-amber-500/10 border border-primary-500/30 backdrop-blur-sm">
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 text-center">
+                                        {t.help.bookmarklet?.dragInstruction || '👇 Drag this button to your bookmarks bar'}
+                                    </p>
+                                    <div className="flex justify-center">
+                                        <a
+                                            ref={(el) => { if (el) el.setAttribute('href', bookmarkletCode); }}
+                                            onClick={(e) => e.preventDefault()}
+                                            className="group relative inline-flex items-center gap-2.5 px-6 py-3 bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-500 hover:to-secondary-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 transition-all hover:scale-105 cursor-grab active:cursor-grabbing border border-primary-400/30"
+                                            title={t.help.bookmarklet?.dragInstruction || 'Drag to bookmarks bar'}
+                                        >
+                                            <Bookmark size={18} className="group-hover:animate-bounce" />
+                                            <span>Open in SynCinema</span>
+                                            {/* Glow effect */}
+                                            <div className="absolute inset-0 rounded-xl bg-primary-400/20 opacity-0 group-hover:opacity-100 blur-md transition-opacity -z-10" />
+                                        </a>
+                                    </div>
+                                    <div className="mt-4 p-3 bg-gray-900/50 rounded-lg border border-gray-700/50">
+                                        <p className="text-[10px] text-gray-400 mb-1.5 font-medium">💡 {t.help.bookmarklet?.howToInstall || 'Manual setup:'}</p>
+                                        <p className="text-[10px] text-gray-500 mb-2">1. Right-click bookmarks bar → "Add page" / "Add bookmark"</p>
+                                        <p className="text-[10px] text-gray-500 mb-2">2. Name: <span className="text-primary-400">Open in SynCinema</span></p>
+                                        <p className="text-[10px] text-gray-500 mb-1.5">3. URL: Copy the code below</p>
+                                        <div className="relative">
+                                            <code className="block text-[9px] text-primary-300 bg-gray-950 p-2 rounded border border-gray-700 break-all max-h-16 overflow-y-auto select-all font-mono">
+                                                {bookmarkletCode}
+                                            </code>
+                                        </div>
+                                    </div>
+                                    <p className="text-[10px] text-gray-500 dark:text-gray-500 mt-3 text-center">
+                                        {t.help.bookmarklet?.note || 'Works on Chrome, Firefox, Edge, Opera, and Brave browsers.'}
+                                    </p>
                                 </div>
-                                <p className="text-[10px] text-gray-500 dark:text-gray-500 mt-3 text-center">
-                                    {t.help.bookmarklet?.note || 'Works on Chrome, Firefox, Edge, Opera, and Brave browsers.'}
-                                </p>
-                            </div>
-                        )}
+                            );
+                        })()}
                     </div>
                 </div>
             </div>
