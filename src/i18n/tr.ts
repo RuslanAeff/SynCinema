@@ -312,6 +312,10 @@ export const tr: Translations = {
             howToUseDesc: 'Video içeren herhangi bir sayfaya gidin. "Open in SynCinema" yer imine tıklayın. Video otomatik olarak tüm özelliklerle birlikte SynCinema\'da açılacaktır.',
             dragInstruction: '👇 Bu butonu yer imleri çubuğunuza sürükleyin',
             note: 'Chrome, Firefox, Edge, Opera ve Brave tarayıcılarında çalışır.',
+            supported: 'Desteklenen Kaynaklar',
+            supportedDesc: 'YouTube, Google Drive, Dropbox ve doğrudan video dosyası içeren (.mp4, .webm) tüm siteler. Bu kaynaklar tam uyumludur.',
+            limitations: 'Harici Kısıtlamalar',
+            limitationsDesc: 'iframe gömülü oynatıcı kullanan akış siteleri (örn. dizi/film siteleri — VidMoly, Filemoon vb.) veya DRM korumalı içerikler yakalanamaz. Bu SynCinema\'nın değil, tarayıcıların evrensel güvenlik kısıtlamasıdır.',
         },
     },
 

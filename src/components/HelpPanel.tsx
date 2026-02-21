@@ -340,6 +340,18 @@ const getHelpSections = (t: Translations): HelpSection[] => [
                 icon: <Film size={16} />,
                 iconColor: 'bg-secondary-500/20 text-secondary-600 dark:bg-secondary-500/20 dark:text-secondary-400',
                 description: t.help.bookmarklet?.howToUseDesc || 'Navigate to any page with a video. Click the "Open in SynCinema" bookmark. The video will automatically open in SynCinema with all features ready.',
+            },
+            {
+                name: '✅ ' + (t.help.bookmarklet?.supported || 'Supported Sources'),
+                icon: <Link size={16} />,
+                iconColor: 'bg-secondary-500/20 text-secondary-600 dark:bg-secondary-500/20 dark:text-secondary-400',
+                description: t.help.bookmarklet?.supportedDesc || 'YouTube, Google Drive, Dropbox, and any site with direct video files (.mp4, .webm). These sources are fully compatible.',
+            },
+            {
+                name: '⚠️ ' + (t.help.bookmarklet?.limitations || 'External Limitations'),
+                icon: <AlertTriangle size={16} />,
+                iconColor: 'bg-amber-500/20 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400',
+                description: t.help.bookmarklet?.limitationsDesc || 'Streaming sites (e.g. film/series sites) that use iframe-embedded video players (VidMoly, Filemoon, etc.) or DRM-protected content CANNOT be captured. This is NOT a SynCinema limitation — it is a browser security restriction that applies to all bookmarklets and extensions worldwide.',
             }
         ]
     }

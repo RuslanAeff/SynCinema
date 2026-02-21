@@ -313,6 +313,10 @@ export const en: Translations = {
             howToUseDesc: 'Navigate to any page with a video. Click the "Open in SynCinema" bookmark. The video will automatically open in SynCinema with all features ready.',
             dragInstruction: '👇 Drag this button to your bookmarks bar',
             note: 'Works on Chrome, Firefox, Edge, Opera, and Brave browsers.',
+            supported: 'Supported Sources',
+            supportedDesc: 'YouTube, Google Drive, Dropbox, and any site with direct video files (.mp4, .webm). These sources are fully compatible.',
+            limitations: 'External Limitations',
+            limitationsDesc: 'Streaming sites (e.g. film/series portals) that use iframe-embedded players (VidMoly, Filemoon, etc.) or DRM-protected content cannot be captured. This is a universal browser security restriction, not a SynCinema limitation.',
         },
     },
 

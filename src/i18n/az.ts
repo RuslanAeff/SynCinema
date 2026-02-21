@@ -312,6 +312,10 @@ export const az: Translations = {
             howToUseDesc: 'Video olan istənilən səhifəyə daxil olun. "Open in SynCinema" zərfinə klikləyin. Video avtomatik olaraq bütün funksiyalarla SynCinema-da açılacaq.',
             dragInstruction: '👇 Bu düyməni zərlər panelinizə sürükləyin',
             note: 'Chrome, Firefox, Edge, Opera və Brave brauzrlərində işləyir.',
+            supported: 'Dəstəklənən Mənbələr',
+            supportedDesc: 'YouTube, Google Drive, Dropbox və birbaşa video faylları (.mp4, .webm) olan istənilən sayt. Bu mənbələr tam uyumludur.',
+            limitations: 'Xarici Məhdudiyyətlər',
+            limitationsDesc: 'iframe gömülü pleyer istifadə edən axın saytları (məs. film/serial portalları — VidMoly, Filemoon və s.) və ya DRM ilə qorunan məzmun tutula bilməz. Bu SynCinema-nın deyil, brauzrlərin universal təhlükəsizlik məhdudiyyətidir.',
         },
     },
 

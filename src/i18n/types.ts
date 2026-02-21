@@ -359,6 +359,10 @@ export interface Translations {
             howToUseDesc: string;
             dragInstruction: string;
             note: string;
+            supported: string;
+            supportedDesc: string;
+            limitations: string;
+            limitationsDesc: string;
         };
     };
 

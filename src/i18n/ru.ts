@@ -312,6 +312,10 @@ export const ru: Translations = {
             howToUseDesc: 'Перейдите на любую страницу с видео. Нажмите закладку "Open in SynCinema". Видео автоматически откроется в SynCinema со всеми функциями.',
             dragInstruction: '👇 Перетащите эту кнопку на панель закладок',
             note: 'Работает в Chrome, Firefox, Edge, Opera и Brave.',
+            supported: 'Поддерживаемые источники',
+            supportedDesc: 'YouTube, Google Drive, Dropbox и любой сайт с прямыми видеофайлами (.mp4, .webm). Эти источники полностью совместимы.',
+            limitations: 'Внешние ограничения',
+            limitationsDesc: 'Сайты с потоковым видео (напр. порталы фильмов/сериалов), использующие встроенные iframe-плееры (VidMoly, Filemoon и т.д.) или DRM-защищённый контент не могут быть захвачены. Это универсальное ограничение браузеров, а не SynCinema.',
         },
     },
 
