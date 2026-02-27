@@ -52,6 +52,7 @@ const StatCard: React.FC<{
                 transition-all duration-300 hover:scale-[1.02] hover:shadow-md dark:hover:border-gray-600/50
                 ${large ? 'col-span-2' : ''}
             `}
+            onClick={() => isLongLabel && setShowTooltip(!showTooltip)}
         >
             {/* Glow effect - only in dark mode */}
             <div className={`absolute -top-10 -right-10 w-24 h-24 rounded-full blur-3xl opacity-0 dark:opacity-20 ${colorClass}`} />
@@ -66,14 +67,7 @@ const StatCard: React.FC<{
                             {label}
                         </p>
                         {isLongLabel && (
-                            <button
-                                onClick={(e) => { e.stopPropagation(); setShowTooltip(!showTooltip); }}
-                                onMouseEnter={() => setShowTooltip(true)}
-                                onMouseLeave={() => setShowTooltip(false)}
-                                className="flex-shrink-0 p-0.5 rounded-full text-gray-400 hover:text-primary-400 transition-colors"
-                            >
-                                <Info size={10} />
-                            </button>
+                            <Info size={10} className="flex-shrink-0 text-gray-400" />
                         )}
                     </div>
                     <p className={`font-bold text-gray-900 dark:text-gray-100 ${large ? 'text-2xl' : 'text-lg'}`}>
@@ -82,17 +76,10 @@ const StatCard: React.FC<{
                 </div>
             </div>
 
-            {/* Tooltip overlay */}
+            {/* Inline tooltip — shown below content when tapped */}
             {showTooltip && isLongLabel && (
-                <div
-                    className="absolute z-50 left-2 right-2 -top-2 -translate-y-full px-3 py-2 rounded-xl
-                        bg-gray-900 dark:bg-gray-700 text-white text-[11px] font-medium
-                        shadow-xl border border-gray-700 dark:border-gray-600
-                        animate-[fadeIn_0.15s_ease-out]"
-                    onClick={() => setShowTooltip(false)}
-                >
-                    {label}
-                    <div className="absolute left-1/2 -translate-x-1/2 -bottom-1 w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45 border-r border-b border-gray-700 dark:border-gray-600" />
+                <div className="relative mt-2 px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-700/60 border border-gray-200 dark:border-gray-600/50 animate-[fadeIn_0.15s_ease-out]">
+                    <p className="text-[11px] text-gray-700 dark:text-gray-200 font-medium">{label}</p>
                 </div>
             )}
         </div>
@@ -204,7 +191,7 @@ export const StatisticsPanel: React.FC<StatisticsPanelProps> = ({
                 </div>
 
                 {/* Content */}
-                <div className="px-5 pb-5 overflow-y-auto max-h-[calc(90vh-140px)] space-y-4 bg-gray-50 dark:bg-transparent">
+                <div className="px-5 pt-4 pb-5 overflow-y-auto max-h-[calc(90vh-140px)] space-y-4 bg-gray-50 dark:bg-transparent">
                     {/* Main Stats Grid */}
                     <div className="grid grid-cols-2 gap-3">
                         <StatCard
