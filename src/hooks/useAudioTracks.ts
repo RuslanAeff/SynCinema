@@ -21,11 +21,15 @@ export const useAudioTracks = () => {
     const refreshDevices = useCallback(async () => {
         try {
             if (!permissionsGranted) {
-                // We only request permission if not already granted to avoid annoying popups on every refresh if denied
+                // Request microphone permission to enable full device enumeration with labels
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 // Stop the tracks immediately as we only needed permission
                 stream.getTracks().forEach(t => t.stop());
                 setPermissionsGranted(true);
+                // Small delay to let the browser update its internal permission state
+                // before enumerating devices — without this, some browsers return
+                // devices without labels or incomplete lists
+                await new Promise(resolve => setTimeout(resolve, 300));
             }
             const devices = await navigator.mediaDevices.enumerateDevices();
             const outputs = devices.filter(d => d.kind === 'audiooutput');
