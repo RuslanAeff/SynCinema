@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useRef, useCallback } from 'react';
 import {
     X,
     Clock,
@@ -16,8 +16,7 @@ import {
     Bookmark,
     BarChart3,
     Trash2,
-    FolderOpen,
-    Info
+    FolderOpen
 } from 'lucide-react';
 import { AnalyticsData } from '../hooks/useAnalytics';
 import { useI18n } from '../context/I18nContext';
@@ -30,7 +29,7 @@ interface StatisticsPanelProps {
     onReset: () => void;
 }
 
-// Stat card component with light/dark mode support + mobile tooltip
+// Stat card component with smooth expand on tap for truncated labels
 const StatCard: React.FC<{
     icon: React.ReactNode;
     label: string;
@@ -39,20 +38,22 @@ const StatCard: React.FC<{
     iconColorClass: string;
     large?: boolean;
 }> = ({ icon, label, value, colorClass, iconColorClass, large }) => {
-    const [showTooltip, setShowTooltip] = useState(false);
-    const isLongLabel = label.length > 16;
+    const [expanded, setExpanded] = useState(false);
+    const expandRef = useRef<HTMLDivElement>(null);
+    const isLongLabel = label.length > 14;
 
     return (
         <div
             className={`
-                relative overflow-hidden rounded-2xl p-4
+                relative overflow-hidden rounded-2xl p-4 cursor-pointer select-none
                 bg-white dark:bg-gray-800/80
                 border border-gray-200 dark:border-gray-700/50
                 shadow-sm dark:shadow-none
-                transition-all duration-300 hover:scale-[1.02] hover:shadow-md dark:hover:border-gray-600/50
+                transition-all duration-300 hover:shadow-md dark:hover:border-gray-600/50
                 ${large ? 'col-span-2' : ''}
+                ${expanded ? 'ring-1 ring-primary-500/30 dark:ring-primary-400/20 scale-[1.03]' : 'hover:scale-[1.02]'}
             `}
-            onClick={() => isLongLabel && setShowTooltip(!showTooltip)}
+            onClick={() => isLongLabel && setExpanded(!expanded)}
         >
             {/* Glow effect - only in dark mode */}
             <div className={`absolute -top-10 -right-10 w-24 h-24 rounded-full blur-3xl opacity-0 dark:opacity-20 ${colorClass}`} />
@@ -62,26 +63,29 @@ const StatCard: React.FC<{
                     <span className={iconColorClass}>{icon}</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1">
-                        <p className={`text-gray-500 dark:text-gray-400 leading-tight line-clamp-2 ${isLongLabel ? 'text-[10px]' : 'text-xs'}`}>
-                            {label}
-                        </p>
-                        {isLongLabel && (
-                            <Info size={10} className="flex-shrink-0 text-gray-400" />
-                        )}
-                    </div>
+                    <p className={`text-gray-500 dark:text-gray-400 leading-tight ${isLongLabel && !expanded ? 'line-clamp-1' : ''} ${isLongLabel ? 'text-[10px]' : 'text-xs'}`}>
+                        {label}
+                    </p>
                     <p className={`font-bold text-gray-900 dark:text-gray-100 ${large ? 'text-2xl' : 'text-lg'}`}>
                         {value}
                     </p>
                 </div>
             </div>
 
-            {/* Inline tooltip — shown below content when tapped */}
-            {showTooltip && isLongLabel && (
-                <div className="relative mt-2 px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-700/60 border border-gray-200 dark:border-gray-600/50 animate-[fadeIn_0.15s_ease-out]">
-                    <p className="text-[11px] text-gray-700 dark:text-gray-200 font-medium">{label}</p>
+            {/* Smooth expand section — full label revealed on tap */}
+            <div
+                ref={expandRef}
+                className="transition-all duration-300 ease-in-out"
+                style={{
+                    maxHeight: expanded && isLongLabel ? '60px' : '0px',
+                    opacity: expanded && isLongLabel ? 1 : 0,
+                    marginTop: expanded && isLongLabel ? '8px' : '0px',
+                }}
+            >
+                <div className="px-3 py-1.5 rounded-lg bg-gray-100/80 dark:bg-gray-700/40">
+                    <p className="text-[11px] text-gray-600 dark:text-gray-300 font-medium leading-snug">{label}</p>
                 </div>
-            )}
+            </div>
         </div>
     );
 };
