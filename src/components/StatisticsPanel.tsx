@@ -39,19 +39,18 @@ const StatCard: React.FC<{
     large?: boolean;
 }> = ({ icon, label, value, colorClass, iconColorClass, large }) => {
     const [expanded, setExpanded] = useState(false);
-    const expandRef = useRef<HTMLDivElement>(null);
     const isLongLabel = label.length > 14;
 
     return (
         <div
             className={`
-                relative overflow-hidden rounded-2xl p-4 cursor-pointer select-none
+                relative rounded-2xl p-4 cursor-pointer select-none
                 bg-white dark:bg-gray-800/80
                 border border-gray-200 dark:border-gray-700/50
                 shadow-sm dark:shadow-none
                 transition-all duration-300 hover:shadow-md dark:hover:border-gray-600/50
                 ${large ? 'col-span-2' : ''}
-                ${expanded ? 'ring-1 ring-primary-500/30 dark:ring-primary-400/20 scale-[1.03]' : 'hover:scale-[1.02]'}
+                ${expanded ? 'ring-1 ring-primary-500/30 dark:ring-primary-400/20' : 'hover:scale-[1.02]'}
             `}
             onClick={() => isLongLabel && setExpanded(!expanded)}
         >
@@ -63,27 +62,12 @@ const StatCard: React.FC<{
                     <span className={iconColorClass}>{icon}</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                    <p className={`text-gray-500 dark:text-gray-400 leading-tight ${isLongLabel && !expanded ? 'line-clamp-1' : ''} ${isLongLabel ? 'text-[10px]' : 'text-xs'}`}>
+                    <p className={`text-gray-500 dark:text-gray-400 leading-tight transition-all duration-300 ${isLongLabel && !expanded ? 'line-clamp-1' : ''} ${isLongLabel ? 'text-[10px]' : 'text-xs'}`}>
                         {label}
                     </p>
                     <p className={`font-bold text-gray-900 dark:text-gray-100 ${large ? 'text-2xl' : 'text-lg'}`}>
                         {value}
                     </p>
-                </div>
-            </div>
-
-            {/* Smooth expand section — full label revealed on tap */}
-            <div
-                ref={expandRef}
-                className="transition-all duration-300 ease-in-out"
-                style={{
-                    maxHeight: expanded && isLongLabel ? '60px' : '0px',
-                    opacity: expanded && isLongLabel ? 1 : 0,
-                    marginTop: expanded && isLongLabel ? '8px' : '0px',
-                }}
-            >
-                <div className="px-3 py-1.5 rounded-lg bg-gray-100/80 dark:bg-gray-700/40">
-                    <p className="text-[11px] text-gray-600 dark:text-gray-300 font-medium leading-snug">{label}</p>
                 </div>
             </div>
         </div>
