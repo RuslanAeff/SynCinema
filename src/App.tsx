@@ -187,6 +187,13 @@ function App() {
     if (videoParam) {
       try {
         const decodedUrl = decodeURIComponent(videoParam);
+
+        // Security: Only allow http/https URLs (block javascript:, data:, file:, etc.)
+        if (!/^https?:\/\//i.test(decodedUrl)) {
+          console.warn('[SynCinema Bookmarklet] Blocked non-http URL:', decodedUrl);
+          return;
+        }
+
         // Skip welcome screen
         setShowWelcome(false);
         sessionStorage.setItem('syncinema_welcome_seen', 'true');
