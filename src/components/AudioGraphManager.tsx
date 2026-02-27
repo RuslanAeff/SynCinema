@@ -27,7 +27,11 @@ export const AudioGraphManager: React.FC<AudioGraphManagerProps> = ({
     const compressorRef = useRef<DynamicsCompressorNode | null>(null);
     const isInitializedRef = useRef(false);
 
-    // Initialize Audio Graph
+    // Store deviceId in ref so the init effect can use it without re-running
+    const deviceIdRef = useRef(deviceId);
+    useEffect(() => { deviceIdRef.current = deviceId; }, [deviceId]);
+
+    // Initialize Audio Graph (runs ONCE per audioElement — never re-runs on deviceId change)
     useEffect(() => {
         if (!audioElement || sourceRef.current) return;
 
@@ -74,9 +78,9 @@ export const AudioGraphManager: React.FC<AudioGraphManagerProps> = ({
 
             console.log('[AudioGraphManager] Audio graph initialized');
 
-            // Immediately set the output device after graph creation
+            // Set the initial output device
             if ('setSinkId' in ctx && typeof (ctx as any).setSinkId === 'function') {
-                const targetId = deviceId || '';
+                const targetId = deviceIdRef.current || '';
                 (ctx as any).setSinkId(targetId).then(() => {
                     console.log('[AudioGraphManager] Initial device set to:', targetId || 'default');
                     isInitializedRef.current = true;
@@ -103,7 +107,7 @@ export const AudioGraphManager: React.FC<AudioGraphManagerProps> = ({
             compressorRef.current = null;
             isInitializedRef.current = false;
         };
-    }, [audioElement, deviceId]);
+    }, [audioElement]);
 
     // Update EQ values
     useEffect(() => {
