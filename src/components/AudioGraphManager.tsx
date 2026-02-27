@@ -13,18 +13,21 @@ interface AudioGraphManagerProps {
     eqSettings?: { low: number; mid: number; high: number };
     deviceId: string;
     useCompressor?: boolean;
+    gainBoost?: number; // 1.0 = normal, up to 3.0 = 3x amplification
 }
 
 export const AudioGraphManager: React.FC<AudioGraphManagerProps> = ({
     audioElement,
     eqSettings = { low: 0, mid: 0, high: 0 },
     deviceId,
-    useCompressor = false
+    useCompressor = false,
+    gainBoost = 1.0
 }) => {
     const contextRef = useRef<AudioContext | null>(null);
     const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
     const eqNodesRef = useRef<{ low: BiquadFilterNode; mid: BiquadFilterNode; high: BiquadFilterNode } | null>(null);
     const compressorRef = useRef<DynamicsCompressorNode | null>(null);
+    const gainNodeRef = useRef<GainNode | null>(null);
     const isInitializedRef = useRef(false);
 
     // Store deviceId in ref so the init effect can use it without re-running
@@ -66,12 +69,18 @@ export const AudioGraphManager: React.FC<AudioGraphManagerProps> = ({
             compressor.release.value = 0.25;
             compressorRef.current = compressor;
 
-            // Connect graph: Source -> Low -> Mid -> High -> Destination
-            // Compressor is OFF by default — High connects directly to destination
+            // Create Gain Node for boost (at end of chain, before destination)
+            const gainNode = ctx.createGain();
+            gainNode.gain.value = 1.0; // Will be updated by gainBoost effect
+            gainNodeRef.current = gainNode;
+
+            // Connect graph: Source -> Low -> Mid -> High -> GainNode -> Destination
+            // Compressor is OFF by default — High connects to GainNode (not compressor)
             source.connect(low);
             low.connect(mid);
             mid.connect(high);
-            high.connect(ctx.destination);
+            high.connect(gainNode);
+            gainNode.connect(ctx.destination);
 
             eqNodesRef.current = { low, mid, high };
 
@@ -104,6 +113,7 @@ export const AudioGraphManager: React.FC<AudioGraphManagerProps> = ({
             sourceRef.current = null;
             eqNodesRef.current = null;
             compressorRef.current = null;
+            gainNodeRef.current = null;
             isInitializedRef.current = false;
         };
     }, [audioElement]);
@@ -122,26 +132,34 @@ export const AudioGraphManager: React.FC<AudioGraphManagerProps> = ({
         const ctx = contextRef.current;
         const eq = eqNodesRef.current;
         const comp = compressorRef.current;
-        if (!ctx || !eq || !comp) return;
+        const gain = gainNodeRef.current;
+        if (!ctx || !eq || !comp || !gain) return;
 
         // Disconnect High filter's current output
         eq.high.disconnect();
+        comp.disconnect();
 
         if (useCompressor) {
-            // High -> Compressor -> Destination
+            // High -> Compressor -> GainNode -> Destination
             comp.threshold.value = -24;
             comp.knee.value = 30;
             comp.ratio.value = 12;
             eq.high.connect(comp);
-            comp.connect(ctx.destination);
+            comp.connect(gain);
             console.log('[AudioGraphManager] Compressor ENABLED');
         } else {
-            // High -> Destination (skip compressor entirely)
-            comp.disconnect();
-            eq.high.connect(ctx.destination);
+            // High -> GainNode -> Destination (skip compressor entirely)
+            eq.high.connect(gain);
             console.log('[AudioGraphManager] Compressor BYPASSED');
         }
     }, [useCompressor]);
+
+    // Update Gain Boost
+    useEffect(() => {
+        if (gainNodeRef.current) {
+            gainNodeRef.current.gain.value = gainBoost;
+        }
+    }, [gainBoost]);
 
     // Handle Output Device Switching via AudioContext.setSinkId
     useEffect(() => {

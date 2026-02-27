@@ -77,6 +77,7 @@ export const useAudioTracks = () => {
                 isMuted: false,
                 eq: saved.eq || { low: 0, mid: 0, high: 0 },
                 useCompressor: saved.useCompressor || false,
+                gainBoost: saved.gainBoost || 1,
                 audioFingerprint: getAudioFingerprint(file, null)
             };
         });
@@ -100,6 +101,7 @@ export const useAudioTracks = () => {
             isMuted: false,
             eq: saved.eq || { low: 0, mid: 0, high: 0 },
             useCompressor: saved.useCompressor || false,
+            gainBoost: saved.gainBoost || 1,
             audioFingerprint: getAudioFingerprint(null, url)
         };
 
@@ -117,14 +119,16 @@ export const useAudioTracks = () => {
                     updates.playbackRate !== undefined ||
                     updates.deviceId !== undefined ||
                     updates.eq !== undefined ||
-                    updates.useCompressor !== undefined
+                    updates.useCompressor !== undefined ||
+                    updates.gainBoost !== undefined
                 ) {
                     saveTrackPref(t.name, {
                         offset: updated.offset,
                         playbackRate: updated.playbackRate,
                         deviceId: updated.deviceId,
                         eq: updated.eq,
-                        useCompressor: updated.useCompressor
+                        useCompressor: updated.useCompressor,
+                        gainBoost: updated.gainBoost
                     });
                 }
                 return updated;

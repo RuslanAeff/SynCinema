@@ -177,6 +177,7 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
         eqSettings={track.eq}
         deviceId={track.deviceId}
         useCompressor={track.useCompressor}
+        gainBoost={track.gainBoost ?? 1}
       />
 
       {/* Main Content */}
@@ -625,6 +626,43 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Gain Boost */}
+          <div className="flex items-center gap-3 pt-1">
+            <span className="text-xs text-gray-600 dark:text-gray-500 whitespace-nowrap">🔊 Boost</span>
+            <input
+              type="range"
+              min="1"
+              max="3"
+              step="0.1"
+              value={track.gainBoost ?? 1}
+              onChange={(e) => onUpdate(track.id, { gainBoost: parseFloat(e.target.value) })}
+              className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer
+                bg-gray-200 dark:bg-gray-700
+                [&::-webkit-slider-thumb]:appearance-none
+                [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5
+                [&::-webkit-slider-thumb]:rounded-full
+                [&::-webkit-slider-thumb]:bg-primary-500
+                [&::-webkit-slider-thumb]:shadow-[0_0_6px_rgba(var(--color-primary-500),0.5)]
+                [&::-webkit-slider-thumb]:transition-shadow
+                [&::-webkit-slider-thumb]:hover:shadow-[0_0_10px_rgba(var(--color-primary-500),0.7)]"
+            />
+            <span className={`text-xs font-mono w-10 text-right ${(track.gainBoost ?? 1) > 1
+              ? 'text-primary-500 font-bold'
+              : 'text-gray-500'
+              }`}>
+              {Math.round((track.gainBoost ?? 1) * 100)}%
+            </span>
+            {(track.gainBoost ?? 1) > 1 && (
+              <button
+                onClick={() => onUpdate(track.id, { gainBoost: 1 })}
+                className="text-[10px] text-gray-500 hover:text-primary-400 transition-colors"
+                title="Reset"
+              >
+                <RotateCcw size={10} />
+              </button>
+            )}
           </div>
 
           {/* Limiter Toggle */}

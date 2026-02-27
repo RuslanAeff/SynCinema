@@ -19,6 +19,7 @@ export interface AudioTrack {
     high: number;
   };
   useCompressor: boolean;
+  gainBoost: number; // 1.0 = normal, up to 3.0 = 3x amplification
   audioFingerprint: string | null;
   isCloudSynced?: boolean;
 }
