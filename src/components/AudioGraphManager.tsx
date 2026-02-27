@@ -90,6 +90,19 @@ export const AudioGraphManager: React.FC<AudioGraphManagerProps> = ({
         } catch (err) {
             console.error("[AudioGraphManager] Audio Graph Error:", err);
         }
+
+        // Cleanup: close AudioContext on unmount to prevent memory leaks
+        return () => {
+            if (contextRef.current) {
+                contextRef.current.close().catch(() => { });
+                console.log('[AudioGraphManager] AudioContext closed');
+            }
+            contextRef.current = null;
+            sourceRef.current = null;
+            eqNodesRef.current = null;
+            compressorRef.current = null;
+            isInitializedRef.current = false;
+        };
     }, [audioElement, deviceId]);
 
     // Update EQ values
