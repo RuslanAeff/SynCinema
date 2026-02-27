@@ -57,26 +57,25 @@ export const AudioGraphManager: React.FC<AudioGraphManagerProps> = ({
             high.type = 'highshelf';
             high.frequency.value = 3200;
 
-            // Create Compressor
+            // Create Compressor (initialized in DISABLED state)
             const compressor = ctx.createDynamicsCompressor();
-            compressor.threshold.value = -24;
-            compressor.knee.value = 30;
-            compressor.ratio.value = 12;
+            compressor.threshold.value = 0;
+            compressor.knee.value = 0;
+            compressor.ratio.value = 1;
             compressor.attack.value = 0.003;
             compressor.release.value = 0.25;
             compressorRef.current = compressor;
 
-            // Connect graph
-            // Source -> Low -> Mid -> High -> Compressor -> Destination
+            // Connect graph: Source -> Low -> Mid -> High -> Destination
+            // Compressor is OFF by default — High connects directly to destination
             source.connect(low);
             low.connect(mid);
             mid.connect(high);
-            high.connect(compressor);
-            compressor.connect(ctx.destination);
+            high.connect(ctx.destination);
 
             eqNodesRef.current = { low, mid, high };
 
-            console.log('[AudioGraphManager] Audio graph initialized');
+            console.log('[AudioGraphManager] Audio graph initialized (compressor bypassed)');
 
             // Set the initial output device
             if ('setSinkId' in ctx && typeof (ctx as any).setSinkId === 'function') {
@@ -118,15 +117,29 @@ export const AudioGraphManager: React.FC<AudioGraphManagerProps> = ({
         }
     }, [eqSettings]);
 
-    // Update Compressor state
+    // Toggle Compressor: bypass by rewiring the graph
     useEffect(() => {
-        if (!compressorRef.current || !contextRef.current) return;
+        const ctx = contextRef.current;
+        const eq = eqNodesRef.current;
+        const comp = compressorRef.current;
+        if (!ctx || !eq || !comp) return;
+
+        // Disconnect High filter's current output
+        eq.high.disconnect();
+
         if (useCompressor) {
-            compressorRef.current.threshold.value = -24;
-            compressorRef.current.ratio.value = 12;
+            // High -> Compressor -> Destination
+            comp.threshold.value = -24;
+            comp.knee.value = 30;
+            comp.ratio.value = 12;
+            eq.high.connect(comp);
+            comp.connect(ctx.destination);
+            console.log('[AudioGraphManager] Compressor ENABLED');
         } else {
-            compressorRef.current.threshold.value = 0; // Disable (mostly)
-            compressorRef.current.ratio.value = 1;
+            // High -> Destination (skip compressor entirely)
+            comp.disconnect();
+            eq.high.connect(ctx.destination);
+            console.log('[AudioGraphManager] Compressor BYPASSED');
         }
     }, [useCompressor]);
 
