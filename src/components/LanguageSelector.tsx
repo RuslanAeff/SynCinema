@@ -7,7 +7,7 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Globe, Check, ChevronDown } from 'lucide-react';
+import { Check, ChevronDown } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { Language } from '../i18n';
 
@@ -60,11 +60,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                     ${isOpen ? 'ring-1 ring-primary-500/20 bg-white/10' : ''}
                 `}
             >
-                <Globe
-                    size={compact ? 12 : 14}
-                    className="text-primary-400 group-hover:text-primary-300 transition-colors"
-                />
-                <span className="text-sm font-medium leading-none flex items-center mt-[-2px]">{currentLang.flag}</span>
+                <span className="text-sm font-medium leading-none flex items-center">{currentLang.flag}</span>
                 {!compact && (
                     <span className="font-medium text-gray-300 text-xs leading-none flex items-center mt-[-1px]">{currentLang.nativeName}</span>
                 )}
@@ -96,12 +92,9 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
 
                     {/* Header */}
                     <div className="relative px-4 py-3 border-b border-gray-200 dark:border-white/10">
-                        <div className="flex items-center gap-2">
-                            <Globe size={12} className="text-primary-500 dark:text-primary-400" />
-                            <p className="text-[10px] uppercase tracking-[0.15em] text-gray-600 dark:text-gray-400 font-semibold">
-                                Select Language
-                            </p>
-                        </div>
+                        <p className="text-[10px] uppercase tracking-[0.15em] text-gray-600 dark:text-gray-400 font-semibold">
+                            Select Language
+                        </p>
                     </div>
 
                     {/* Language Options */}

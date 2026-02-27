@@ -1,12 +1,4 @@
-/**
- * ═══════════════════════════════════════════════════════════════════════════
- *  SynCinema - Statistics Panel Component
- *  @author Ruslan Aliyev
- *  Displays usage statistics with beautiful visualizations
- * ═══════════════════════════════════════════════════════════════════════════
- */
-
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
     X,
     Clock,
@@ -24,7 +16,8 @@ import {
     Bookmark,
     BarChart3,
     Trash2,
-    FolderOpen
+    FolderOpen,
+    Info
 } from 'lucide-react';
 import { AnalyticsData } from '../hooks/useAnalytics';
 import { useI18n } from '../context/I18nContext';
@@ -37,7 +30,7 @@ interface StatisticsPanelProps {
     onReset: () => void;
 }
 
-// Stat card component with light/dark mode support
+// Stat card component with light/dark mode support + mobile tooltip
 const StatCard: React.FC<{
     icon: React.ReactNode;
     label: string;
@@ -45,31 +38,66 @@ const StatCard: React.FC<{
     colorClass: string;
     iconColorClass: string;
     large?: boolean;
-}> = ({ icon, label, value, colorClass, iconColorClass, large }) => (
-    <div className={`
-        relative overflow-hidden rounded-2xl p-4
-        bg-white dark:bg-gray-800/80
-        border border-gray-200 dark:border-gray-700/50
-        shadow-sm dark:shadow-none
-        transition-all duration-300 hover:scale-[1.02] hover:shadow-md dark:hover:border-gray-600/50
-        ${large ? 'col-span-2' : ''}
-    `}>
-        {/* Glow effect - only in dark mode */}
-        <div className={`absolute -top-10 -right-10 w-24 h-24 rounded-full blur-3xl opacity-0 dark:opacity-20 ${colorClass}`} />
+}> = ({ icon, label, value, colorClass, iconColorClass, large }) => {
+    const [showTooltip, setShowTooltip] = useState(false);
+    const isLongLabel = label.length > 16;
 
-        <div className="relative flex items-center gap-3">
-            <div className={`p-2.5 rounded-xl ${colorClass} bg-opacity-10 dark:bg-opacity-20`}>
-                <span className={iconColorClass}>{icon}</span>
+    return (
+        <div
+            className={`
+                relative overflow-hidden rounded-2xl p-4
+                bg-white dark:bg-gray-800/80
+                border border-gray-200 dark:border-gray-700/50
+                shadow-sm dark:shadow-none
+                transition-all duration-300 hover:scale-[1.02] hover:shadow-md dark:hover:border-gray-600/50
+                ${large ? 'col-span-2' : ''}
+            `}
+        >
+            {/* Glow effect - only in dark mode */}
+            <div className={`absolute -top-10 -right-10 w-24 h-24 rounded-full blur-3xl opacity-0 dark:opacity-20 ${colorClass}`} />
+
+            <div className="relative flex items-center gap-3">
+                <div className={`p-2.5 rounded-xl ${colorClass} bg-opacity-10 dark:bg-opacity-20 flex-shrink-0`}>
+                    <span className={iconColorClass}>{icon}</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1">
+                        <p className={`text-gray-500 dark:text-gray-400 leading-tight line-clamp-2 ${isLongLabel ? 'text-[10px]' : 'text-xs'}`}>
+                            {label}
+                        </p>
+                        {isLongLabel && (
+                            <button
+                                onClick={(e) => { e.stopPropagation(); setShowTooltip(!showTooltip); }}
+                                onMouseEnter={() => setShowTooltip(true)}
+                                onMouseLeave={() => setShowTooltip(false)}
+                                className="flex-shrink-0 p-0.5 rounded-full text-gray-400 hover:text-primary-400 transition-colors"
+                            >
+                                <Info size={10} />
+                            </button>
+                        )}
+                    </div>
+                    <p className={`font-bold text-gray-900 dark:text-gray-100 ${large ? 'text-2xl' : 'text-lg'}`}>
+                        {value}
+                    </p>
+                </div>
             </div>
-            <div className="flex-1 min-w-0">
-                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{label}</p>
-                <p className={`font-bold text-gray-900 dark:text-gray-100 truncate ${large ? 'text-2xl' : 'text-lg'}`}>
-                    {value}
-                </p>
-            </div>
+
+            {/* Tooltip overlay */}
+            {showTooltip && isLongLabel && (
+                <div
+                    className="absolute z-50 left-2 right-2 -top-2 -translate-y-full px-3 py-2 rounded-xl
+                        bg-gray-900 dark:bg-gray-700 text-white text-[11px] font-medium
+                        shadow-xl border border-gray-700 dark:border-gray-600
+                        animate-[fadeIn_0.15s_ease-out]"
+                    onClick={() => setShowTooltip(false)}
+                >
+                    {label}
+                    <div className="absolute left-1/2 -translate-x-1/2 -bottom-1 w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45 border-r border-b border-gray-700 dark:border-gray-600" />
+                </div>
+            )}
         </div>
-    </div>
-);
+    );
+};
 
 // Feature bar component for "Most Used Features" with light/dark mode
 const FeatureBar: React.FC<{

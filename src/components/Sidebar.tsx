@@ -200,10 +200,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
             {/* Language Selector */}
             <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-800/50">
-                <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500 dark:text-gray-500">{t.settings.language}</span>
-                    <LanguageSelector compact />
-                </div>
+                <LanguageSelector compact />
             </div>
 
             {/* Designer Signature Footer */}
