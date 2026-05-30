@@ -7,7 +7,7 @@
  */
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { Play, Pause, RotateCcw, Film, Maximize, Minimize, Volume2, Expand, Shrink, PictureInPicture2 } from 'lucide-react';
+import { Play, Pause, RotateCcw, Film, Maximize, Minimize, Volume2, Expand, Shrink, PictureInPicture2, Sun } from 'lucide-react';
 import { formatTime } from '../utils/formatTime';
 import { Translations } from '../i18n';
 import { useI18n } from '../context/I18nContext';
@@ -53,18 +53,31 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     const { t } = useI18n();
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [showControls, setShowControls] = useState(true);
-    // Video scaling: 'contain' keeps full frame (letterbox), 'cover' fills the screen (crops edges)
-    const [fillMode, setFillMode] = useState<'contain' | 'cover'>('contain');
+    // Video scaling: 'contain' keeps full frame (letterbox), 'cover' fills the screen (crops edges).
+    // Default to 'cover' on touch devices so ultra-wide phones aren't letterboxed out of the box.
+    const [fillMode, setFillMode] = useState<'contain' | 'cover'>(
+        () => (typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches ? 'cover' : 'contain')
+    );
     const [isPiPActive, setIsPiPActive] = useState(false);
-    // Transient on-screen indicator for touch gestures (volume / seek feedback)
-    const [gestureHint, setGestureHint] = useState<{ icon: 'vol' | 'fwd' | 'rwd'; value: string } | null>(null);
+    // Software brightness (CSS filter on the video) — adjustable via left-edge vertical swipe
+    const [brightness, setBrightness] = useState(1);
+    // Orientation + input type drive the immersive (overlay-controls) layout and swipe gestures
+    const [isLandscape, setIsLandscape] = useState(false);
+    const [isTouchDevice, setIsTouchDevice] = useState(false);
+    // Transient on-screen indicator for touch gestures (brightness / volume / seek feedback)
+    const [gestureHint, setGestureHint] = useState<{ icon: 'vol' | 'bright' | 'fwd' | 'rwd'; value: string } | null>(null);
     const gestureHintTimeoutRef = useRef<number | null>(null);
     const controlsTimeoutRef = useRef<number | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
-    // Touch gesture tracking (double-tap seek, vertical-swipe volume)
-    const touchStateRef = useRef({ startX: 0, startY: 0, startTime: 0, startVolume: 1, isVerticalSwipe: false, moved: false });
+    // Immersive = real fullscreen, or a touch device held in landscape.
+    // In this mode controls overlay the video (so it fills the screen) and swipe gestures are active.
+    const isImmersive = isFullscreen || (isTouchDevice && isLandscape);
+
+    // Touch gesture tracking (double-tap seek, vertical-swipe brightness/volume, single-tap controls)
+    const touchStateRef = useRef({ startX: 0, startY: 0, startTime: 0, startVolume: 1, startBrightness: 1, side: 'right' as 'left' | 'right', isVerticalSwipe: false, moved: false });
     const lastTapRef = useRef<{ time: number; x: number }>({ time: 0, x: 0 });
+    const lastTouchEndRef = useRef<number>(0);
     const singleTapTimeoutRef = useRef<number | null>(null);
     const syncChannelRef = useRef<BroadcastChannel | null>(null);
     const sessionTokenRef = useRef<string>('');
@@ -233,21 +246,21 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     const handleUserActivity = useCallback(() => {
         setShowControls(true);
         if (controlsTimeoutRef.current) window.clearTimeout(controlsTimeoutRef.current);
-        // Auto-hide controls after 3 seconds in fullscreen, 5 seconds otherwise
-        if (isPlaying || isFullscreen) {
-            const timeout = isFullscreen ? 3000 : 5000;
+        // Only auto-hide while actually playing — keep controls reachable when paused
+        if (isPlaying) {
+            const timeout = isImmersive ? 3500 : 5000;
             controlsTimeoutRef.current = window.setTimeout(() => setShowControls(false), timeout);
         }
-    }, [isPlaying, isFullscreen]);
+    }, [isPlaying, isImmersive]);
 
     useEffect(() => {
-        if (isPlaying || isFullscreen) handleUserActivity();
+        if (isPlaying) handleUserActivity();
         else {
             setShowControls(true);
             if (controlsTimeoutRef.current) window.clearTimeout(controlsTimeoutRef.current);
         }
         return () => { if (controlsTimeoutRef.current) window.clearTimeout(controlsTimeoutRef.current); };
-    }, [isPlaying, isFullscreen, handleUserActivity]);
+    }, [isPlaying, isImmersive, handleUserActivity]);
 
     useEffect(() => {
         const handleFullscreenChange = () => {
@@ -256,6 +269,24 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         };
         document.addEventListener('fullscreenchange', handleFullscreenChange);
         return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    }, []);
+
+    // Track orientation + pointer type to decide when to switch to the immersive (overlay) layout
+    useEffect(() => {
+        if (typeof window === 'undefined' || !window.matchMedia) return;
+        const mqLandscape = window.matchMedia('(orientation: landscape)');
+        const mqCoarse = window.matchMedia('(pointer: coarse)');
+        const update = () => {
+            setIsLandscape(mqLandscape.matches);
+            setIsTouchDevice(mqCoarse.matches);
+        };
+        update();
+        mqLandscape.addEventListener('change', update);
+        mqCoarse.addEventListener('change', update);
+        return () => {
+            mqLandscape.removeEventListener('change', update);
+            mqCoarse.removeEventListener('change', update);
+        };
     }, []);
 
     const toggleFullscreen = useCallback(async () => {
@@ -313,7 +344,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     }, []);
 
     // Show a brief on-screen gesture hint (volume / seek), then fade out
-    const flashGestureHint = useCallback((icon: 'vol' | 'fwd' | 'rwd', value: string) => {
+    const flashGestureHint = useCallback((icon: 'vol' | 'bright' | 'fwd' | 'rwd', value: string) => {
         setGestureHint({ icon, value });
         if (gestureHintTimeoutRef.current) window.clearTimeout(gestureHintTimeoutRef.current);
         gestureHintTimeoutRef.current = window.setTimeout(() => setGestureHint(null), 700);
@@ -323,18 +354,26 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     const handleTouchStart = useCallback((e: React.TouchEvent) => {
         if (e.touches.length !== 1) return;
         const touch = e.touches[0];
+        const rect = containerRef.current?.getBoundingClientRect();
+        const width = rect?.width || window.innerWidth;
+        const relX = touch.clientX - (rect?.left ?? 0);
         touchStateRef.current = {
             startX: touch.clientX,
             startY: touch.clientY,
             startTime: Date.now(),
             startVolume: videoRef.current?.volume ?? 1,
+            startBrightness: brightness,
+            // Which half the swipe began in: left = brightness, right = volume
+            side: relX < width / 2 ? 'left' : 'right',
             isVerticalSwipe: false,
             moved: false,
         };
-    }, [videoRef]);
+    }, [videoRef, brightness]);
 
     const handleTouchMove = useCallback((e: React.TouchEvent) => {
         if (e.touches.length !== 1) return;
+        // Brightness/volume swipes only in the immersive cinema layout — keep normal page scroll in portrait
+        if (!isImmersive) return;
         const touch = e.touches[0];
         const state = touchStateRef.current;
         const dx = touch.clientX - state.startX;
@@ -342,27 +381,36 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
         if (Math.abs(dx) > 8 || Math.abs(dy) > 8) state.moved = true;
 
-        // Lock into a vertical-swipe (volume) gesture once it's clearly vertical
+        // Lock into a vertical-swipe gesture once it's clearly vertical
         if (!state.isVerticalSwipe && Math.abs(dy) > 24 && Math.abs(dy) > Math.abs(dx) * 1.5) {
             state.isVerticalSwipe = true;
         }
 
-        if (state.isVerticalSwipe && videoRef.current) {
+        if (state.isVerticalSwipe) {
             const rect = containerRef.current?.getBoundingClientRect();
             const height = rect?.height || window.innerHeight;
-            // Swipe up = louder. Full height swipe ≈ full range.
-            const delta = -dy / height;
-            const newVolume = Math.max(0, Math.min(1, state.startVolume + delta));
-            videoRef.current.volume = newVolume;
-            flashGestureHint('vol', `${Math.round(newVolume * 100)}%`);
+            const delta = -dy / height; // swipe up = increase
+            if (state.side === 'left') {
+                // Left half → screen brightness (software, via CSS filter on the video)
+                const next = Math.max(0.2, Math.min(1.5, state.startBrightness + delta * 1.3));
+                setBrightness(next);
+                flashGestureHint('bright', `${Math.round(next * 100)}%`);
+            } else if (videoRef.current) {
+                // Right half → volume
+                const next = Math.max(0, Math.min(1, state.startVolume + delta));
+                videoRef.current.volume = next;
+                flashGestureHint('vol', `${Math.round(next * 100)}%`);
+            }
         }
-    }, [videoRef, flashGestureHint]);
+    }, [isImmersive, videoRef, flashGestureHint]);
 
     const handleTouchEnd = useCallback((e: React.TouchEvent) => {
         const state = touchStateRef.current;
         const video = videoRef.current;
+        // Mark the moment a touch ended so the synthetic mouse-click that follows can be ignored
+        lastTouchEndRef.current = Date.now();
 
-        // A vertical volume swipe consumes the gesture — no tap handling
+        // A vertical brightness/volume swipe consumes the gesture — no tap handling
         if (state.isVerticalSwipe) return;
         if (state.moved) return; // a horizontal drag / scroll, not a tap
 
@@ -407,12 +455,25 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             lastTapRef.current = { time: now, x: tapX };
             if (singleTapTimeoutRef.current) window.clearTimeout(singleTapTimeoutRef.current);
             singleTapTimeoutRef.current = window.setTimeout(() => {
-                // Single tap → toggle controls visibility
-                setShowControls(prev => !prev);
                 singleTapTimeoutRef.current = null;
+                if (isImmersive) {
+                    // Immersive: single tap toggles the control overlay (and restarts auto-hide when revealed)
+                    setShowControls(prev => {
+                        const next = !prev;
+                        if (next && isPlaying) {
+                            if (controlsTimeoutRef.current) window.clearTimeout(controlsTimeoutRef.current);
+                            controlsTimeoutRef.current = window.setTimeout(() => setShowControls(false), 3500);
+                        }
+                        return next;
+                    });
+                } else {
+                    // Inline (portrait): single tap plays/pauses, like a simple embedded player
+                    togglePlay();
+                    onTrackEvent?.('playPauseCount');
+                }
             }, DOUBLE_TAP_MS);
         }
-    }, [videoRef, togglePlay, setCurrentTime, onTrackEvent, flashGestureHint]);
+    }, [isImmersive, isPlaying, videoRef, togglePlay, setCurrentTime, onTrackEvent, flashGestureHint]);
 
     // Keyboard Shortcuts (Pro Workflow)
     useEffect(() => {
@@ -639,10 +700,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             data-tour="video-area"
             className={`flex-1 flex flex-col relative bg-gray-100 dark:bg-black transition-all ${isFullscreen && !showControls ? 'cursor-none' : ''}`}
             onMouseMove={handleUserActivity}
-            onClick={handleUserActivity}
         >
             <div
-                className="flex-1 flex items-center justify-center relative overflow-hidden group touch-none"
+                className={`flex-1 flex items-center justify-center relative overflow-hidden group ${isImmersive ? 'touch-none' : ''}`}
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
@@ -653,9 +713,16 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                         src={videoObjectUrl}
                         playsInline
                         className={`w-full h-full shadow-2xl ${fillMode === 'cover' ? 'object-cover' : 'object-contain'}`}
+                        style={{ filter: brightness !== 1 ? `brightness(${brightness})` : undefined }}
                         onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
                         onEnded={() => setIsPlaying(false)}
-                        onClick={(e) => { e.stopPropagation(); togglePlay(); onTrackEvent?.('playPauseCount'); }}
+                        onClick={(e) => {
+                            // Desktop click toggles play; ignore the synthetic click that follows a touch (handled by gestures)
+                            if (Date.now() - lastTouchEndRef.current < 600) return;
+                            e.stopPropagation();
+                            togglePlay();
+                            onTrackEvent?.('playPauseCount');
+                        }}
                     />
                 ) : (
                     <div className="text-center text-gray-600">
@@ -664,7 +731,11 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                     </div>
                 )}
                 {videoObjectUrl && !isPlaying && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 cursor-pointer backdrop-blur-[2px]" onClick={() => { togglePlay(); onTrackEvent?.('playPauseCount'); }}>
+                    <div
+                        className="absolute inset-0 flex items-center justify-center bg-black/40 cursor-pointer backdrop-blur-[2px] z-20"
+                        onClick={() => { if (Date.now() - lastTouchEndRef.current < 600) return; togglePlay(); onTrackEvent?.('playPauseCount'); }}
+                        onTouchEnd={(e) => { e.stopPropagation(); lastTouchEndRef.current = Date.now(); togglePlay(); onTrackEvent?.('playPauseCount'); }}
+                    >
                         <div className="p-6 bg-white/10 rounded-full backdrop-blur-md border border-white/20 hover:scale-110 transition-transform">
                             <Play size={48} fill="currentColor" className="text-white ml-1" />
                         </div>
@@ -675,7 +746,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 {subtitleCues.length > 0 && (
                     <div
                         className="absolute left-0 right-0 text-center pointer-events-none px-4 z-30 transition-[bottom] duration-200"
-                        style={{ bottom: `${subtitleStyle?.position ?? 8}%` }}
+                        style={{ bottom: isImmersive && showControls ? `calc(${subtitleStyle?.position ?? 8}% + 4.5rem)` : `${subtitleStyle?.position ?? 8}%` }}
                     >
                         {subtitleCues
                             .filter(cue => currentTime >= (cue.startTime + subtitleOffset) && currentTime <= (cue.endTime + subtitleOffset))
@@ -719,6 +790,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-40">
                         <div className="bg-black/70 text-white rounded-2xl px-5 py-3 flex items-center gap-2 backdrop-blur-sm">
                             {gestureHint.icon === 'vol' && <Volume2 size={22} />}
+                            {gestureHint.icon === 'bright' && <Sun size={22} />}
                             {gestureHint.icon === 'fwd' && <RotateCcw size={22} className="-scale-x-100" />}
                             {gestureHint.icon === 'rwd' && <RotateCcw size={22} />}
                             <span className="text-lg font-semibold tabular-nums">{gestureHint.value}</span>
@@ -727,16 +799,19 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 )}
             </div>
 
-            {/* Controls Bar - Overlay in fullscreen */}
+            {/* Controls Bar — overlays the video in the immersive (fullscreen / mobile-landscape) layout
+                so the video fills the screen instead of being squeezed by the panel */}
             <div
                 className={`
-                    h-24 bg-gray-900 border-t border-gray-800 p-4 flex flex-col justify-center gap-2 relative z-50 transition-all duration-500 ease-in-out
-                    ${isFullscreen
-                        ? `absolute bottom-0 left-0 right-0 ${!showControls ? 'opacity-0 translate-y-full pointer-events-none' : 'opacity-100 translate-y-0'}`
-                        : ''
+                    p-4 flex flex-col justify-center gap-2 z-50 transition-all duration-300 ease-in-out
+                    ${isImmersive
+                        ? `absolute bottom-0 left-0 right-0 pt-12 bg-gradient-to-t from-black via-black/80 to-transparent ${!showControls ? 'opacity-0 translate-y-full pointer-events-none' : 'opacity-100 translate-y-0'}`
+                        : 'h-24 bg-gray-900 border-t border-gray-800 relative'
                     }
                 `}
+                style={isImmersive ? { paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' } : undefined}
                 onMouseEnter={handleUserActivity}
+                onPointerDown={handleUserActivity}
             >
                 {/* Progress Bar with Preview */}
                 <div className="flex items-center gap-4">
