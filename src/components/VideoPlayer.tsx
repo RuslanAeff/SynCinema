@@ -246,12 +246,19 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     const handleUserActivity = useCallback(() => {
         setShowControls(true);
         if (controlsTimeoutRef.current) window.clearTimeout(controlsTimeoutRef.current);
-        // Only auto-hide while actually playing — keep controls reachable when paused
+        // Only auto-hide while actually playing — keep controls reachable when paused.
+        // 5s of no interaction → slide the panel away (stable, consistent everywhere).
         if (isPlaying) {
-            const timeout = isImmersive ? 3500 : 5000;
-            controlsTimeoutRef.current = window.setTimeout(() => setShowControls(false), timeout);
+            controlsTimeoutRef.current = window.setTimeout(() => setShowControls(false), 5000);
         }
-    }, [isPlaying, isImmersive]);
+    }, [isPlaying]);
+
+    // Desktop mouse movement reveals the controls; ignore the synthetic mousemove a touch
+    // tap emits right after touchend, otherwise it fights the single-tap show/hide toggle.
+    const handleMouseMove = useCallback(() => {
+        if (Date.now() - lastTouchEndRef.current < 800) return;
+        handleUserActivity();
+    }, [handleUserActivity]);
 
     useEffect(() => {
         if (isPlaying) handleUserActivity();
@@ -457,12 +464,12 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             singleTapTimeoutRef.current = window.setTimeout(() => {
                 singleTapTimeoutRef.current = null;
                 if (isImmersive) {
-                    // Immersive: single tap toggles the control overlay (and restarts auto-hide when revealed)
+                    // Immersive: single tap toggles the control overlay (and restarts the 5s auto-hide when revealed)
                     setShowControls(prev => {
                         const next = !prev;
                         if (next && isPlaying) {
                             if (controlsTimeoutRef.current) window.clearTimeout(controlsTimeoutRef.current);
-                            controlsTimeoutRef.current = window.setTimeout(() => setShowControls(false), 3500);
+                            controlsTimeoutRef.current = window.setTimeout(() => setShowControls(false), 5000);
                         }
                         return next;
                     });
@@ -699,7 +706,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             ref={containerRef}
             data-tour="video-area"
             className={`flex-1 flex flex-col relative bg-gray-100 dark:bg-black transition-all ${isFullscreen && !showControls ? 'cursor-none' : ''}`}
-            onMouseMove={handleUserActivity}
+            onMouseMove={handleMouseMove}
         >
             <div
                 className={`flex-1 flex items-center justify-center relative overflow-hidden group ${isImmersive ? 'touch-none' : ''}`}
