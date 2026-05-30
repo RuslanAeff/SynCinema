@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Upload, Type, Palette, ChevronDown } from 'lucide-react';
+import { Upload, Type, Palette, ChevronDown, MoveVertical, Square } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { SubtitleStyle } from '../../types';
 
@@ -232,6 +232,50 @@ export const SubtitleSettings: React.FC<SubtitleSettingsProps> = ({
                                     <option value="rgba(0, 0, 0, 0.8)">Darker</option>
                                 </select>
                             </div>
+                        </div>
+
+                        {/* Outline & Font Family */}
+                        <div className="flex items-center gap-4">
+                            <div className="flex-1 flex items-center justify-between">
+                                <label className="text-[10px] text-gray-400 flex items-center gap-1"><Square size={10} /> Outline</label>
+                                <input
+                                    type="checkbox"
+                                    checked={safeStyle.outline ?? false}
+                                    onChange={(e) => onSubtitleStyleChange({ ...safeStyle, outline: e.target.checked })}
+                                    className="rounded text-primary-500 bg-gray-800 border-gray-700 focus:ring-primary-500"
+                                />
+                            </div>
+                            <div className="flex-1 flex items-center justify-between pl-4 border-l border-gray-700/50">
+                                <label className="text-[10px] text-gray-400">Font</label>
+                                <select
+                                    value={safeStyle.fontFamily ?? 'system-ui, sans-serif'}
+                                    onChange={(e) => onSubtitleStyleChange({ ...safeStyle, fontFamily: e.target.value })}
+                                    className="bg-gray-800 border border-gray-700 text-[10px] text-gray-300 rounded px-1 py-0.5 max-w-[90px]"
+                                >
+                                    <option value="system-ui, sans-serif">Default</option>
+                                    <option value="'Arial', Helvetica, sans-serif">Arial</option>
+                                    <option value="'Georgia', serif">Georgia</option>
+                                    <option value="'Verdana', sans-serif">Verdana</option>
+                                    <option value="'Trebuchet MS', sans-serif">Trebuchet</option>
+                                    <option value="'Courier New', monospace">Monospace</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        {/* Vertical Position */}
+                        <div className="flex items-center gap-3">
+                            <label className="text-[10px] text-gray-400 flex items-center gap-1 whitespace-nowrap"><MoveVertical size={10} /> Height</label>
+                            <input
+                                type="range"
+                                min={0}
+                                max={45}
+                                step={1}
+                                value={safeStyle.position ?? 8}
+                                onChange={(e) => onSubtitleStyleChange({ ...safeStyle, position: parseInt(e.target.value) })}
+                                className="flex-1 h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary-500"
+                                aria-label="Subtitle vertical position"
+                            />
+                            <span className="text-[10px] text-gray-400 w-9 text-right tabular-nums">{safeStyle.position ?? 8}%</span>
                         </div>
                     </div>
                 </div>

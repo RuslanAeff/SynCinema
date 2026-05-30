@@ -312,21 +312,34 @@ const DetachedPlayer: React.FC = () => {
 
                         {/* Subtitle Overlay */}
                         {activeSubtitles.length > 0 && (
-                            <div className="absolute bottom-20 left-0 right-0 text-center pointer-events-none">
+                            <div
+                                className="absolute left-0 right-0 text-center pointer-events-none px-4"
+                                style={{ bottom: `${subtitleStyle?.position ?? 8}%` }}
+                            >
                                 {activeSubtitles.map((cue, i) => {
                                     const sizeClass =
                                         subtitleStyle?.fontSize === 'small' ? 'text-base md:text-lg' :
-                                            subtitleStyle?.fontSize === 'large' ? 'text-xl md:text-3xl' :
-                                                subtitleStyle?.fontSize === 'xlarge' ? 'text-2xl md:text-4xl font-bold' :
-                                                    'text-lg md:text-2xl';
+                                            subtitleStyle?.fontSize === 'large' ? 'text-2xl md:text-4xl' :
+                                                subtitleStyle?.fontSize === 'xlarge' ? 'text-3xl md:text-5xl font-bold' :
+                                                    'text-lg md:text-3xl';
+
+                                    const shadowParts: string[] = [];
+                                    if (subtitleStyle?.outline) {
+                                        shadowParts.push('-1.5px -1.5px 0 #000', '1.5px -1.5px 0 #000', '-1.5px 1.5px 0 #000', '1.5px 1.5px 0 #000', '0 0 4px #000');
+                                    }
+                                    if (subtitleStyle?.textShadow) {
+                                        shadowParts.push('0 2px 4px rgba(0,0,0,0.9)');
+                                    }
 
                                     return (
                                         <div
                                             key={i}
-                                            className={`inline-block px-4 py-2 rounded-lg mb-1 whitespace-pre-wrap ${sizeClass} ${subtitleStyle?.textShadow ? 'drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]' : ''}`}
+                                            className={`inline-block px-4 py-2 rounded-lg mb-1 whitespace-pre-wrap leading-snug ${sizeClass}`}
                                             style={{
                                                 color: subtitleStyle?.color || '#ffffff',
                                                 backgroundColor: subtitleStyle?.backgroundColor || 'rgba(0,0,0,0.8)',
+                                                fontFamily: subtitleStyle?.fontFamily || 'system-ui, sans-serif',
+                                                textShadow: shadowParts.length ? shadowParts.join(', ') : undefined,
                                             }}
                                         >
                                             {cue.text}

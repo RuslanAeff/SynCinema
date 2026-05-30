@@ -7,7 +7,7 @@
  */
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { Play, Pause, RotateCcw, Film, Maximize, Minimize, Volume2 } from 'lucide-react';
+import { Play, Pause, RotateCcw, Film, Maximize, Minimize, Volume2, Expand, Shrink, PictureInPicture2 } from 'lucide-react';
 import { formatTime } from '../utils/formatTime';
 import { Translations } from '../i18n';
 import { useI18n } from '../context/I18nContext';
@@ -53,8 +53,19 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     const { t } = useI18n();
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [showControls, setShowControls] = useState(true);
+    // Video scaling: 'contain' keeps full frame (letterbox), 'cover' fills the screen (crops edges)
+    const [fillMode, setFillMode] = useState<'contain' | 'cover'>('contain');
+    const [isPiPActive, setIsPiPActive] = useState(false);
+    // Transient on-screen indicator for touch gestures (volume / seek feedback)
+    const [gestureHint, setGestureHint] = useState<{ icon: 'vol' | 'fwd' | 'rwd'; value: string } | null>(null);
+    const gestureHintTimeoutRef = useRef<number | null>(null);
     const controlsTimeoutRef = useRef<number | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+
+    // Touch gesture tracking (double-tap seek, vertical-swipe volume)
+    const touchStateRef = useRef({ startX: 0, startY: 0, startTime: 0, startVolume: 1, isVerticalSwipe: false, moved: false });
+    const lastTapRef = useRef<{ time: number; x: number }>({ time: 0, x: 0 });
+    const singleTapTimeoutRef = useRef<number | null>(null);
     const syncChannelRef = useRef<BroadcastChannel | null>(null);
     const sessionTokenRef = useRef<string>('');
 
@@ -185,17 +196,17 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         }
     }, [isPlaying]);
 
-    // Broadcast subtitles
+    // Broadcast subtitles (including style, so the detached window reflects live changes)
     useEffect(() => {
         if (syncChannelRef.current && subtitleCues.length > 0) {
             syncChannelRef.current.postMessage({
                 type: 'SYNC_SUBTITLES',
-                payload: { cues: subtitleCues, offset: subtitleOffset },
+                payload: { cues: subtitleCues, offset: subtitleOffset, style: subtitleStyle },
                 token: sessionTokenRef.current,
                 timestamp: Date.now()
             });
         }
-    }, [subtitleCues, subtitleOffset]);
+    }, [subtitleCues, subtitleOffset, subtitleStyle]);
 
     // Broadcast seek periodically (for time sync)
     useEffect(() => {
@@ -247,14 +258,161 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
     }, []);
 
-    const toggleFullscreen = async () => {
+    const toggleFullscreen = useCallback(async () => {
         if (!containerRef.current) return;
         if (!document.fullscreenElement) {
-            try { await containerRef.current.requestFullscreen(); } catch (err) { console.error(err); }
+            try {
+                await containerRef.current.requestFullscreen();
+                // On mobile, lock to landscape for a proper cinema view (no-op/throws on desktop)
+                const orientation = screen.orientation as (ScreenOrientation & { lock?: (o: string) => Promise<void> }) | undefined;
+                if (orientation?.lock) {
+                    orientation.lock('landscape').catch(() => { /* unsupported on desktop — ignore */ });
+                }
+            } catch (err) { console.error(err); }
         } else {
+            try { screen.orientation?.unlock?.(); } catch { /* ignore */ }
             if (document.exitFullscreen) await document.exitFullscreen();
         }
-    };
+    }, []);
+
+    // Native Picture-in-Picture toggle
+    const togglePiP = useCallback(async () => {
+        const video = videoRef.current;
+        if (!video) return;
+        try {
+            if (document.pictureInPictureElement) {
+                await document.exitPictureInPicture();
+            } else if (document.pictureInPictureEnabled) {
+                await video.requestPictureInPicture();
+            }
+        } catch (err) {
+            console.error('[PiP] Failed to toggle Picture-in-Picture:', err);
+        }
+    }, [videoRef]);
+
+    // Keep PiP button state in sync with the browser
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!video) return;
+        const onEnter = () => setIsPiPActive(true);
+        const onLeave = () => setIsPiPActive(false);
+        video.addEventListener('enterpictureinpicture', onEnter);
+        video.addEventListener('leavepictureinpicture', onLeave);
+        return () => {
+            video.removeEventListener('enterpictureinpicture', onEnter);
+            video.removeEventListener('leavepictureinpicture', onLeave);
+        };
+    }, [videoRef, videoObjectUrl]);
+
+    // Clean up gesture timers on unmount (VideoPlayer unmounts when switching to YouTube)
+    useEffect(() => {
+        return () => {
+            if (singleTapTimeoutRef.current) window.clearTimeout(singleTapTimeoutRef.current);
+            if (gestureHintTimeoutRef.current) window.clearTimeout(gestureHintTimeoutRef.current);
+        };
+    }, []);
+
+    // Show a brief on-screen gesture hint (volume / seek), then fade out
+    const flashGestureHint = useCallback((icon: 'vol' | 'fwd' | 'rwd', value: string) => {
+        setGestureHint({ icon, value });
+        if (gestureHintTimeoutRef.current) window.clearTimeout(gestureHintTimeoutRef.current);
+        gestureHintTimeoutRef.current = window.setTimeout(() => setGestureHint(null), 700);
+    }, []);
+
+    // ─── Touch gesture handlers (mobile) ───────────────────────────────────
+    const handleTouchStart = useCallback((e: React.TouchEvent) => {
+        if (e.touches.length !== 1) return;
+        const touch = e.touches[0];
+        touchStateRef.current = {
+            startX: touch.clientX,
+            startY: touch.clientY,
+            startTime: Date.now(),
+            startVolume: videoRef.current?.volume ?? 1,
+            isVerticalSwipe: false,
+            moved: false,
+        };
+    }, [videoRef]);
+
+    const handleTouchMove = useCallback((e: React.TouchEvent) => {
+        if (e.touches.length !== 1) return;
+        const touch = e.touches[0];
+        const state = touchStateRef.current;
+        const dx = touch.clientX - state.startX;
+        const dy = touch.clientY - state.startY;
+
+        if (Math.abs(dx) > 8 || Math.abs(dy) > 8) state.moved = true;
+
+        // Lock into a vertical-swipe (volume) gesture once it's clearly vertical
+        if (!state.isVerticalSwipe && Math.abs(dy) > 24 && Math.abs(dy) > Math.abs(dx) * 1.5) {
+            state.isVerticalSwipe = true;
+        }
+
+        if (state.isVerticalSwipe && videoRef.current) {
+            const rect = containerRef.current?.getBoundingClientRect();
+            const height = rect?.height || window.innerHeight;
+            // Swipe up = louder. Full height swipe ≈ full range.
+            const delta = -dy / height;
+            const newVolume = Math.max(0, Math.min(1, state.startVolume + delta));
+            videoRef.current.volume = newVolume;
+            flashGestureHint('vol', `${Math.round(newVolume * 100)}%`);
+        }
+    }, [videoRef, flashGestureHint]);
+
+    const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+        const state = touchStateRef.current;
+        const video = videoRef.current;
+
+        // A vertical volume swipe consumes the gesture — no tap handling
+        if (state.isVerticalSwipe) return;
+        if (state.moved) return; // a horizontal drag / scroll, not a tap
+
+        const now = Date.now();
+        const tapX = e.changedTouches[0]?.clientX ?? state.startX;
+        const rect = containerRef.current?.getBoundingClientRect();
+        const width = rect?.width || window.innerWidth;
+        const relativeX = tapX - (rect?.left ?? 0);
+
+        const DOUBLE_TAP_MS = 300;
+        const isDoubleTap = now - lastTapRef.current.time < DOUBLE_TAP_MS;
+
+        if (isDoubleTap) {
+            // Cancel any pending single-tap action
+            if (singleTapTimeoutRef.current) {
+                window.clearTimeout(singleTapTimeoutRef.current);
+                singleTapTimeoutRef.current = null;
+            }
+            lastTapRef.current = { time: 0, x: 0 };
+
+            if (!video) return;
+            const third = width / 3;
+            if (relativeX < third) {
+                // Left third → rewind 10s
+                video.currentTime = Math.max(0, video.currentTime - 10);
+                setCurrentTime(video.currentTime);
+                flashGestureHint('rwd', '-10s');
+                onTrackEvent?.('seekCount');
+            } else if (relativeX > third * 2) {
+                // Right third → forward 10s
+                video.currentTime = Math.min(video.duration || Infinity, video.currentTime + 10);
+                setCurrentTime(video.currentTime);
+                flashGestureHint('fwd', '+10s');
+                onTrackEvent?.('seekCount');
+            } else {
+                // Center → play/pause
+                togglePlay();
+                onTrackEvent?.('playPauseCount');
+            }
+        } else {
+            // Defer single tap so a follow-up tap can upgrade it to a double tap
+            lastTapRef.current = { time: now, x: tapX };
+            if (singleTapTimeoutRef.current) window.clearTimeout(singleTapTimeoutRef.current);
+            singleTapTimeoutRef.current = window.setTimeout(() => {
+                // Single tap → toggle controls visibility
+                setShowControls(prev => !prev);
+                singleTapTimeoutRef.current = null;
+            }, DOUBLE_TAP_MS);
+        }
+    }, [videoRef, togglePlay, setCurrentTime, onTrackEvent, flashGestureHint]);
 
     // Keyboard Shortcuts (Pro Workflow)
     useEffect(() => {
@@ -483,12 +641,18 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             onMouseMove={handleUserActivity}
             onClick={handleUserActivity}
         >
-            <div className="flex-1 flex items-center justify-center relative overflow-hidden group">
+            <div
+                className="flex-1 flex items-center justify-center relative overflow-hidden group touch-none"
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+            >
                 {videoObjectUrl ? (
                     <video
                         ref={videoRef}
                         src={videoObjectUrl}
-                        className="max-w-full max-h-full shadow-2xl"
+                        playsInline
+                        className={`w-full h-full shadow-2xl ${fillMode === 'cover' ? 'object-cover' : 'object-contain'}`}
                         onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
                         onEnded={() => setIsPlaying(false)}
                         onClick={(e) => { e.stopPropagation(); togglePlay(); onTrackEvent?.('playPauseCount'); }}
@@ -507,25 +671,39 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                     </div>
                 )}
 
-                {/* Subtitle Overlay */}
+                {/* Subtitle Overlay — positioned relative to the video area, distance adjustable */}
                 {subtitleCues.length > 0 && (
-                    <div className="absolute bottom-24 left-0 right-0 text-center pointer-events-none p-4">
+                    <div
+                        className="absolute left-0 right-0 text-center pointer-events-none px-4 z-30 transition-[bottom] duration-200"
+                        style={{ bottom: `${subtitleStyle?.position ?? 8}%` }}
+                    >
                         {subtitleCues
                             .filter(cue => currentTime >= (cue.startTime + subtitleOffset) && currentTime <= (cue.endTime + subtitleOffset))
                             .map(cue => {
                                 const sizeClass =
                                     subtitleStyle?.fontSize === 'small' ? 'text-base md:text-lg' :
-                                        subtitleStyle?.fontSize === 'large' ? 'text-xl md:text-3xl' :
-                                            subtitleStyle?.fontSize === 'xlarge' ? 'text-2xl md:text-4xl font-bold' :
-                                                'text-lg md:text-2xl';
+                                        subtitleStyle?.fontSize === 'large' ? 'text-2xl md:text-4xl' :
+                                            subtitleStyle?.fontSize === 'xlarge' ? 'text-3xl md:text-5xl font-bold' :
+                                                'text-lg md:text-3xl';
+
+                                // Compose the text-shadow from the outline + soft-shadow toggles
+                                const shadowParts: string[] = [];
+                                if (subtitleStyle?.outline) {
+                                    shadowParts.push('-1.5px -1.5px 0 #000', '1.5px -1.5px 0 #000', '-1.5px 1.5px 0 #000', '1.5px 1.5px 0 #000', '0 0 4px #000');
+                                }
+                                if (subtitleStyle?.textShadow) {
+                                    shadowParts.push('0 2px 4px rgba(0,0,0,0.9)');
+                                }
 
                                 return (
                                     <div
                                         key={cue.id}
-                                        className={`px-3 py-1 rounded inline-block mx-auto backdrop-blur-sm whitespace-pre-wrap ${sizeClass} ${subtitleStyle?.textShadow ? 'drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]' : ''}`}
+                                        className={`px-3 py-1 rounded inline-block mx-auto whitespace-pre-wrap leading-snug ${sizeClass}`}
                                         style={{
                                             color: subtitleStyle?.color || '#ffffff',
                                             backgroundColor: subtitleStyle?.backgroundColor || 'rgba(0,0,0,0.6)',
+                                            fontFamily: subtitleStyle?.fontFamily || 'system-ui, sans-serif',
+                                            textShadow: shadowParts.length ? shadowParts.join(', ') : undefined,
                                         }}
                                     >
                                         {cue.text}
@@ -533,6 +711,18 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                                 );
                             })
                         }
+                    </div>
+                )}
+
+                {/* Touch gesture hint (volume / seek feedback) */}
+                {gestureHint && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-40">
+                        <div className="bg-black/70 text-white rounded-2xl px-5 py-3 flex items-center gap-2 backdrop-blur-sm">
+                            {gestureHint.icon === 'vol' && <Volume2 size={22} />}
+                            {gestureHint.icon === 'fwd' && <RotateCcw size={22} className="-scale-x-100" />}
+                            {gestureHint.icon === 'rwd' && <RotateCcw size={22} />}
+                            <span className="text-lg font-semibold tabular-nums">{gestureHint.value}</span>
+                        </div>
                     </div>
                 )}
             </div>
@@ -635,8 +825,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                         </button>
                     </div>
 
-                    {/* Right side buttons - Volume, Fullscreen, Detach */}
-                    <div className="flex items-center sm:flex-1 justify-end gap-2 sm:gap-4">
+                    {/* Right side buttons - Volume, Fill, PiP, Fullscreen, Detach */}
+                    <div className="flex items-center sm:flex-1 justify-end gap-1.5 sm:gap-3">
                         <div className="flex items-center gap-2 group relative">
                             <Volume2 size={18} className="sm:w-5 sm:h-5 text-gray-600 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
                             <input
@@ -645,34 +835,48 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                                 max="1"
                                 step="0.05"
                                 defaultValue="1"
+                                aria-label="Video volume"
                                 onChange={(e) => { if (videoRef.current) videoRef.current.volume = parseFloat(e.target.value); onTrackEvent?.('volumeAdjustments'); }}
-                                className="w-12 sm:w-20 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer accent-primary-500"
+                                className="w-10 sm:w-20 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer accent-primary-500"
                             />
                         </div>
 
-                        {/* Fullscreen Toggle */}
+                        {/* Fill / Fit Mode Toggle — fixes letterboxing on ultra-wide phones */}
                         <button
-                            onClick={() => {
-                                if (!containerRef.current) return;
-                                if (!document.fullscreenElement) {
-                                    containerRef.current.requestFullscreen();
-                                    setIsFullscreen(true);
-                                } else {
-                                    document.exitFullscreen();
-                                    setIsFullscreen(false);
-                                }
-                                onTrackEvent?.('fullscreenToggles');
-                            }}
+                            onClick={() => setFillMode(m => (m === 'cover' ? 'contain' : 'cover'))}
                             className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors p-1.5 sm:p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg"
+                            title={fillMode === 'cover' ? 'Fit to screen (show full frame)' : 'Fill screen (crop edges)'}
+                            aria-label={fillMode === 'cover' ? 'Fit video to screen' : 'Fill screen with video'}
+                        >
+                            {fillMode === 'cover' ? <Shrink size={18} className="sm:w-5 sm:h-5 text-primary-400" /> : <Expand size={18} className="sm:w-5 sm:h-5" />}
+                        </button>
+
+                        {/* Picture-in-Picture (native browser PiP) */}
+                        <button
+                            onClick={togglePiP}
+                            className="hidden sm:inline-flex text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors p-1.5 sm:p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg"
+                            title="Picture-in-Picture"
+                            aria-label="Toggle Picture-in-Picture"
+                        >
+                            <PictureInPicture2 size={18} className={`sm:w-5 sm:h-5 ${isPiPActive ? 'text-primary-400' : ''}`} />
+                        </button>
+
+                        {/* Fullscreen Toggle (locks landscape on mobile) */}
+                        <button
+                            onClick={() => { toggleFullscreen(); onTrackEvent?.('fullscreenToggles'); }}
+                            className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors p-1.5 sm:p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg"
+                            title={isFullscreen ? t.player.exitFullscreen : t.player.fullscreen}
+                            aria-label={isFullscreen ? t.player.exitFullscreen : t.player.fullscreen}
                         >
                             {isFullscreen ? <Minimize size={18} className="sm:w-5 sm:h-5" /> : <Maximize size={18} className="sm:w-5 sm:h-5" />}
                         </button>
 
-                        {/* Detach / PIP Mode */}
+                        {/* Detach / Separate Window (desktop only — popups aren't useful on mobile) */}
                         <button
                             onClick={() => { openDetachedWindow(); onTrackEvent?.('detachOpened'); }}
-                            className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors p-1.5 sm:p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg"
+                            className="hidden sm:inline-flex text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors p-1.5 sm:p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg"
                             title={t.player.detach}
+                            aria-label={t.player.detach}
                         >
                             <Film size={18} className="sm:w-5 sm:h-5" />
                         </button>

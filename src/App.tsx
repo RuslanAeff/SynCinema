@@ -5,17 +5,20 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef, lazy, Suspense } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { VideoPlayer } from './components/VideoPlayer';
 import { YouTubePlayer } from './components/YouTubePlayer';
 import { WelcomeScreen } from './components/WelcomeScreen';
-import { OnboardingTour } from './components/OnboardingTour';
 import { HelpPanel } from './components/HelpPanel';
-import { UrlLoaderModal } from './components/UrlLoaderModal';
-import { Snowfall } from './components/Snowfall';
-import { StatisticsPanel } from './components/StatisticsPanel';
-import { AdminPanel } from './components/AdminPanel';
+import { Snowfall } from './components/Snowfall'; // shared with WelcomeScreen — kept eager
+
+// Lazy-loaded overlays — code-split so they're only fetched when first opened.
+// This trims the initial bundle (AdminPanel pulls in Supabase, etc.).
+const OnboardingTour = lazy(() => import('./components/OnboardingTour').then(m => ({ default: m.OnboardingTour })));
+const UrlLoaderModal = lazy(() => import('./components/UrlLoaderModal').then(m => ({ default: m.UrlLoaderModal })));
+const StatisticsPanel = lazy(() => import('./components/StatisticsPanel').then(m => ({ default: m.StatisticsPanel })));
+const AdminPanel = lazy(() => import('./components/AdminPanel').then(m => ({ default: m.AdminPanel })));
 import { useVideoPlayer } from './hooks/useVideoPlayer';
 import { useAudioTracks } from './hooks/useAudioTracks';
 import { useTheme } from './hooks/useTheme';
@@ -104,6 +107,9 @@ function App() {
     backgroundColor: 'rgba(0, 0, 0, 0)',
     fontSize: 'medium',
     textShadow: true,
+    position: 8,
+    outline: false,
+    fontFamily: 'system-ui, sans-serif',
   });
 
   // Secret admin access: Ctrl+Shift+A (desktop) or ?admin=true URL param (mobile)
@@ -430,14 +436,16 @@ function App() {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      {/* 🎄 New Year Snowfall - Festive Season Only (Dec 20 - Jan 10) */}
-      {(() => { const now = new Date(); const m = now.getMonth(); const d = now.getDate(); return (m === 11 && d >= 20) || (m === 0 && d <= 10); })() && <Snowfall intensity="medium" />}
+      <Suspense fallback={null}>
+        {/* 🎄 New Year Snowfall - Festive Season Only (Dec 20 - Jan 10) */}
+        {(() => { const now = new Date(); const m = now.getMonth(); const d = now.getDate(); return (m === 11 && d >= 20) || (m === 0 && d <= 10); })() && <Snowfall intensity="medium" />}
 
-      {/* Welcome Screen */}
-      {showWelcome && <WelcomeScreen onComplete={handleWelcomeComplete} />}
+        {/* Welcome Screen */}
+        {showWelcome && <WelcomeScreen onComplete={handleWelcomeComplete} />}
 
-      {/* Onboarding Tour */}
-      {showTour && <OnboardingTour onComplete={handleTourComplete} onSkip={handleTourSkip} />}
+        {/* Onboarding Tour */}
+        {showTour && <OnboardingTour onComplete={handleTourComplete} onSkip={handleTourSkip} />}
+      </Suspense>
 
       {/* Drop Overlay */}
       {isDragging && (
@@ -561,41 +569,47 @@ function App() {
         onAccentThemeToggle={toggleAccentTheme}
       />
 
-      {/* Admin Panel */}
-      <AdminPanel isOpen={showAdmin} onClose={() => setShowAdmin(false)} />
+      <Suspense fallback={null}>
+        {/* Admin Panel */}
+        {showAdmin && <AdminPanel isOpen={showAdmin} onClose={() => setShowAdmin(false)} />}
 
-      {/* URL Loader Modal - at App level to overlay everything */}
-      <UrlLoaderModal
-        isOpen={showUrlLoader}
-        onClose={() => setShowUrlLoader(false)}
-        onVideoUrlLoad={(url, filename) => {
-          // Check if it's a YouTube URL (starts with youtube:)
-          if (url.startsWith('youtube:')) {
-            const videoId = url.replace('youtube:', '');
-            setYoutubeVideoId(videoId);
-            // Clear regular video if any
-            if (videoFile) {
-              loadVideoFromUrl('', '');
-            }
-          } else {
-            // Regular video URL
-            setYoutubeVideoId(null);
-            loadVideoFromUrl(url, filename);
-          }
-          trackEvent('videosLoaded');
-          setShowUrlLoader(false);
-        }}
-        onAudioUrlLoad={handleAudioFromUrl}
-      />
+        {/* URL Loader Modal - at App level to overlay everything */}
+        {showUrlLoader && (
+          <UrlLoaderModal
+            isOpen={showUrlLoader}
+            onClose={() => setShowUrlLoader(false)}
+            onVideoUrlLoad={(url, filename) => {
+              // Check if it's a YouTube URL (starts with youtube:)
+              if (url.startsWith('youtube:')) {
+                const videoId = url.replace('youtube:', '');
+                setYoutubeVideoId(videoId);
+                // Clear regular video if any
+                if (videoFile) {
+                  loadVideoFromUrl('', '');
+                }
+              } else {
+                // Regular video URL
+                setYoutubeVideoId(null);
+                loadVideoFromUrl(url, filename);
+              }
+              trackEvent('videosLoaded');
+              setShowUrlLoader(false);
+            }}
+            onAudioUrlLoad={handleAudioFromUrl}
+          />
+        )}
 
-      {/* Statistics Panel */}
-      <StatisticsPanel
-        isOpen={showStatistics}
-        onClose={() => setShowStatistics(false)}
-        analytics={analytics}
-        formatWatchTime={formatWatchTime}
-        onReset={resetAnalytics}
-      />
+        {/* Statistics Panel */}
+        {showStatistics && (
+          <StatisticsPanel
+            isOpen={showStatistics}
+            onClose={() => setShowStatistics(false)}
+            analytics={analytics}
+            formatWatchTime={formatWatchTime}
+            onReset={resetAnalytics}
+          />
+        )}
+      </Suspense>
     </div>
   );
 }

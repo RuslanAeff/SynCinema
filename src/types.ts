@@ -29,6 +29,12 @@ export interface SubtitleStyle {
   backgroundColor: string;
   fontSize: 'small' | 'medium' | 'large' | 'xlarge';
   textShadow: boolean;
+  /** Vertical distance from the bottom edge, as a percentage of the video area height (0-45). Defaults to 8. */
+  position?: number;
+  /** Draw a crisp outline around glyphs for readability over bright scenes. */
+  outline?: boolean;
+  /** Font family stack for subtitle text. */
+  fontFamily?: string;
 }
 
 export interface AudioDevice {
