@@ -35,6 +35,8 @@ export interface SubtitleStyle {
   outline?: boolean;
   /** Font family stack for subtitle text. */
   fontFamily?: string;
+  /** Precise font size in pixels (14-80). When set, overrides the `fontSize` preset. */
+  fontSizePx?: number;
 }
 
 export interface AudioDevice {

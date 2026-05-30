@@ -317,7 +317,8 @@ const DetachedPlayer: React.FC = () => {
                                 style={{ bottom: `${subtitleStyle?.position ?? 8}%` }}
                             >
                                 {activeSubtitles.map((cue, i) => {
-                                    const sizeClass =
+                                    const hasPx = typeof subtitleStyle?.fontSizePx === 'number';
+                                    const sizeClass = hasPx ? '' :
                                         subtitleStyle?.fontSize === 'small' ? 'text-base md:text-lg' :
                                             subtitleStyle?.fontSize === 'large' ? 'text-2xl md:text-4xl' :
                                                 subtitleStyle?.fontSize === 'xlarge' ? 'text-3xl md:text-5xl font-bold' :
@@ -339,6 +340,7 @@ const DetachedPlayer: React.FC = () => {
                                                 color: subtitleStyle?.color || '#ffffff',
                                                 backgroundColor: subtitleStyle?.backgroundColor || 'rgba(0,0,0,0.8)',
                                                 fontFamily: subtitleStyle?.fontFamily || 'system-ui, sans-serif',
+                                                fontSize: hasPx ? `${subtitleStyle!.fontSizePx}px` : undefined,
                                                 textShadow: shadowParts.length ? shadowParts.join(', ') : undefined,
                                             }}
                                         >

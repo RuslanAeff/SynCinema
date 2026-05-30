@@ -34,6 +34,10 @@ export const SubtitleSettings: React.FC<SubtitleSettingsProps> = ({
         textShadow: true,
     };
 
+    // Pixel size each preset maps to — picking a preset jumps the precise slider here
+    const PRESET_PX: Record<string, number> = { small: 20, medium: 28, large: 38, xlarge: 52 };
+    const currentPx = safeStyle.fontSizePx ?? PRESET_PX[safeStyle.fontSize] ?? 28;
+
     const [localColor, setLocalColor] = useState(safeStyle.color);
 
     useEffect(() => {
@@ -91,7 +95,7 @@ export const SubtitleSettings: React.FC<SubtitleSettingsProps> = ({
             </div>
 
             {hasSubtitles && (
-                <div className={`transition-all duration-300 ease-in-out ${isSettingsCollapsed ? 'max-h-0 opacity-0 overflow-hidden' : 'max-h-[500px] opacity-100 overflow-visible relative z-50'}`}>
+                <div className={`transition-all duration-300 ease-in-out ${isSettingsCollapsed ? 'max-h-0 opacity-0 overflow-hidden' : 'max-h-[600px] opacity-100 overflow-visible relative z-50'}`}>
                     <div className="space-y-3 bg-gray-900/50 p-3 rounded-lg border border-gray-700/50 mb-1">
                         {/* Font Size & Shadow */}
                         <div className="flex items-center gap-4">
@@ -99,7 +103,11 @@ export const SubtitleSettings: React.FC<SubtitleSettingsProps> = ({
                                 <label className="text-[10px] text-gray-400 flex items-center gap-1"><Type size={10} /> Size</label>
                                 <select
                                     value={safeStyle.fontSize}
-                                    onChange={(e) => onSubtitleStyleChange({ ...safeStyle, fontSize: e.target.value as any })}
+                                    onChange={(e) => {
+                                        const preset = e.target.value as SubtitleStyle['fontSize'];
+                                        // Jump the precise slider to the preset's pixel size
+                                        onSubtitleStyleChange({ ...safeStyle, fontSize: preset, fontSizePx: PRESET_PX[preset] });
+                                    }}
                                     className="bg-gray-800 border border-gray-700 text-[10px] text-gray-300 rounded px-1 py-0.5"
                                 >
                                     <option value="small">Small</option>
@@ -117,6 +125,22 @@ export const SubtitleSettings: React.FC<SubtitleSettingsProps> = ({
                                     className="rounded text-primary-500 bg-gray-800 border-gray-700 focus:ring-primary-500"
                                 />
                             </div>
+                        </div>
+
+                        {/* Precise Font Size (px) — fine-tunes beyond the presets above */}
+                        <div className="flex items-center gap-3">
+                            <label className="text-[10px] text-gray-400 flex items-center gap-1 whitespace-nowrap"><Type size={10} /> Font Size</label>
+                            <input
+                                type="range"
+                                min={14}
+                                max={80}
+                                step={1}
+                                value={currentPx}
+                                onChange={(e) => onSubtitleStyleChange({ ...safeStyle, fontSizePx: parseInt(e.target.value) })}
+                                className="flex-1 h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary-500"
+                                aria-label="Subtitle font size in pixels"
+                            />
+                            <span className="text-[10px] text-gray-400 w-9 text-right tabular-nums">{currentPx}px</span>
                         </div>
 
                         {/* Colors */}

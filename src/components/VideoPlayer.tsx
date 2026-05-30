@@ -758,7 +758,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                         {subtitleCues
                             .filter(cue => currentTime >= (cue.startTime + subtitleOffset) && currentTime <= (cue.endTime + subtitleOffset))
                             .map(cue => {
-                                const sizeClass =
+                                // A precise pixel size overrides the responsive preset classes
+                                const hasPx = typeof subtitleStyle?.fontSizePx === 'number';
+                                const sizeClass = hasPx ? '' :
                                     subtitleStyle?.fontSize === 'small' ? 'text-base md:text-lg' :
                                         subtitleStyle?.fontSize === 'large' ? 'text-2xl md:text-4xl' :
                                             subtitleStyle?.fontSize === 'xlarge' ? 'text-3xl md:text-5xl font-bold' :
@@ -781,6 +783,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                                             color: subtitleStyle?.color || '#ffffff',
                                             backgroundColor: subtitleStyle?.backgroundColor || 'rgba(0,0,0,0.6)',
                                             fontFamily: subtitleStyle?.fontFamily || 'system-ui, sans-serif',
+                                            fontSize: hasPx ? `${subtitleStyle!.fontSizePx}px` : undefined,
                                             textShadow: shadowParts.length ? shadowParts.join(', ') : undefined,
                                         }}
                                     >
