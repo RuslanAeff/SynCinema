@@ -9,6 +9,8 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { AlertTriangle, Volume2, VolumeX, Play, Pause, Maximize, Minimize, Youtube, ExternalLink } from 'lucide-react';
 import { formatTime } from '../utils/formatTime';
+import { SubtitleStyle } from '../types';
+import { SubtitleOverlay } from './SubtitleOverlay';
 
 // YouTube IFrame API types
 declare global {
@@ -25,6 +27,10 @@ interface YouTubePlayerProps {
     onTimeUpdate: (time: number) => void;
     onDurationChange: (duration: number) => void;
     currentTime: number;
+    /** Externally loaded .srt cues, rendered over the iframe. */
+    subtitleCues?: { id: string, startTime: number, endTime: number, text: string }[];
+    subtitleOffset?: number;
+    subtitleStyle?: SubtitleStyle;
 }
 
 // Load YouTube IFrame API script
@@ -53,7 +59,10 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({
     onPlayingChange,
     onTimeUpdate,
     onDurationChange,
-    currentTime
+    currentTime,
+    subtitleCues = [],
+    subtitleOffset = 0,
+    subtitleStyle,
 }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const fullscreenContainerRef = useRef<HTMLDivElement>(null);
@@ -306,6 +315,16 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({
                         </div>
                     </div>
                 )}
+
+                {/* Subtitle Overlay — external .srt drawn over the iframe. Only lifted in
+                    fullscreen, where the controls float above the video instead of below it. */}
+                <SubtitleOverlay
+                    cues={subtitleCues}
+                    currentTime={localTime}
+                    offset={subtitleOffset}
+                    style={subtitleStyle}
+                    liftForControls={isFullscreen && showControls}
+                />
             </div>
 
             {/* Custom Controls - Theme-aware */}

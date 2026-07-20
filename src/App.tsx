@@ -500,6 +500,9 @@ function App() {
           onTimeUpdate={setCurrentTime}
           onDurationChange={setDuration}
           currentTime={currentTime}
+          subtitleCues={subtitleCues}
+          subtitleOffset={subtitleOffset}
+          subtitleStyle={subtitleStyle}
         />
       ) : (
         <VideoPlayer

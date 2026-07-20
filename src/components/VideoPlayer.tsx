@@ -12,6 +12,7 @@ import { formatTime } from '../utils/formatTime';
 import { Translations } from '../i18n';
 import { useI18n } from '../context/I18nContext';
 import { SubtitleStyle } from '../types';
+import { SubtitleOverlay } from './SubtitleOverlay';
 
 interface VideoPlayerProps {
     videoFile: File | null;
@@ -782,50 +783,13 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 )}
 
                 {/* Subtitle Overlay — positioned relative to the video area, distance adjustable */}
-                {subtitleCues.length > 0 && (
-                    <div
-                        className="absolute left-0 right-0 text-center pointer-events-none px-4 z-30 transition-[bottom] duration-200"
-                        style={{ bottom: isImmersive && showControls ? `calc(${subtitleStyle?.position ?? 8}% + 4.5rem)` : `${subtitleStyle?.position ?? 8}%` }}
-                    >
-                        {subtitleCues
-                            .filter(cue => currentTime >= (cue.startTime + subtitleOffset) && currentTime <= (cue.endTime + subtitleOffset))
-                            .map(cue => {
-                                // A precise pixel size overrides the responsive preset classes
-                                const hasPx = typeof subtitleStyle?.fontSizePx === 'number';
-                                const sizeClass = hasPx ? '' :
-                                    subtitleStyle?.fontSize === 'small' ? 'text-base md:text-lg' :
-                                        subtitleStyle?.fontSize === 'large' ? 'text-2xl md:text-4xl' :
-                                            subtitleStyle?.fontSize === 'xlarge' ? 'text-3xl md:text-5xl font-bold' :
-                                                'text-lg md:text-3xl';
-
-                                // Compose the text-shadow from the outline + soft-shadow toggles
-                                const shadowParts: string[] = [];
-                                if (subtitleStyle?.outline) {
-                                    shadowParts.push('-1.5px -1.5px 0 #000', '1.5px -1.5px 0 #000', '-1.5px 1.5px 0 #000', '1.5px 1.5px 0 #000', '0 0 4px #000');
-                                }
-                                if (subtitleStyle?.textShadow) {
-                                    shadowParts.push('0 2px 4px rgba(0,0,0,0.9)');
-                                }
-
-                                return (
-                                    <div
-                                        key={cue.id}
-                                        className={`px-3 py-1 rounded inline-block mx-auto whitespace-pre-wrap leading-snug ${sizeClass}`}
-                                        style={{
-                                            color: subtitleStyle?.color || '#ffffff',
-                                            backgroundColor: subtitleStyle?.backgroundColor || 'rgba(0,0,0,0.6)',
-                                            fontFamily: subtitleStyle?.fontFamily || 'system-ui, sans-serif',
-                                            fontSize: hasPx ? `${subtitleStyle!.fontSizePx}px` : undefined,
-                                            textShadow: shadowParts.length ? shadowParts.join(', ') : undefined,
-                                        }}
-                                    >
-                                        {cue.text}
-                                    </div>
-                                );
-                            })
-                        }
-                    </div>
-                )}
+                <SubtitleOverlay
+                    cues={subtitleCues}
+                    currentTime={currentTime}
+                    offset={subtitleOffset}
+                    style={subtitleStyle}
+                    liftForControls={isImmersive && showControls}
+                />
 
                 {/* Touch gesture hint (volume / seek feedback) */}
                 {gestureHint && (
