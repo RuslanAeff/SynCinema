@@ -10,6 +10,12 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { ExtendedMediaElement } from '../types';
 import { getVideoFingerprint } from '../utils/fileFingerprint';
 
+// `currentTime` fans out to the whole tree — sidebar, every audio track row, the
+// subtitle overlay — so committing it on every animation frame makes playback cost
+// a full re-render 60x/second. Displays are MM:SS and the progress bar moves
+// sub-pixel per tick, so committing at 10Hz is visually identical and ~6x cheaper.
+const TIME_COMMIT_INTERVAL_MS = 100;
+
 export const useVideoPlayer = () => {
     const [videoFile, setVideoFile] = useState<File | null>(null);
     const [videoObjectUrl, setVideoObjectUrl] = useState<string | null>(null);
@@ -90,17 +96,23 @@ export const useVideoPlayer = () => {
         }
     }, []);
 
-    // Update loop for current time
+    // Update loop for current time — tracks playback every frame but only commits
+    // to React state every TIME_COMMIT_INTERVAL_MS (see note at top of file).
     useEffect(() => {
         let animationFrameId: number;
-        const updateLoop = () => {
+        let lastCommit = 0;
+
+        const updateLoop = (now: number) => {
             if (videoRef.current && !videoRef.current.paused) {
-                setCurrentTime(videoRef.current.currentTime);
+                if (now - lastCommit >= TIME_COMMIT_INTERVAL_MS) {
+                    lastCommit = now;
+                    setCurrentTime(videoRef.current.currentTime);
+                }
                 animationFrameId = requestAnimationFrame(updateLoop);
             }
         };
 
-        if (isPlaying) updateLoop();
+        if (isPlaying) animationFrameId = requestAnimationFrame(updateLoop);
         else if (videoRef.current) setCurrentTime(videoRef.current.currentTime);
 
         return () => cancelAnimationFrame(animationFrameId);

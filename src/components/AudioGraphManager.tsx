@@ -39,7 +39,8 @@ export const AudioGraphManager: React.FC<AudioGraphManagerProps> = ({
         if (!audioElement || sourceRef.current) return;
 
         try {
-            const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContextClass) throw new Error('Web Audio API is not supported in this browser');
             const ctx = new AudioContextClass();
             contextRef.current = ctx;
 
@@ -87,9 +88,9 @@ export const AudioGraphManager: React.FC<AudioGraphManagerProps> = ({
             console.log('[AudioGraphManager] Audio graph initialized (compressor bypassed)');
 
             // Set the initial output device
-            if ('setSinkId' in ctx && typeof (ctx as any).setSinkId === 'function') {
+            if (typeof ctx.setSinkId === 'function') {
                 const targetId = deviceIdRef.current || '';
-                (ctx as any).setSinkId(targetId).then(() => {
+                ctx.setSinkId(targetId).then(() => {
                     console.log('[AudioGraphManager] Initial device set to:', targetId || 'default');
                     isInitializedRef.current = true;
                 }).catch((err: Error) => {
@@ -169,10 +170,10 @@ export const AudioGraphManager: React.FC<AudioGraphManagerProps> = ({
         const switchDevice = async () => {
             try {
                 // Check if AudioContext supports setSinkId (Chrome 110+)
-                if ('setSinkId' in ctx && typeof (ctx as any).setSinkId === 'function') {
+                if (typeof ctx.setSinkId === 'function') {
                     const targetId = deviceId || '';
                     console.log('[AudioGraphManager] Switching to device:', targetId || 'default');
-                    await (ctx as any).setSinkId(targetId);
+                    await ctx.setSinkId(targetId);
                     console.log('[AudioGraphManager] Device switch successful');
                 } else {
                     console.warn('[AudioGraphManager] AudioContext.setSinkId not supported in this browser');

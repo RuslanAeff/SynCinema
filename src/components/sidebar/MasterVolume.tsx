@@ -7,7 +7,7 @@ interface MasterVolumeProps {
     onMasterVolumeChange: (volume: number) => void;
 }
 
-export const MasterVolume: React.FC<MasterVolumeProps> = ({
+const MasterVolumeComponent: React.FC<MasterVolumeProps> = ({
     masterVolume,
     onMasterVolumeChange,
 }) => {
@@ -43,3 +43,7 @@ export const MasterVolume: React.FC<MasterVolumeProps> = ({
         </div>
     );
 };
+
+// Memoized: all props from Sidebar are referentially stable, so this section
+// skips re-rendering on playback ticks that only move `currentTime`.
+export const MasterVolume = React.memo(MasterVolumeComponent);

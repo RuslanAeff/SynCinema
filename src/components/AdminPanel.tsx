@@ -140,7 +140,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
             } else {
                 throw new Error(t.adminPanel.invalidPassword);
             }
-        } catch (err: any) {
+        } catch (err) {
             console.error(err);
 
             const newFailedCount = failedAttempts + 1;
@@ -157,7 +157,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
             showToast({ message: t.adminPanel.invalidPassword, type: 'error' });
 
             // If unauthorized, you might want to kick them out
-            if (err.message?.includes('Unauthorized')) {
+            if (err instanceof Error && err.message.includes('Unauthorized')) {
                 setIsLoggedIn(false);
             }
         } finally {

@@ -28,6 +28,11 @@ interface VideoPlayerProps {
     subtitleCues?: { id: string, startTime: number, endTime: number, text: string }[];
     subtitleOffset?: number;
     subtitleStyle?: SubtitleStyle;
+    /** Video volume, owned by useVideoPlayer — the single source of truth shared with the sidebar. */
+    videoVolume: number;
+    videoMuted: boolean;
+    onVideoVolumeChange: (volume: number) => void;
+    onVideoMutedChange: (muted: boolean) => void;
     onTrackEvent?: (event: string) => void;
     onTrackWatchTime?: (seconds: number) => void;
 }
@@ -47,6 +52,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     subtitleCues = [],
     subtitleOffset = 0,
     subtitleStyle,
+    videoVolume,
+    videoMuted,
+    onVideoVolumeChange,
+    onVideoMutedChange,
     onTrackEvent,
     onTrackWatchTime,
 }) => {
@@ -78,6 +87,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     const touchStateRef = useRef({ startX: 0, startY: 0, startTime: 0, startVolume: 1, startBrightness: 1, side: 'right' as 'left' | 'right', isVerticalSwipe: false, moved: false });
     const lastTapRef = useRef<{ time: number; x: number }>({ time: 0, x: 0 });
     const lastTouchEndRef = useRef<number>(0);
+    // Volume reached during a swipe, applied straight to the element for frame-accurate
+    // feedback and committed to shared state once the gesture ends.
+    const pendingVolumeRef = useRef<number | null>(null);
     const singleTapTimeoutRef = useRef<number | null>(null);
     const syncChannelRef = useRef<BroadcastChannel | null>(null);
     const sessionTokenRef = useRef<string>('');
@@ -89,6 +101,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     const previewVideoRef = useRef<HTMLVideoElement>(null);
     const previewCanvasRef = useRef<HTMLCanvasElement>(null);
     const progressBarRef = useRef<HTMLDivElement>(null);
+    const previewSeekTimeoutRef = useRef<number | null>(null);
 
     // Refs to hold current state for BroadcastChannel handler (avoids stale closures)
     const stateRef = useRef({
@@ -347,6 +360,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         return () => {
             if (singleTapTimeoutRef.current) window.clearTimeout(singleTapTimeoutRef.current);
             if (gestureHintTimeoutRef.current) window.clearTimeout(gestureHintTimeoutRef.current);
+            if (previewSeekTimeoutRef.current) window.clearTimeout(previewSeekTimeoutRef.current);
         };
     }, []);
 
@@ -364,6 +378,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         const rect = containerRef.current?.getBoundingClientRect();
         const width = rect?.width || window.innerWidth;
         const relX = touch.clientX - (rect?.left ?? 0);
+        pendingVolumeRef.current = null; // discard anything left by an interrupted swipe
         touchStateRef.current = {
             startX: touch.clientX,
             startY: touch.clientY,
@@ -406,6 +421,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 // Right half → volume
                 const next = Math.max(0, Math.min(1, state.startVolume + delta));
                 videoRef.current.volume = next;
+                pendingVolumeRef.current = next;
                 flashGestureHint('vol', `${Math.round(next * 100)}%`);
             }
         }
@@ -417,8 +433,16 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         // Mark the moment a touch ended so the synthetic mouse-click that follows can be ignored
         lastTouchEndRef.current = Date.now();
 
-        // A vertical brightness/volume swipe consumes the gesture — no tap handling
-        if (state.isVerticalSwipe) return;
+        // A vertical brightness/volume swipe consumes the gesture — no tap handling.
+        // Commit the swiped volume now so the sidebar slider agrees with the player.
+        if (state.isVerticalSwipe) {
+            if (pendingVolumeRef.current !== null) {
+                onVideoVolumeChange(pendingVolumeRef.current);
+                pendingVolumeRef.current = null;
+                onTrackEvent?.('volumeAdjustments');
+            }
+            return;
+        }
         if (state.moved) return; // a horizontal drag / scroll, not a tap
 
         const now = Date.now();
@@ -480,7 +504,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 }
             }, DOUBLE_TAP_MS);
         }
-    }, [isImmersive, isPlaying, videoRef, togglePlay, setCurrentTime, onTrackEvent, flashGestureHint]);
+    }, [isImmersive, isPlaying, videoRef, togglePlay, setCurrentTime, onTrackEvent, flashGestureHint, onVideoVolumeChange]);
 
     // Keyboard Shortcuts (Pro Workflow)
     useEffect(() => {
@@ -560,18 +584,16 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                     }
                     break;
 
-                // Volume control
+                // Volume control — routed through shared state so the sidebar slider
+                // and the player slider never drift apart. The element's own value is
+                // kept in sync by useVideoPlayer, so it's a safe read for the delta.
                 case 'ArrowUp':
                     e.preventDefault();
-                    if (video) {
-                        video.volume = Math.min(1, video.volume + 0.1);
-                    }
+                    if (video) onVideoVolumeChange(Math.min(1, video.volume + 0.1));
                     break;
                 case 'ArrowDown':
                     e.preventDefault();
-                    if (video) {
-                        video.volume = Math.max(0, video.volume - 0.1);
-                    }
+                    if (video) onVideoVolumeChange(Math.max(0, video.volume - 0.1));
                     break;
 
                 // Jump to start/end
@@ -599,7 +621,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 // Mute toggle
                 case 'KeyM':
                     e.preventDefault();
-                    if (video) video.muted = !video.muted;
+                    if (video) onVideoMutedChange(!video.muted);
                     break;
 
                 // Reset playback speed
@@ -630,7 +652,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [togglePlay, toggleFullscreen]); // videoRef is ref, stable
+    }, [togglePlay, toggleFullscreen, onVideoVolumeChange, onVideoMutedChange]); // videoRef is ref, stable
 
     // Progress bar hover preview handlers
     const handleProgressHover = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -644,13 +666,23 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         setHoverTime(time);
         setHoverPosition(x);
 
-        // Seek preview video to this time
+        // Each seek on the hidden preview video costs a decode, so debounce: a fast
+        // sweep across the bar should decode where the pointer settles, not every
+        // pixel it passed over. The time label above still follows the pointer live.
         if (previewVideoRef.current && videoObjectUrl) {
-            previewVideoRef.current.currentTime = time;
+            if (previewSeekTimeoutRef.current) window.clearTimeout(previewSeekTimeoutRef.current);
+            previewSeekTimeoutRef.current = window.setTimeout(() => {
+                previewSeekTimeoutRef.current = null;
+                if (previewVideoRef.current) previewVideoRef.current.currentTime = time;
+            }, 120);
         }
     }, [duration, videoObjectUrl]);
 
     const handleProgressLeave = useCallback(() => {
+        if (previewSeekTimeoutRef.current) {
+            window.clearTimeout(previewSeekTimeoutRef.current);
+            previewSeekTimeoutRef.current = null;
+        }
         setHoverTime(null);
         setPreviewImage(null);
     }, []);
@@ -919,9 +951,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                                 min="0"
                                 max="1"
                                 step="0.05"
-                                defaultValue="1"
+                                value={videoMuted ? 0 : videoVolume}
                                 aria-label="Video volume"
-                                onChange={(e) => { if (videoRef.current) videoRef.current.volume = parseFloat(e.target.value); onTrackEvent?.('volumeAdjustments'); }}
+                                onChange={(e) => { onVideoVolumeChange(parseFloat(e.target.value)); onTrackEvent?.('volumeAdjustments'); }}
                                 className="w-10 sm:w-20 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer accent-primary-500"
                             />
                         </div>

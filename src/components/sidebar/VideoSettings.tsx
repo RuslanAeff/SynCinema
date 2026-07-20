@@ -19,7 +19,7 @@ interface VideoSettingsProps {
     handleVideoChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export const VideoSettings: React.FC<VideoSettingsProps> = ({
+const VideoSettingsComponent: React.FC<VideoSettingsProps> = ({
     videoFile,
     audioDevices,
     videoVolume,
@@ -199,3 +199,7 @@ export const VideoSettings: React.FC<VideoSettingsProps> = ({
         </div>
     );
 };
+
+// Memoized: all props from Sidebar are referentially stable, so this section
+// skips re-rendering on playback ticks that only move `currentTime`.
+export const VideoSettings = React.memo(VideoSettingsComponent);

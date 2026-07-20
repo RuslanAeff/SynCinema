@@ -121,19 +121,22 @@ function extractConfirmToken(html: string): string | null {
     return null;
 }
 
-// Fetch with proper headers
-async function fetchGoogleDrive(url: string): Promise<Response> {
-    return fetch(url, {
-        headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Accept-Encoding': 'identity', // Don't compress for streaming
-            'Referer': 'https://drive.google.com/',
-            'Connection': 'keep-alive',
-        },
-        redirect: 'follow'
-    });
+// Fetch with proper headers.
+// `range` is forwarded verbatim when present: a <video> element seeks by asking for
+// byte ranges, so dropping the header forces every scrub to re-download from zero.
+async function fetchGoogleDrive(url: string, range?: string): Promise<Response> {
+    const headers: Record<string, string> = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept-Encoding': 'identity', // Don't compress for streaming
+        'Referer': 'https://drive.google.com/',
+        'Connection': 'keep-alive',
+    };
+
+    if (range) headers['Range'] = range;
+
+    return fetch(url, { headers, redirect: 'follow' });
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -185,10 +188,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         console.log(`[Proxy] Request for file: ${id}`);
 
+        // Forwarded to Google on every attempt so seeking works on large files
+        const rangeHeader = typeof req.headers.range === 'string' ? req.headers.range : undefined;
+
         // First attempt: Try direct download with confirm=t
         let gdriveUrl = `https://drive.google.com/uc?export=download&confirm=t&id=${id}`;
 
-        let response = await fetchGoogleDrive(gdriveUrl);
+        let response = await fetchGoogleDrive(gdriveUrl, rangeHeader);
         let contentType = response.headers.get('content-type') || '';
 
         // Check if we got HTML (virus scan page)
@@ -205,7 +211,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
                 // Retry with the confirmation token
                 gdriveUrl = `https://drive.google.com/uc?export=download&confirm=${confirmToken}&id=${id}`;
-                response = await fetchGoogleDrive(gdriveUrl);
+                response = await fetchGoogleDrive(gdriveUrl, rangeHeader);
                 contentType = response.headers.get('content-type') || '';
 
                 // Still HTML? Try one more method
@@ -214,7 +220,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
                     // Try the direct download link format
                     gdriveUrl = `https://drive.usercontent.google.com/download?id=${id}&export=download&confirm=${confirmToken}`;
-                    response = await fetchGoogleDrive(gdriveUrl);
+                    response = await fetchGoogleDrive(gdriveUrl, rangeHeader);
                     contentType = response.headers.get('content-type') || '';
                 }
             } else {
@@ -222,7 +228,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
                 // Try alternative URL format
                 gdriveUrl = `https://drive.usercontent.google.com/download?id=${id}&export=download`;
-                response = await fetchGoogleDrive(gdriveUrl);
+                response = await fetchGoogleDrive(gdriveUrl, rangeHeader);
                 contentType = response.headers.get('content-type') || '';
             }
         }
@@ -254,6 +260,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const contentLength = response.headers.get('content-length');
         if (contentLength) {
             res.setHeader('Content-Length', contentLength);
+        }
+
+        // Mirror a partial response back to the player. Answering a Range request with
+        // a bare 200 makes the browser treat the stream as non-seekable, so this is
+        // what actually enables scrubbing on large files.
+        const contentRange = response.headers.get('content-range');
+        if (response.status === 206 && contentRange) {
+            res.setHeader('Content-Range', contentRange);
+            res.status(206);
         }
 
         // Stream the response

@@ -6,7 +6,7 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import React, { useRef } from 'react';
+import React, { useRef, useCallback } from 'react';
 import { SidebarHeader } from './sidebar/SidebarHeader';
 import { VideoSettings } from './sidebar/VideoSettings';
 import { SubtitleSettings } from './sidebar/SubtitleSettings';
@@ -111,21 +111,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
     const subtitleInputRef = useRef<HTMLInputElement>(null);
     const videoDeviceDropdownRef = useRef<HTMLDivElement>(null);
 
-    const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Kept referentially stable so the memoized sections below actually skip
+    // re-rendering on playback ticks.
+    const handleVideoChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) onVideoUpload(file);
-    };
+    }, [onVideoUpload]);
 
-    const handleAudioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleAudioChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         onAudioUpload(e.target.files);
         if (audioInputRef.current) audioInputRef.current.value = '';
-    };
+    }, [onAudioUpload]);
 
-    const handleSubtitleLoad = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleSubtitleLoad = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) onSubtitleUpload(file);
         if (subtitleInputRef.current) subtitleInputRef.current.value = '';
-    };
+    }, [onSubtitleUpload]);
 
     return (
         <div data-tour="sidebar" className="w-full lg:w-[450px] flex-shrink-0 bg-gray-50 dark:bg-gray-900 lg:border-r border-t lg:border-t-0 border-gray-200 dark:border-gray-800 flex flex-col h-auto lg:h-full z-10 shadow-2xl transition-colors duration-300">

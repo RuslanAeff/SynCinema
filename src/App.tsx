@@ -413,8 +413,8 @@ function App() {
     trackEvent('projectsSaved');
   }, [exportProject, trackEvent]);
 
-  const handleLoadProject = useCallback((data: any) => {
-    importProject(data);
+  const handleLoadProject = useCallback((file: File) => {
+    importProject(file);
     trackEvent('projectsLoaded');
   }, [importProject, trackEvent]);
 
@@ -427,6 +427,15 @@ function App() {
     addAudioFromUrl(url, filename);
     trackEvent('audioTracksAdded');
   }, [addAudioFromUrl, trackEvent]);
+
+  // Panel open/close handlers — stable references so the memoized sidebar sections
+  // aren't invalidated on every playback tick.
+  const openHelp = useCallback(() => setShowHelp(true), []);
+  const closeHelp = useCallback(() => setShowHelp(false), []);
+  const openUrlLoader = useCallback(() => setShowUrlLoader(true), []);
+  const closeUrlLoader = useCallback(() => setShowUrlLoader(false), []);
+  const openStatistics = useCallback(() => setShowStatistics(true), []);
+  const closeStatistics = useCallback(() => setShowStatistics(false), []);
 
   return (
     <div
@@ -466,13 +475,13 @@ function App() {
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setShowStatistics(true)}
+            onClick={openStatistics}
             className="p-2 rounded-lg bg-gradient-to-br from-primary-500/20 to-secondary-500/20 border border-primary-500/30 text-primary-400 hover:text-primary-300 transition-colors"
             title="Statistics"
           >
             <BarChart3 size={18} />
           </button>
-          <InfoButton onClick={() => setShowHelp(true)} />
+          <InfoButton onClick={openHelp} />
           <button
             onClick={toggleTheme}
             className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
@@ -508,6 +517,10 @@ function App() {
           subtitleCues={subtitleCues}
           subtitleOffset={subtitleOffset}
           subtitleStyle={subtitleStyle}
+          videoVolume={videoVolume}
+          videoMuted={videoMuted}
+          onVideoVolumeChange={setVideoVolume}
+          onVideoMutedChange={setVideoMuted}
           onTrackEvent={trackEvent as (event: string) => void}
           onTrackWatchTime={trackWatchTime}
         />
@@ -551,11 +564,11 @@ function App() {
         videoDeviceId={videoDeviceId}
         onVideoDeviceChange={setVideoDeviceId}
         isHelpOpen={showHelp}
-        onHelpOpen={() => setShowHelp(true)}
-        onHelpClose={() => setShowHelp(false)}
-        onUrlLoaderOpen={() => setShowUrlLoader(true)}
+        onHelpOpen={openHelp}
+        onHelpClose={closeHelp}
+        onUrlLoaderOpen={openUrlLoader}
         onAudioUrlLoad={handleAudioFromUrl}
-        onStatisticsOpen={() => setShowStatistics(true)}
+        onStatisticsOpen={openStatistics}
 
         onTrackEvent={trackEvent as (event: string) => void}
         onShareSync={handleShareSync}
@@ -564,7 +577,7 @@ function App() {
       {/* Help Panel - at App level to overlay everything */}
       <HelpPanel
         isOpen={showHelp}
-        onClose={() => setShowHelp(false)}
+        onClose={closeHelp}
         accentTheme={accentTheme}
         onAccentThemeToggle={toggleAccentTheme}
       />
@@ -577,7 +590,7 @@ function App() {
         {showUrlLoader && (
           <UrlLoaderModal
             isOpen={showUrlLoader}
-            onClose={() => setShowUrlLoader(false)}
+            onClose={closeUrlLoader}
             onVideoUrlLoad={(url, filename) => {
               // Check if it's a YouTube URL (starts with youtube:)
               if (url.startsWith('youtube:')) {
@@ -603,7 +616,7 @@ function App() {
         {showStatistics && (
           <StatisticsPanel
             isOpen={showStatistics}
-            onClose={() => setShowStatistics(false)}
+            onClose={closeStatistics}
             analytics={analytics}
             formatWatchTime={formatWatchTime}
             onReset={resetAnalytics}

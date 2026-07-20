@@ -316,7 +316,7 @@ const DetachedPlayer: React.FC = () => {
                                 className="absolute left-0 right-0 text-center pointer-events-none px-4"
                                 style={{ bottom: `${subtitleStyle?.position ?? 8}%` }}
                             >
-                                {activeSubtitles.map((cue, i) => {
+                                {activeSubtitles.map((cue) => {
                                     const hasPx = typeof subtitleStyle?.fontSizePx === 'number';
                                     const sizeClass = hasPx ? '' :
                                         subtitleStyle?.fontSize === 'small' ? 'text-base md:text-lg' :
@@ -334,7 +334,7 @@ const DetachedPlayer: React.FC = () => {
 
                                     return (
                                         <div
-                                            key={i}
+                                            key={`${cue.start}-${cue.text}`}
                                             className={`inline-block px-4 py-2 rounded-lg mb-1 whitespace-pre-wrap leading-snug ${sizeClass}`}
                                             style={{
                                                 color: subtitleStyle?.color || '#ffffff',

@@ -26,7 +26,7 @@ interface AudioTrackRowProps {
   onShareSync?: (id: string, offset: number) => void;
 }
 
-export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
+const AudioTrackRowComponent: React.FC<AudioTrackRowProps> = ({
   track,
   availableDevices,
   videoCurrentTime,
@@ -682,3 +682,8 @@ export const AudioTrackRow: React.FC<AudioTrackRowProps> = ({
     </div >
   );
 };
+
+// One instance per audio track, each carrying dropdowns, EQ sliders and gradients.
+// Memoizing keeps app state a track doesn't depend on — theme, analytics ticks,
+// modals opening — from re-rendering every row.
+export const AudioTrackRow = React.memo(AudioTrackRowComponent);

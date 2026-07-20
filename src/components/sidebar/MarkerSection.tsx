@@ -10,7 +10,7 @@ interface MarkerSectionProps {
     onSeekToMarker: (time: number) => void;
 }
 
-export const MarkerSection: React.FC<MarkerSectionProps> = ({
+const MarkerSectionComponent: React.FC<MarkerSectionProps> = ({
     videoFile,
     markers,
     onAddMarker,
@@ -86,3 +86,7 @@ export const MarkerSection: React.FC<MarkerSectionProps> = ({
         </div>
     );
 };
+
+// Memoized: all props from Sidebar are referentially stable, so this section
+// skips re-rendering on playback ticks that only move `currentTime`.
+export const MarkerSection = React.memo(MarkerSectionComponent);

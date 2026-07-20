@@ -13,7 +13,7 @@ interface SubtitleSettingsProps {
     handleSubtitleLoad: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export const SubtitleSettings: React.FC<SubtitleSettingsProps> = ({
+const SubtitleSettingsComponent: React.FC<SubtitleSettingsProps> = ({
     hasSubtitles,
     subtitleOffset,
     onSubtitleOffsetChange,
@@ -309,3 +309,7 @@ export const SubtitleSettings: React.FC<SubtitleSettingsProps> = ({
         </div>
     );
 };
+
+// Memoized: all props from Sidebar are referentially stable, so this section
+// skips re-rendering on playback ticks that only move `currentTime`.
+export const SubtitleSettings = React.memo(SubtitleSettingsComponent);
