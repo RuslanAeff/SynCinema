@@ -7,14 +7,13 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { X, Link, Film, Music, AlertCircle, CheckCircle, Loader2, ExternalLink } from 'lucide-react';
+import { X, Link, Film, AlertCircle, CheckCircle, Loader2, ExternalLink } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 
 interface UrlLoaderModalProps {
     isOpen: boolean;
     onClose: () => void;
     onVideoUrlLoad: (url: string, filename: string) => void;
-    onAudioUrlLoad: (url: string, filename: string) => void;
 }
 
 interface UrlValidation {
@@ -212,25 +211,16 @@ const extractFilename = (url: string, defaultName: string): string => {
 export const UrlLoaderModal: React.FC<UrlLoaderModalProps> = ({
     isOpen,
     onClose,
-    onVideoUrlLoad,
-    onAudioUrlLoad
+    onVideoUrlLoad
 }) => {
     const { t } = useI18n();
     const [videoUrl, setVideoUrl] = useState('');
-    const [audioUrl, setAudioUrl] = useState('');
     const [videoValidation, setVideoValidation] = useState<UrlValidation>({ isValid: false, message: '' });
-    const [audioValidation, setAudioValidation] = useState<UrlValidation>({ isValid: false, message: '' });
     const [isLoading, setIsLoading] = useState(false);
-    const [activeTab, setActiveTab] = useState<'video' | 'audio'>('video');
 
     const handleVideoUrlChange = useCallback((value: string) => {
         setVideoUrl(value);
         setVideoValidation(validateUrl(value, 'video'));
-    }, []);
-
-    const handleAudioUrlChange = useCallback((value: string) => {
-        setAudioUrl(value);
-        setAudioValidation(validateUrl(value, 'audio'));
     }, []);
 
     const handleLoadVideo = useCallback(async () => {
@@ -250,28 +240,9 @@ export const UrlLoaderModal: React.FC<UrlLoaderModalProps> = ({
         }
     }, [videoUrl, videoValidation, onVideoUrlLoad, onClose]);
 
-    const handleLoadAudio = useCallback(async () => {
-        if (!audioValidation.isValid || !audioValidation.convertedUrl) return;
-
-        setIsLoading(true);
-        try {
-            const filename = extractFilename(audioUrl, 'audio');
-            onAudioUrlLoad(audioValidation.convertedUrl, filename);
-            setAudioUrl('');
-            setAudioValidation({ isValid: false, message: '' });
-            // Don't close modal after audio - user might want to add more
-        } catch (error) {
-            console.error('Error loading audio URL:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [audioUrl, audioValidation, onAudioUrlLoad]);
-
     const handleClose = useCallback(() => {
         setVideoUrl('');
-        setAudioUrl('');
         setVideoValidation({ isValid: false, message: '' });
-        setAudioValidation({ isValid: false, message: '' });
         onClose();
     }, [onClose]);
 

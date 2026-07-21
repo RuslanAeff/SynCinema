@@ -1,5 +1,6 @@
 // YouTube IFrame API type definitions
 declare namespace YT {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging -- intentional idiom: interface describes the instance shape of the external YT.Player global, class below supplies its `new` constructor signature.
     interface Player {
         playVideo(): void;
         pauseVideo(): void;
@@ -53,6 +54,7 @@ declare namespace YT {
         CUED: 5;
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging -- intentional idiom: see interface Player above.
     class Player {
         constructor(element: HTMLElement | string, options: PlayerOptions);
     }

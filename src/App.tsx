@@ -611,7 +611,6 @@ function App() {
               trackEvent('videosLoaded');
               setShowUrlLoader(false);
             }}
-            onAudioUrlLoad={handleAudioFromUrl}
           />
         )}
 
