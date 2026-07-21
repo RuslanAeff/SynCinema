@@ -6,6 +6,7 @@ import { useI18n } from '../context/I18nContext';
 import { eqPresets, getCurrentPresetId } from '../constants/eqPresets';
 import { formatTime } from '../utils/formatTime';
 import { getDeviceIcon } from '../utils/getDeviceIcon';
+import { computeDriftCorrection } from '../utils/driftCorrection';
 
 // Format seconds to MM:SS.d
 
@@ -97,11 +98,10 @@ const AudioTrackRowComponent: React.FC<AudioTrackRowProps> = ({
     if (now - lastSyncRef.current < 500) return;
 
     const audioTime = audioRef.current.currentTime;
-    const targetTime = Math.max(0, videoCurrentTime - track.offset);
-    const diff = Math.abs(audioTime - targetTime);
-
     // Only sync if drift is significant (> syncThreshold, default 0.3s)
-    if (diff > syncThreshold) {
+    const { shouldResync, targetTime } = computeDriftCorrection(videoCurrentTime, track.offset, audioTime, syncThreshold);
+
+    if (shouldResync) {
       lastSyncRef.current = now;
       audioRef.current.currentTime = targetTime;
       setDriftWarning(true);

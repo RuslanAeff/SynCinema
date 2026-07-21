@@ -7,6 +7,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
+import { applyCompressorBypass } from '../utils/compressorBypass';
 
 interface AudioGraphManagerProps {
     audioElement: HTMLMediaElement | null;
@@ -136,23 +137,8 @@ export const AudioGraphManager: React.FC<AudioGraphManagerProps> = ({
         const gain = gainNodeRef.current;
         if (!ctx || !eq || !comp || !gain) return;
 
-        // Disconnect High filter's current output
-        eq.high.disconnect();
-        comp.disconnect();
-
-        if (useCompressor) {
-            // High -> Compressor -> GainNode -> Destination
-            comp.threshold.value = -24;
-            comp.knee.value = 30;
-            comp.ratio.value = 12;
-            eq.high.connect(comp);
-            comp.connect(gain);
-            console.log('[AudioGraphManager] Compressor ENABLED');
-        } else {
-            // High -> GainNode -> Destination (skip compressor entirely)
-            eq.high.connect(gain);
-            console.log('[AudioGraphManager] Compressor BYPASSED');
-        }
+        applyCompressorBypass({ highFilter: eq.high, compressor: comp, gain }, useCompressor);
+        console.log(useCompressor ? '[AudioGraphManager] Compressor ENABLED' : '[AudioGraphManager] Compressor BYPASSED');
     }, [useCompressor]);
 
     // Update Gain Boost
