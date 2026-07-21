@@ -139,6 +139,9 @@ src/
 ├── detached.tsx                # Standalone detached player window
 ├── index.css                   # Global styles + Tailwind directives
 ├── types.ts                    # Shared TypeScript interfaces
+├── types/
+│   ├── dom-extensions.d.ts     # DOM API typings not covered by lib.dom.d.ts
+│   └── youtube.d.ts            # YouTube IFrame API type definitions
 │
 ├── hooks/
 │   ├── useVideoPlayer.ts       # Video state, subtitle parsing (SRT), markers
@@ -166,7 +169,7 @@ src/
 │   ├── UrlLoaderModal.tsx      # Modal for loading video/audio from URL
 │   ├── StatisticsPanel.tsx     # Local analytics panel
 │   ├── AdminPanel.tsx          # Supabase sync_presets moderation panel
-│   ├── VuMeter.tsx             # Real-time audio level meter
+│   ├── SubtitleOverlay.tsx     # Subtitle cue rendering, shared by local + YouTube players
 │   ├── Snowfall.tsx            # Canvas-based seasonal snowfall effect
 │   ├── Toast.tsx               # Toast notification system + useToast hook
 │   ├── Button.tsx              # Reusable button component
@@ -177,7 +180,8 @@ src/
 ├── utils/
 │   ├── fileFingerprint.ts      # DJB2-based fingerprint IDs for video/audio files
 │   ├── formatTime.ts           # Time formatting utilities
-│   └── getDeviceIcon.tsx       # Audio device type icon resolver
+│   ├── getDeviceIcon.tsx       # Audio device type icon resolver
+│   └── syncImportValidation.ts # Whitelist-based .sync import shape validation
 │
 ├── lib/
 │   └── supabase.ts             # Supabase client init + SyncPreset type
@@ -198,7 +202,7 @@ src/
 ```
 
 **Root-level extras:**
-- `admin_rpc.sql`, `safe_insert_rpc.sql`, `vote_dedup_rpc.sql`, `verify_admin_rpc.sql` — Supabase RPC function definitions
+- `supabase/migrations/` — versioned SQL migrations for the Supabase RPC functions and RLS policies (see `supabase/README.md`)
 - `api/` — Vercel serverless functions (Google Drive proxy)
 - `vercel.json` — Vercel routing config
 - `.env.local` — local env vars (not committed)
@@ -473,7 +477,7 @@ Both are optional. If absent, the Supabase client is `null` and all Cloud Sync f
 # Install dependencies
 npm install
 
-# Start dev server (http://localhost:5173)
+# Start dev server (http://localhost:3000)
 npm run dev
 
 # Production build

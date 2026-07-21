@@ -11,7 +11,7 @@
 
 ## Yönetici Özeti
 
-SynCinema, kullanıcıların video oynatımıyla senkronize kalarak birden fazla ses parçasını farklı çıkış cihazlarına yönlendirmesini sağlayan, açık kaynaklı, tarayıcı tabanlı bir uygulamadır. Tamamen W3C web standartları üzerine inşa edilen SynCinema, ortak izleme ortamlarında kişiselleştirilmiş ses deneyimlerine olan artan ihtiyacı karşılamaktadır.
+SynCinema, kullanıcıların video oynatımıyla senkronize kalarak birden fazla ses parçasını farklı çıkış cihazlarına yönlendirmesini sağlayan, kaynak kodu erişilebilir (source-available), özel bir lisans altında yayınlanan (bkz. Bölüm 8), tarayıcı tabanlı bir uygulamadır. Tamamen W3C web standartları üzerine inşa edilen SynCinema, ortak izleme ortamlarında kişiselleştirilmiş ses deneyimlerine olan artan ihtiyacı karşılamaktadır.
 
 **Temel İnovasyon:** Standart Web API'leri kullanarak istemci taraflı çoklu ses yönlendirme, özel donanım veya sunucu altyapısı ihtiyacını ortadan kaldırır.
 
@@ -52,7 +52,7 @@ Mevcut hiçbir çözüm şunları sağlayamaz:
 | Ses İşleme | Web Audio API | W3C Tavsiyesi |
 | Cihaz Yönlendirme | Audio Output Devices API | W3C Çalışma Taslağı (2015) |
 | Medya Oynatma | HTML5 Video/Audio | WHATWG Yaşayan Standart |
-| UI Framework | React 18 | MIT Lisansı |
+| UI Framework | React 19 | MIT Lisansı |
 | Derleme Sistemi | Vite | MIT Lisansı |
 
 ### 2.2 Temel Bileşenler
@@ -140,7 +140,7 @@ function applyOffset(audioElement, offsetMs) {
 
 ### 3.1 Temel Teknolojiler
 
-SynCinema, yerleşik açık kaynak projeleri ve web standartları üzerine inşa edilmiştir:
+SynCinema'nın tasarımı, yerleşik açık kaynak projelerinden ve web standartlarından ilham almaktadır (SynCinema'nın kendi kaynak kodu özel bir lisansa tabidir — bkz. Bölüm 8):
 
 | Teknoloji | Yıl | İlgililik |
 |-----------|-----|-----------|

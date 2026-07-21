@@ -11,7 +11,7 @@
 
 ## Executive Summary
 
-SynCinema is an open-source, browser-based application that enables users to route multiple audio tracks to different output devices while maintaining synchronization with video playback. Built entirely on W3C web standards, SynCinema addresses a growing need for personalized audio experiences in shared viewing environments.
+SynCinema is a source-available, browser-based application, released under a proprietary license (see Section 8), that enables users to route multiple audio tracks to different output devices while maintaining synchronization with video playback. Built entirely on W3C web standards, SynCinema addresses a growing need for personalized audio experiences in shared viewing environments.
 
 **Key Innovation:** Client-side multi-audio routing using standard Web APIs, eliminating the need for proprietary hardware or server infrastructure.
 
@@ -52,7 +52,7 @@ No existing solution provides:
 | Audio Processing | Web Audio API | W3C Recommendation |
 | Device Routing | Audio Output Devices API | W3C Working Draft (2015) |
 | Media Playback | HTML5 Video/Audio | WHATWG Living Standard |
-| UI Framework | React 18 | MIT License |
+| UI Framework | React 19 | MIT License |
 | Build System | Vite | MIT License |
 
 ### 2.2 Core Components
@@ -140,7 +140,7 @@ function applyOffset(audioElement, offsetMs) {
 
 ### 3.1 Foundational Technologies
 
-SynCinema builds upon established open-source projects and web standards:
+SynCinema's design draws on ideas from established open-source projects and web standards (SynCinema's own source code remains proprietary — see Section 8):
 
 | Technology | Year | Relevance |
 |------------|------|-----------|

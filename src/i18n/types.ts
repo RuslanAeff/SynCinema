@@ -109,6 +109,7 @@ export interface Translations {
             youtube: string;
             googleDrive: string;
             drm: string;
+            httpsCsp: string;
         };
     };
 

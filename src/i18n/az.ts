@@ -182,13 +182,14 @@ export const az: Translations = {
             dropbox: 'Dropbox paylaşım linkləri (böyük fayllar üçün tövsiyə olunur)',
             googleDrive: 'Google Drive ictimai linkləri (maks ~50MB)',
             youtube: 'YouTube videoları (məhdud funksiyalar)',
-            https: 'Media faylı təqdim edən istənilən HTTPS linki',
+            https: 'Birbaşa HTTPS media linkləri (dəstəklənən bir mənbədən deyilsə brauzer təhlükəsizlik siyasəti tərəfindən bloklana bilər)',
         },
         limitations: {
             title: 'Məhdudiyyətlər:',
             youtube: 'YouTube: Səs çıxışı dəyişdirilə bilməz (yalnız standart cihaz)',
             googleDrive: 'Google Drive: >50MB fayllar yüklənməyə bilər (Dropbox istifadə edin)',
             drm: 'Netflix, Vimeo: Dəstəklənmir (DRM qorunması)',
+            httpsCsp: 'Ümumi HTTPS linkləri: Dəstəklənən bir domendə yerləşmirsə brauzer təhlükəsizlik siyasəti (CSP) tərəfindən bloklana bilər',
         },
     },
 

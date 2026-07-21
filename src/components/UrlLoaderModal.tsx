@@ -164,11 +164,15 @@ const validateUrl = (url: string, type: 'video' | 'audio'): UrlValidation => {
             };
         }
 
-        // Allow any HTTPS URL (might be a CDN or streaming server)
+        // Allow any HTTPS URL (might be a CDN or streaming server). Note: unlike
+        // Google Drive/Dropbox above, this path has no server-side handling, so
+        // the browser's CSP media-src allowlist applies directly -- an
+        // arbitrary third-party host will be blocked unless it happens to
+        // already be allowlisted (confirmed via live testing, Faz3.3).
         if (urlObj.protocol === 'https:' || urlObj.protocol === 'http:') {
             return {
                 isValid: true,
-                message: 'URL format valid (will attempt to load)',
+                message: 'URL format valid — may be blocked by browser security policy unless from a supported source',
                 convertedUrl: url
             };
         }
@@ -344,6 +348,7 @@ export const UrlLoaderModal: React.FC<UrlLoaderModalProps> = ({
                                 <li>• {t.urlLoader.limitations.youtube}</li>
                                 <li>• {t.urlLoader.limitations.googleDrive}</li>
                                 <li>• {t.urlLoader.limitations.drm}</li>
+                                <li>• {t.urlLoader.limitations.httpsCsp}</li>
                             </ul>
                         </div>
                     </div>

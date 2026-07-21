@@ -183,13 +183,14 @@ export const en: Translations = {
             dropbox: 'Dropbox share links (recommended for large files)',
             googleDrive: 'Google Drive public links (max ~50MB)',
             youtube: 'YouTube videos (limited features)',
-            https: 'Any HTTPS URL that serves media files',
+            https: 'Direct HTTPS media links (may be blocked by browser security policy unless from a supported source)',
         },
         limitations: {
             title: 'Limitations:',
             youtube: 'YouTube: Audio output cannot be changed (always default device)',
             googleDrive: 'Google Drive: Files >50MB may not load (use Dropbox)',
             drm: 'Netflix, Vimeo: Not supported (DRM protection)',
+            httpsCsp: 'Generic HTTPS links: may be blocked by browser security policy (CSP) unless hosted on a supported domain',
         },
     },
 
