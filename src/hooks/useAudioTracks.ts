@@ -10,6 +10,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { AudioTrack, AudioDevice } from '../types';
 import { useToast } from '../components/Toast';
 import { getAudioFingerprint } from '../utils/fileFingerprint';
+import { sanitizeImportedTrackPref, sanitizeImportedAppSettings, hadInvalidKnownField } from '../utils/syncImportValidation';
 
 export const useAudioTracks = () => {
     const [audioTracks, setAudioTracks] = useState<AudioTrack[]>([]);
@@ -40,7 +41,12 @@ export const useAudioTracks = () => {
     }, [permissionsGranted]);
 
     useEffect(() => {
-        refreshDevices();
+        // Do not call refreshDevices() here: it requests microphone permission
+        // (getUserMedia), and doing that on mount shows the browser's permission
+        // prompt before any user action. refreshDevices() is instead gesture-gated
+        // — wired to the sidebar's explicit "Grant Permission" button. This listener
+        // only reacts to devices already visible after permission is granted; it
+        // does not itself trigger a prompt.
         navigator.mediaDevices.addEventListener('devicechange', refreshDevices);
         return () => navigator.mediaDevices.removeEventListener('devicechange', refreshDevices);
     }, [refreshDevices]);
@@ -191,13 +197,27 @@ export const useAudioTracks = () => {
                 const data = JSON.parse(json);
 
                 // Handle both old format (flat prefs) and new format (with version)
-                const prefs = data.trackPrefs || data;
-                const appSettings = data.appSettings;
+                const rawPrefs = data.trackPrefs || data;
+                const rawAppSettings = data.appSettings;
 
-                localStorage.setItem('synCinema_trackPrefs', JSON.stringify(prefs));
+                // Whitelist-sanitize before this data touches live state OR
+                // localStorage: an unsanitized write to localStorage would let a
+                // malformed field corrupt a track added later (addAudioTracks/
+                // addAudioFromUrl read back from localStorage too), not just the
+                // tracks currently loaded.
+                let anyInvalidKnownField = false;
+                const sanitizedPrefs: Record<string, Partial<AudioTrack>> = {};
+                for (const name of Object.keys(rawPrefs)) {
+                    const sanitized = sanitizeImportedTrackPref(rawPrefs[name]);
+                    sanitizedPrefs[name] = sanitized;
+                    if (hadInvalidKnownField(rawPrefs[name], sanitized)) anyInvalidKnownField = true;
+                }
+
+                localStorage.setItem('synCinema_trackPrefs', JSON.stringify(sanitizedPrefs));
 
                 // Apply app settings if present
-                if (appSettings) {
+                const appSettings = sanitizeImportedAppSettings(rawAppSettings);
+                if (rawAppSettings) {
                     if (appSettings.masterVolume !== undefined) {
                         setMasterVolume(appSettings.masterVolume);
                     }
@@ -209,21 +229,19 @@ export const useAudioTracks = () => {
                 // Update currently loaded tracks if they match
                 let matchCount = 0;
                 setAudioTracks(prev => prev.map(t => {
-                    if (prefs[t.name]) {
-                        console.log(`Matching settings found for track: ${t.name}`, prefs[t.name]);
+                    const trackPrefs = sanitizedPrefs[t.name];
+                    if (trackPrefs && Object.keys(trackPrefs).length > 0) {
+                        console.log(`Matching settings found for track: ${t.name}`, trackPrefs);
                         matchCount++;
-                        return {
-                            ...t,
-                            ...prefs[t.name],
-                            eq: prefs[t.name].eq || t.eq,
-                            useCompressor: prefs[t.name].useCompressor ?? t.useCompressor
-                        };
+                        return { ...t, ...trackPrefs };
                     }
                     return t;
                 }));
 
-                const trackCount = Object.keys(prefs).length;
-                showToast(`Project loaded! Found settings for ${trackCount} tracks.\n${matchCount} active tracks updated.${appSettings ? '\nApp settings restored. Refresh for theme change.' : ''}`);
+                const trackCount = Object.keys(rawPrefs).length;
+                const settingsNote = rawAppSettings ? '\nApp settings restored. Refresh for theme change.' : '';
+                const invalidNote = anyInvalidKnownField ? '\nSome settings were invalid and were skipped.' : '';
+                showToast(`Project loaded! Found settings for ${trackCount} tracks.\n${matchCount} active tracks updated.${settingsNote}${invalidNote}`);
             } catch (err) {
                 console.error("Failed to load project", err);
                 showToast("Error parsing project file. Please check if it's a valid .sync or .json file.", 'error');

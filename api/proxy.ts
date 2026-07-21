@@ -76,9 +76,16 @@ function isAllowedOrigin(req: VercelRequest): boolean {
         return true;
     }
 
-    // Fallback to Referer header
+    // Fallback to Referer header: compare the parsed origin exactly, not a
+    // string prefix — startsWith('https://syncinema.vercel.app') would also
+    // match an attacker-controlled 'https://syncinema.vercel.app.evil.example'.
     if (referer) {
-        return ALLOWED_ORIGINS.some(allowed => referer.startsWith(allowed));
+        try {
+            const refererOrigin = new URL(referer).origin;
+            return ALLOWED_ORIGINS.includes(refererOrigin);
+        } catch {
+            return false;
+        }
     }
 
     // No origin/referer = likely direct browser navigation or curl
