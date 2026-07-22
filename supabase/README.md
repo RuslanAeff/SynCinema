@@ -27,14 +27,22 @@ state lives in React. It resets on reload, and more importantly the RPCs above a
 reachable directly with the public anon key — from the browser console, or curl —
 which bypasses the UI entirely.
 
-`supabase/migrations/0001_admin_lockout_serverside.sql` implements the fix: a
-per-caller (`inet_client_addr()`-keyed) attempt-tracking table plus lockout-check/
-record/reset helper functions, matching the existing 3-attempt/30-second UX values.
-**This migration is not yet applied to the live project** — applying it requires
-wiring the helper functions into `verify_admin_password`/`admin_delete_preset`'s
-existing bodies (see the integration note at the bottom of the migration file) via
-the dashboard, and confirming with a direct RPC call that bypasses `AdminPanel.tsx`.
-Treat the client-side lock as UX only until that live step is done and confirmed.
+`supabase/migrations/0001_admin_lockout_serverside.sql` implements a per-caller
+(`inet_client_addr()`-keyed) attempt-tracking table plus lockout-check/record/reset
+helper functions, matching the existing 3-attempt/30-second UX values.
+
+**Applied live 2026-07-22.** Live investigation at apply-time found
+`verify_admin_password`/`admin_delete_preset` already had a separate,
+pre-existing **global** (not per-caller) brute-force gate — a `login_attempts`
+table counting all failures across all callers in the last 5 minutes, a 1s
+`pg_sleep()` throttle, and a hashed (`crypt()`) password compare. This wasn't
+evidenced in any planning document; AUTOPSY-P1-01 assumed no server-side
+protection existed. Decision: keep the global gate untouched and layer the new
+per-IP lockout on top as an independent, additional check — see
+`supabase/migrations/0000_baseline_asis.sql` (pre-change bodies) and
+`supabase/migrations/0002_admin_lockout_integration_applied.sql` (as-applied
+bodies, both gates active). `AdminPanel.tsx`'s client-side lock is now backed by
+two real server-side gates, not just UX.
 
 Longer term, replace the shared password with Supabase Auth and a real admin account
 so the check is delegated to an audited system instead of a secret compared in SQL.
