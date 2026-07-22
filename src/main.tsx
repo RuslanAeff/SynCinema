@@ -23,6 +23,9 @@ import App from './App';
 import { I18nProvider } from './context/I18nContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ToastProvider } from './components/Toast';
+import { initSentry } from './lib/sentry';
+
+initSentry();
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {

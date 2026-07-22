@@ -21,6 +21,12 @@ const ALLOWED_ORIGINS = [
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  Security: Rate limiting (in-memory, per serverless instance)
+//
+//  Accepted tradeoff: state is per-instance and resets on cold start, so a
+//  determined attacker spread across instances/IPs isn't caught. Fine at
+//  this project's current low traffic; revisit with a shared store (e.g.
+//  Redis/Upstash) only if sustained traffic or a real abuse incident shows
+//  this limit is being bypassed in practice (see Planing-Ledger.md Faz6.2).
 // ═══════════════════════════════════════════════════════════════════════════
 const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
 const RATE_LIMIT_MAX_REQUESTS = 10;     // max 10 requests per IP per minute

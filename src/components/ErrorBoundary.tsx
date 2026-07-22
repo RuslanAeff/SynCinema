@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { getSavedLanguage, getTranslation } from '../i18n';
+import { reportError } from '../lib/sentry';
 
 interface ErrorBoundaryProps {
     children: React.ReactNode;
@@ -31,6 +32,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
 
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
         console.error('SynCinema Error:', error, errorInfo);
+        reportError(error, { componentStack: errorInfo.componentStack });
     }
 
     render(): React.ReactNode {

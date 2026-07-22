@@ -38,3 +38,28 @@ Treat the client-side lock as UX only until that live step is done and confirmed
 
 Longer term, replace the shared password with Supabase Auth and a real admin account
 so the check is delegated to an audited system instead of a secret compared in SQL.
+
+## Backup/retention policy for `sync_presets`
+
+Confirmed against the live project (2026-07-22): this project is on Supabase's **Free
+tier**, which does not include automatic backups or point-in-time recovery. `sync_presets`
+today has **zero automated backup coverage** — a truncation or corruption (accidental or
+via a bug in `admin_delete_preset`) is currently unrecoverable except by users
+re-contributing their offsets.
+
+**Policy decision: accept this risk; no additional application-level backup is added.**
+`sync_presets` holds community-contributed, votable offset presets, not user-private or
+otherwise irreplaceable data (see `Project-Ontology.md` Section 4) — every row is
+re-derivable because any user can re-submit the same video/audio offset pair. Building a
+custom export/backup pipeline for data this cheap to regenerate would be disproportionate
+engineering effort relative to the actual risk, consistent with this project's
+evidence-based, appropriately-scoped approach to Phase 6.
+
+**Revisit this decision if:**
+- The project moves to Supabase's Pro tier (or higher) for other reasons — at that point,
+  the included daily backups apply to `sync_presets` automatically, at no extra effort.
+- `sync_presets` ever starts holding data that isn't cheaply re-derivable by users (e.g., if
+  a future feature attaches non-recreatable content to a preset row).
+- A real data-loss incident occurs — at that point, a lightweight manual export (e.g., a
+  periodic `pg_dump`/CSV export of `sync_presets` run from the dashboard's SQL editor) is
+  the appropriately-scoped first mitigation to reach for, before anything more automated.
