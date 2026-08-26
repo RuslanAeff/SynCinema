@@ -70,17 +70,43 @@ export const pickBestQuality = (levels: string[]): string | null =>
 /**
  * Highest quality a player box of this size can realistically get.
  *
- * YouTube's adaptive streaming picks by rendered pixel size, not by request, so a
- * 640×360 embed stays at 360p no matter what the API is asked for. Assumes 16:9
- * content letterboxed into the box, so the narrower constraint wins.
+ * YouTube's adaptive streaming picks from the embed's own CSS pixel size, not from the
+ * physical pixels behind it and not from what the API is asked for — which is why
+ * zooming the browser out raises quality while the picture occupies the same screen
+ * area. `layoutScale` is how many times larger than its visible box the iframe is laid
+ * out (see resolveBoostFactor). Assumes 16:9 content letterboxed into the box, so the
+ * narrower constraint wins.
  */
 export const qualityForPlayerSize = (
     cssWidth: number,
     cssHeight: number,
-    devicePixelRatio = 1,
+    layoutScale = 1,
 ): QualityToken => {
-    const dpr = devicePixelRatio > 0 ? devicePixelRatio : 1;
-    const videoHeight = Math.min(cssHeight, (cssWidth * 9) / 16) * dpr;
+    const scale = layoutScale > 0 ? layoutScale : 1;
+    const videoHeight = Math.min(cssHeight, (cssWidth * 9) / 16) * scale;
 
     return QUALITY_LADDER.find((token) => QUALITY_HEIGHTS[token] >= videoHeight) ?? 'hd2160';
 };
+
+/** How far the embed is oversampled relative to the box the viewer actually sees. */
+export type DetailBoost = 'off' | 'high' | 'max';
+
+/**
+ * Laying the iframe out this many times larger than its visible box, then scaling it
+ * back down, is what zooming the browser to 50% and 25% does by hand — without also
+ * shrinking every button on the page.
+ */
+const BOOST_FACTORS: Record<DetailBoost, number> = {
+    off: 1,
+    high: 2,
+    max: 4,
+};
+
+/**
+ * The layout multiplier for a boost mode.
+ *
+ * Save-Data always wins: oversampling asks YouTube for a rendition denser than the
+ * screen can show, and on a metered connection that is somebody's data plan.
+ */
+export const resolveBoostFactor = (mode: DetailBoost, saveData = false): number =>
+    (saveData ? BOOST_FACTORS.off : BOOST_FACTORS[mode] ?? BOOST_FACTORS.off);

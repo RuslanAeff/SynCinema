@@ -10,11 +10,13 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { AlertTriangle, Volume2, VolumeX, Play, Pause, Maximize, Minimize, Youtube, ExternalLink, Check, Gauge } from 'lucide-react';
 import { formatTime } from '../utils/formatTime';
 import {
+    DetailBoost,
     QualityPreference,
     formatQuality,
     pickBestQuality,
     qualityForPlayerSize,
     qualityRank,
+    resolveBoostFactor,
     sortQualitiesDesc,
 } from '../utils/youtubeQuality';
 import { SubtitleStyle } from '../types';
@@ -51,6 +53,9 @@ const QUALITY_PREFERENCE_KEY = 'syncinema.youtube.quality';
  */
 const MAX_QUALITY_NUDGES = 2;
 
+/** Where the detail-boost choice is remembered between sessions. */
+const DETAIL_BOOST_KEY = 'syncinema.youtube.detailBoost';
+
 const readStoredPreference = (): QualityPreference => {
     try {
         const stored = window.localStorage.getItem(QUALITY_PREFERENCE_KEY);
@@ -61,6 +66,28 @@ const readStoredPreference = (): QualityPreference => {
         // Private mode or blocked storage — fall through to the default.
     }
     return 'best';
+};
+
+/** Off by default: oversampling costs bandwidth, so it stays an opt-in. */
+const readStoredBoost = (): DetailBoost => {
+    try {
+        const stored = window.localStorage.getItem(DETAIL_BOOST_KEY);
+        if (stored === 'off' || stored === 'high' || stored === 'max') return stored;
+    } catch {
+        // Private mode or blocked storage — fall through to the default.
+    }
+    return 'off';
+};
+
+/** Whether the viewer has asked the browser to conserve data. */
+const prefersReducedData = (): boolean => {
+    const connection = (navigator as Navigator & {
+        connection?: { saveData?: boolean; effectiveType?: string };
+    }).connection;
+
+    if (!connection) return false;
+    if (connection.saveData) return true;
+    return connection.effectiveType === '2g' || connection.effectiveType === 'slow-2g';
 };
 
 // Load YouTube IFrame API script
@@ -109,6 +136,8 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({
     const [currentQuality, setCurrentQuality] = useState<string>('auto');
     const [availableQualities, setAvailableQualities] = useState<string[]>([]);
     const [preferredQuality, setPreferredQuality] = useState<QualityPreference>(readStoredPreference);
+    const [detailBoost, setDetailBoost] = useState<DetailBoost>(readStoredBoost);
+    const [saveData] = useState(prefersReducedData);
     const [showQualityMenu, setShowQualityMenu] = useState(false);
     const [playerBox, setPlayerBox] = useState({ width: 0, height: 0 });
     const preferredQualityRef = useRef<QualityPreference>(preferredQuality);
@@ -117,6 +146,9 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({
     const qualityMenuRef = useRef<HTMLDivElement>(null);
     const intervalRef = useRef<number | null>(null);
     const controlsTimeoutRef = useRef<number | null>(null);
+
+    // How many times larger than its visible box the embed is laid out.
+    const boostFactor = resolveBoostFactor(detailBoost, saveData);
 
     // Auto-hide controls logic
     const handleUserActivity = useCallback(() => {
@@ -313,6 +345,17 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({
         if (isReady) syncQuality();
     }, [preferredQuality, isReady, syncQuality]);
 
+    // Persist the boost and re-read the ladder: resizing the embed changes which levels
+    // YouTube is willing to offer, so the menu and the request both need refreshing.
+    useEffect(() => {
+        try {
+            window.localStorage.setItem(DETAIL_BOOST_KEY, detailBoost);
+        } catch {
+            // Storage blocked — the choice simply won't survive a reload.
+        }
+        if (isReady) syncQuality();
+    }, [detailBoost, isReady, syncQuality]);
+
     // Track the player's real pixel box: it decides the quality ceiling, so the menu can
     // say why 1080p isn't on offer instead of silently failing to deliver it.
     useEffect(() => {
@@ -370,10 +413,13 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({
     };
 
     // What this layout can realistically get, and what YouTube is actually serving.
-    // Until the box has been measured we make no size claims — a 0x0 reading would
+    // The ceiling follows the boost factor, not devicePixelRatio: YouTube reads the
+    // embed's CSS pixels and ignores how dense the panel behind them is — which is the
+    // whole reason zooming the browser out raises quality.
+    // Until the box has been measured we make no size claims: a 0x0 reading would
     // otherwise flag every level as out of reach on the first paint.
     const hasMeasuredBox = playerBox.width > 0 && playerBox.height > 0;
-    const sizeCeiling = qualityForPlayerSize(playerBox.width, playerBox.height, window.devicePixelRatio);
+    const sizeCeiling = qualityForPlayerSize(playerBox.width, playerBox.height, boostFactor);
     const sizeCeilingRank = hasMeasuredBox ? qualityRank(sizeCeiling) : Infinity;
     const bestAvailable = availableQualities[0] ?? null;
     const isBelowBest = bestAvailable !== null
@@ -388,6 +434,12 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({
             label: formatQuality(level),
             needsBiggerPlayer: qualityRank(level) > sizeCeilingRank,
         })),
+    ];
+
+    const boostOptions: { value: DetailBoost; label: string; hint: string }[] = [
+        { value: 'off', label: 'Off', hint: 'Normal' },
+        { value: 'high', label: 'Higher', hint: '2×' },
+        { value: 'max', label: 'Maximum', hint: '4×' },
     ];
 
     // The control bar forces a dark surface in fullscreen; the menu has to follow it.
@@ -438,12 +490,21 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({
             )}
 
             {/* Video Container */}
-            <div ref={videoBoxRef} className="flex-1 relative">
+            <div ref={videoBoxRef} className="flex-1 relative overflow-hidden">
                 {/* The API swaps the inner node out for its own iframe, so sizing lives on
-                    the wrapper — a leftover 640x360 iframe would cap the quality ladder. */}
+                    the wrapper — a leftover 640x360 iframe would cap the quality ladder.
+                    Above 1x the wrapper is laid out proportionally larger and scaled back
+                    down: YouTube then measures the bigger box and picks a denser rendition,
+                    while the picture keeps the exact same place on screen. It is the
+                    browser's own zoom-out trick, confined to the video. */}
                 <div
-                    className="absolute inset-0 [&>iframe]:block [&>iframe]:w-full [&>iframe]:h-full"
-                    style={{ pointerEvents: isReady ? 'none' : 'auto' }}
+                    className="absolute top-0 left-0 origin-top-left [&>iframe]:block [&>iframe]:w-full [&>iframe]:h-full"
+                    style={{
+                        width: `${boostFactor * 100}%`,
+                        height: `${boostFactor * 100}%`,
+                        transform: boostFactor === 1 ? undefined : `scale(${1 / boostFactor})`,
+                        pointerEvents: isReady ? 'none' : 'auto',
+                    }}
                 >
                     <div ref={containerRef} className="w-full h-full" />
                 </div>
@@ -579,12 +640,39 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({
                                         )}
                                     </div>
 
+                                    <div className={`px-3 py-2 border-t text-[11px] uppercase tracking-wide ${menuDivider} ${menuMuted}`}>
+                                        Detail boost
+                                    </div>
+
+                                    <div className="flex gap-1 px-2 py-2">
+                                        {boostOptions.map((option) => (
+                                            <button
+                                                key={option.value}
+                                                onClick={() => setDetailBoost(option.value)}
+                                                disabled={saveData && option.value !== 'off'}
+                                                className={`flex-1 rounded-md px-2 py-1.5 text-xs transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${detailBoost === option.value
+                                                    ? 'bg-red-600 text-white'
+                                                    : `${menuText} ${menuRowHover}`
+                                                    }`}
+                                                title={`Render the embed ${option.hint} larger, then scale it back`}
+                                            >
+                                                {option.label}
+                                            </button>
+                                        ))}
+                                    </div>
+
                                     <div className={`px-3 py-2 border-t text-[11px] leading-relaxed ${menuDivider} ${menuMuted}`}>
-                                        YouTube has the final say on quality.
+                                        {saveData ? (
+                                            <>Detail boost is off because your browser has Save-Data turned on.</>
+                                        ) : (
+                                            <>Boosting asks YouTube for a denser picture than the player box would
+                                                normally get — the same effect as zooming the browser out, without
+                                                shrinking the controls. Costs more bandwidth.</>
+                                        )}
                                         {hasMeasuredBox && (
                                             <> This player is {Math.round(playerBox.width)}×{Math.round(playerBox.height)},
-                                                which supports up to{' '}
-                                                <span className="font-medium">{formatQuality(sizeCeiling)}</span>. Go fullscreen for more.</>
+                                                which currently supports up to{' '}
+                                                <span className="font-medium">{formatQuality(sizeCeiling)}</span>.</>
                                         )}
                                     </div>
                                 </div>

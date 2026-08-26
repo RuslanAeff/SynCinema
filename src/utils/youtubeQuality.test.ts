@@ -4,6 +4,7 @@ import {
     pickBestQuality,
     qualityForPlayerSize,
     qualityRank,
+    resolveBoostFactor,
     sortQualitiesDesc,
 } from './youtubeQuality';
 
@@ -71,9 +72,10 @@ describe('qualityForPlayerSize', () => {
         expect(qualityForPlayerSize(1920, 1080)).toBe('hd1080');
     });
 
-    it('lets a retina display unlock a higher tier at the same CSS size', () => {
+    it('unlocks higher tiers as the layout scale grows, at one visible size', () => {
         expect(qualityForPlayerSize(960, 540, 1)).toBe('hd720');
         expect(qualityForPlayerSize(960, 540, 2)).toBe('hd1080');
+        expect(qualityForPlayerSize(960, 540, 4)).toBe('hd2160');
     });
 
     it('uses the narrower constraint on an ultra-wide box', () => {
@@ -83,5 +85,26 @@ describe('qualityForPlayerSize', () => {
 
     it('never exceeds the top of the ladder', () => {
         expect(qualityForPlayerSize(7680, 4320, 2)).toBe('hd2160');
+    });
+
+    it('ignores a nonsensical scale rather than collapsing to 144p', () => {
+        expect(qualityForPlayerSize(1920, 1080, 0)).toBe('hd1080');
+    });
+});
+
+describe('resolveBoostFactor', () => {
+    it('leaves the embed alone when the boost is off', () => {
+        expect(resolveBoostFactor('off')).toBe(1);
+    });
+
+    it('matches the browser-zoom steps the modes stand in for', () => {
+        // 'high' is the 50% zoom trick, 'max' the 25% one.
+        expect(resolveBoostFactor('high')).toBe(2);
+        expect(resolveBoostFactor('max')).toBe(4);
+    });
+
+    it('refuses to oversample under Save-Data, whatever the mode', () => {
+        expect(resolveBoostFactor('high', true)).toBe(1);
+        expect(resolveBoostFactor('max', true)).toBe(1);
     });
 });
