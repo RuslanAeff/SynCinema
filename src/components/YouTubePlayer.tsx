@@ -7,8 +7,16 @@
  */
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { AlertTriangle, Volume2, VolumeX, Play, Pause, Maximize, Minimize, Youtube, ExternalLink } from 'lucide-react';
+import { AlertTriangle, Volume2, VolumeX, Play, Pause, Maximize, Minimize, Youtube, ExternalLink, Check, Gauge } from 'lucide-react';
 import { formatTime } from '../utils/formatTime';
+import {
+    QualityPreference,
+    formatQuality,
+    pickBestQuality,
+    qualityForPlayerSize,
+    qualityRank,
+    sortQualitiesDesc,
+} from '../utils/youtubeQuality';
 import { SubtitleStyle } from '../types';
 import { SubtitleOverlay } from './SubtitleOverlay';
 
@@ -32,6 +40,28 @@ interface YouTubePlayerProps {
     subtitleOffset?: number;
     subtitleStyle?: SubtitleStyle;
 }
+
+/** Where the user's quality choice is remembered between sessions. */
+const QUALITY_PREFERENCE_KEY = 'syncinema.youtube.quality';
+
+/**
+ * How many times we re-ask for a level after YouTube drifts off it. Past this, adaptive
+ * streaming is choosing for bandwidth or player-size reasons and re-requesting in a loop
+ * only causes rebuffering.
+ */
+const MAX_QUALITY_NUDGES = 2;
+
+const readStoredPreference = (): QualityPreference => {
+    try {
+        const stored = window.localStorage.getItem(QUALITY_PREFERENCE_KEY);
+        if (stored === 'auto' || stored === 'best' || qualityRank(stored ?? '') >= 0) {
+            return stored as QualityPreference;
+        }
+    } catch {
+        // Private mode or blocked storage — fall through to the default.
+    }
+    return 'best';
+};
 
 // Load YouTube IFrame API script
 const loadYouTubeAPI = (): Promise<void> => {
@@ -77,6 +107,14 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({
     const [duration, setDuration] = useState(0);
     const [localTime, setLocalTime] = useState(0);
     const [currentQuality, setCurrentQuality] = useState<string>('auto');
+    const [availableQualities, setAvailableQualities] = useState<string[]>([]);
+    const [preferredQuality, setPreferredQuality] = useState<QualityPreference>(readStoredPreference);
+    const [showQualityMenu, setShowQualityMenu] = useState(false);
+    const [playerBox, setPlayerBox] = useState({ width: 0, height: 0 });
+    const preferredQualityRef = useRef<QualityPreference>(preferredQuality);
+    const qualityNudgesRef = useRef(0);
+    const videoBoxRef = useRef<HTMLDivElement>(null);
+    const qualityMenuRef = useRef<HTMLDivElement>(null);
     const intervalRef = useRef<number | null>(null);
     const controlsTimeoutRef = useRef<number | null>(null);
 
@@ -109,6 +147,44 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({
         return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
     }, []);
 
+    // ── Quality ──────────────────────────────────────────────────────────────
+    // YouTube took real quality control out of the IFrame API years ago:
+    // setPlaybackQuality is a suggestion the player may ignore, and adaptive streaming
+    // ultimately picks from rendered player size and bandwidth. So we ask for what we
+    // want, report what we actually got, and keep the iframe as large as the layout
+    // allows — that size is the one lever that still reliably moves the ladder.
+
+    const requestQuality = useCallback((token: string) => {
+        const player = playerRef.current;
+        if (!player) return;
+        try {
+            player.setPlaybackQualityRange?.(token, token);
+            player.setPlaybackQuality(token);
+        } catch {
+            // Some player builds drop these methods entirely; the size lever still applies.
+        }
+    }, []);
+
+    /** The concrete token our preference means right now, or null to leave YouTube alone. */
+    const resolvePreferred = useCallback((levels: string[]): string | null => {
+        const preference = preferredQualityRef.current;
+        if (preference === 'auto') return null;
+        if (preference === 'best') return pickBestQuality(levels);
+        // A pinned level this video does not offer falls back to the best it does.
+        return levels.includes(preference) ? preference : pickBestQuality(levels);
+    }, []);
+
+    /** Re-read what YouTube offers and re-assert the preference against it. */
+    const syncQuality = useCallback(() => {
+        const player = playerRef.current;
+        if (!player || typeof player.getAvailableQualityLevels !== 'function') return;
+        const levels = sortQualitiesDesc(player.getAvailableQualityLevels());
+        setAvailableQualities(levels);
+        setCurrentQuality(player.getPlaybackQuality());
+        const target = resolvePreferred(levels);
+        if (target) requestQuality(target);
+    }, [resolvePreferred, requestQuality]);
+
     // Initialize YouTube player
     useEffect(() => {
         let mounted = true;
@@ -120,6 +196,10 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({
 
             playerRef.current = new window.YT.Player(containerRef.current, {
                 videoId: videoId,
+                // Fill the wrapper instead of the API's 640x360 default, which would
+                // otherwise pin adaptive streaming near 360p regardless of what we ask for.
+                width: '100%',
+                height: '100%',
                 playerVars: {
                     autoplay: 0,
                     controls: 0,
@@ -128,7 +208,10 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({
                     showinfo: 0,
                     fs: 0,
                     playsinline: 1,
-                    origin: window.location.origin
+                    origin: window.location.origin,
+                    // Legacy hint. Modern players usually ignore it, but it costs nothing
+                    // and still nudges the ones that don't.
+                    vq: 'hd2160'
                 },
                 events: {
                     onReady: (event) => {
@@ -137,6 +220,18 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({
                         const dur = event.target.getDuration();
                         setDuration(dur);
                         onDurationChange(dur);
+                        syncQuality();
+                    },
+                    onPlaybackQualityChange: (event) => {
+                        if (!mounted) return;
+                        setCurrentQuality(event.data);
+                        const levels = sortQualitiesDesc(event.target.getAvailableQualityLevels());
+                        setAvailableQualities(levels);
+                        const target = resolvePreferred(levels);
+                        if (target && event.data !== target && qualityNudgesRef.current < MAX_QUALITY_NUDGES) {
+                            qualityNudgesRef.current += 1;
+                            requestQuality(target);
+                        }
                     },
                     onStateChange: (event) => {
                         if (!mounted) return;
@@ -144,6 +239,8 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({
                         if (state === window.YT.PlayerState.PLAYING) {
                             onPlayingChange(true);
                             startTimeUpdate();
+                            // The level list is empty until playback actually begins.
+                            syncQuality();
                         } else if (state === window.YT.PlayerState.PAUSED) {
                             onPlayingChange(false);
                             stopTimeUpdate();
@@ -163,9 +260,10 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({
             stopTimeUpdate();
             if (playerRef.current) {
                 playerRef.current.destroy();
+                playerRef.current = null;
             }
         };
-    }, [videoId]);
+    }, [videoId, syncQuality, resolvePreferred, requestQuality]);
 
     // Time update interval
     const startTimeUpdate = useCallback(() => {
@@ -175,12 +273,6 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({
                 const time = playerRef.current.getCurrentTime();
                 setLocalTime(time);
                 onTimeUpdate(time);
-
-                // Update quality info
-                if (typeof playerRef.current.getPlaybackQuality === 'function') {
-                    const quality = playerRef.current.getPlaybackQuality();
-                    setCurrentQuality(quality);
-                }
             }
         }, 500); // Slightly slower interval to reduce overhead
     }, [onTimeUpdate]);
@@ -208,6 +300,43 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({
         if (!isReady || !playerRef.current) return;
         playerRef.current.setVolume(isMuted ? 0 : volume);
     }, [volume, isMuted, isReady]);
+
+    // Persist the choice and re-assert it, with a fresh nudge budget per pick.
+    useEffect(() => {
+        preferredQualityRef.current = preferredQuality;
+        qualityNudgesRef.current = 0;
+        try {
+            window.localStorage.setItem(QUALITY_PREFERENCE_KEY, preferredQuality);
+        } catch {
+            // Storage blocked — the choice simply won't survive a reload.
+        }
+        if (isReady) syncQuality();
+    }, [preferredQuality, isReady, syncQuality]);
+
+    // Track the player's real pixel box: it decides the quality ceiling, so the menu can
+    // say why 1080p isn't on offer instead of silently failing to deliver it.
+    useEffect(() => {
+        const box = videoBoxRef.current;
+        if (!box || typeof ResizeObserver === 'undefined') return;
+        const observer = new ResizeObserver(([entry]) => {
+            const { width, height } = entry.contentRect;
+            setPlayerBox({ width, height });
+        });
+        observer.observe(box);
+        return () => observer.disconnect();
+    }, []);
+
+    // Dismiss the quality menu on an outside click
+    useEffect(() => {
+        if (!showQualityMenu) return;
+        const handleClickOutside = (event: MouseEvent) => {
+            if (!qualityMenuRef.current?.contains(event.target as Node)) {
+                setShowQualityMenu(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [showQualityMenu]);
 
     // Toggle mute
     const toggleMute = () => {
@@ -240,26 +369,35 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({
         }
     };
 
-    // Format time
+    // What this layout can realistically get, and what YouTube is actually serving.
+    // Until the box has been measured we make no size claims — a 0x0 reading would
+    // otherwise flag every level as out of reach on the first paint.
+    const hasMeasuredBox = playerBox.width > 0 && playerBox.height > 0;
+    const sizeCeiling = qualityForPlayerSize(playerBox.width, playerBox.height, window.devicePixelRatio);
+    const sizeCeilingRank = hasMeasuredBox ? qualityRank(sizeCeiling) : Infinity;
+    const bestAvailable = availableQualities[0] ?? null;
+    const isBelowBest = bestAvailable !== null
+        && qualityRank(currentQuality) >= 0
+        && qualityRank(currentQuality) < qualityRank(bestAvailable);
 
+    const qualityOptions: { value: QualityPreference; label: string; needsBiggerPlayer: boolean }[] = [
+        { value: 'best', label: 'Best available', needsBiggerPlayer: false },
+        { value: 'auto', label: 'Auto (YouTube decides)', needsBiggerPlayer: false },
+        ...availableQualities.map((level) => ({
+            value: level as QualityPreference,
+            label: formatQuality(level),
+            needsBiggerPlayer: qualityRank(level) > sizeCeilingRank,
+        })),
+    ];
 
-    // Format quality label
-    const formatQuality = (quality: string): string => {
-        const qualityMap: Record<string, string> = {
-            'tiny': '144p',
-            'small': '240p',
-            'medium': '360p',
-            'large': '480p',
-            'hd720': '720p',
-            'hd1080': '1080p',
-            'hd1440': '1440p',
-            'hd2160': '4K',
-            'highres': '4K+',
-            'default': 'Auto',
-            'auto': 'Auto'
-        };
-        return qualityMap[quality] || quality;
-    };
+    // The control bar forces a dark surface in fullscreen; the menu has to follow it.
+    const menuSurface = isFullscreen
+        ? 'bg-gray-900 border-gray-800'
+        : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700';
+    const menuRowHover = isFullscreen ? 'hover:bg-gray-800' : 'hover:bg-gray-100 dark:hover:bg-gray-800';
+    const menuText = isFullscreen ? 'text-gray-200' : 'text-gray-700 dark:text-gray-200';
+    const menuMuted = isFullscreen ? 'text-gray-400' : 'text-gray-500 dark:text-gray-400';
+    const menuDivider = isFullscreen ? 'border-gray-800' : 'border-gray-200 dark:border-gray-800';
 
     return (
         <div
@@ -300,12 +438,15 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({
             )}
 
             {/* Video Container */}
-            <div className="flex-1 relative">
+            <div ref={videoBoxRef} className="flex-1 relative">
+                {/* The API swaps the inner node out for its own iframe, so sizing lives on
+                    the wrapper — a leftover 640x360 iframe would cap the quality ladder. */}
                 <div
-                    ref={containerRef}
-                    className="absolute inset-0 w-full h-full"
+                    className="absolute inset-0 [&>iframe]:block [&>iframe]:w-full [&>iframe]:h-full"
                     style={{ pointerEvents: isReady ? 'none' : 'auto' }}
-                />
+                >
+                    <div ref={containerRef} className="w-full h-full" />
+                </div>
 
                 {!isReady && (
                     <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
@@ -383,12 +524,71 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({
                     </div>
 
                     <div className="flex-1 flex items-center justify-end gap-3">
-                        {/* Quality Badge */}
-                        <div
-                            className={`px-2.5 py-1 rounded-md text-xs font-mono border ${isFullscreen ? 'bg-white/10 border-white/20 text-white/80' : 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300'}`}
-                            title="Current video quality"
-                        >
-                            {formatQuality(currentQuality)}
+                        {/* Quality picker — the label is what YouTube actually serves,
+                            the menu is what we ask it for. */}
+                        <div className="relative" ref={qualityMenuRef}>
+                            <button
+                                onClick={() => {
+                                    syncQuality();
+                                    setShowQualityMenu((open) => !open);
+                                }}
+                                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono border transition-colors ${isFullscreen ? 'bg-white/10 border-white/20 text-white/80 hover:bg-white/20' : 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                                title="Video quality"
+                            >
+                                <Gauge size={13} />
+                                <span>{formatQuality(currentQuality)}</span>
+                                {isBelowBest && (
+                                    <span className="text-amber-500" title={`YouTube is serving below the available ${formatQuality(bestAvailable!)}`}>↓</span>
+                                )}
+                            </button>
+
+                            {showQualityMenu && (
+                                <div className={`absolute bottom-full right-0 mb-2 w-64 rounded-lg border shadow-xl overflow-hidden z-40 ${menuSurface}`}>
+                                    <div className={`px-3 py-2 text-[11px] uppercase tracking-wide border-b ${menuDivider} ${menuMuted}`}>
+                                        Quality
+                                    </div>
+
+                                    <div className="max-h-64 overflow-y-auto py-1">
+                                        {qualityOptions.map((option) => (
+                                            <button
+                                                key={option.value}
+                                                onClick={() => {
+                                                    setPreferredQuality(option.value);
+                                                    setShowQualityMenu(false);
+                                                }}
+                                                className={`w-full flex items-center justify-between gap-2 px-3 py-2 text-sm text-left transition-colors ${menuRowHover}`}
+                                            >
+                                                <span className={preferredQuality === option.value ? 'text-red-500 font-medium' : menuText}>
+                                                    {option.label}
+                                                </span>
+                                                <span className="flex items-center gap-2">
+                                                    {option.needsBiggerPlayer && (
+                                                        <span className={`text-[10px] ${menuMuted}`} title="Your player is too small for this level; go fullscreen">
+                                                            needs a bigger player
+                                                        </span>
+                                                    )}
+                                                    {preferredQuality === option.value && <Check size={14} className="text-red-500" />}
+                                                </span>
+                                            </button>
+                                        ))}
+
+                                        {availableQualities.length === 0 && (
+                                            <p className={`px-3 py-2 text-xs ${menuMuted}`}>
+                                                Levels appear once playback starts.
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <div className={`px-3 py-2 border-t text-[11px] leading-relaxed ${menuDivider} ${menuMuted}`}>
+                                        YouTube has the final say on quality.
+                                        {hasMeasuredBox && (
+                                            <> This player is {Math.round(playerBox.width)}×{Math.round(playerBox.height)},
+                                                which supports up to{' '}
+                                                <span className="font-medium">{formatQuality(sizeCeiling)}</span>. Go fullscreen for more.</>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         <div className="flex items-center gap-2">

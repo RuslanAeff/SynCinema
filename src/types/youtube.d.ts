@@ -16,12 +16,26 @@ declare namespace YT {
         getPlayerState(): number;
         getPlaybackQuality(): string;
         getAvailableQualityLevels(): string[];
+        /**
+         * Deprecated by YouTube and a no-op on many videos — the player treats it as a
+         * suggestion at best. Kept because it is the only quality lever the API exposes.
+         */
+        setPlaybackQuality(suggestedQuality: string): void;
+        /** Same caveat as setPlaybackQuality; absent on some player builds. */
+        setPlaybackQualityRange?(minQuality: string, maxQuality: string): void;
+        getIframe(): HTMLIFrameElement;
         destroy(): void;
     }
 
     interface PlayerEvent {
         target: Player;
         data: number;
+    }
+
+    /** onPlaybackQualityChange reports a quality token, not a numeric state. */
+    interface QualityChangeEvent {
+        target: Player;
+        data: string;
     }
 
     interface PlayerOptions {
@@ -37,10 +51,13 @@ declare namespace YT {
             fs?: 0 | 1;
             playsinline?: 0 | 1;
             origin?: string;
+            /** Legacy quality hint. Modern players usually ignore it; harmless to send. */
+            vq?: string;
         };
         events?: {
             onReady?: (event: PlayerEvent) => void;
             onStateChange?: (event: PlayerEvent) => void;
+            onPlaybackQualityChange?: (event: QualityChangeEvent) => void;
             onError?: (event: PlayerEvent) => void;
         };
     }
