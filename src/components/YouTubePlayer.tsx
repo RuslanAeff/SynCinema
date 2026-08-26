@@ -68,7 +68,10 @@ const readStoredPreference = (): QualityPreference => {
     return 'best';
 };
 
-/** Off by default: oversampling costs bandwidth, so it stays an opt-in. */
+/**
+ * Defaults to 2x: it is a clear win on every screen and still half the bandwidth of the
+ * 4x step, which is left to viewers who go looking for it. Save-Data overrides this.
+ */
 const readStoredBoost = (): DetailBoost => {
     try {
         const stored = window.localStorage.getItem(DETAIL_BOOST_KEY);
@@ -76,7 +79,7 @@ const readStoredBoost = (): DetailBoost => {
     } catch {
         // Private mode or blocked storage — fall through to the default.
     }
-    return 'off';
+    return 'high';
 };
 
 /** Whether the viewer has asked the browser to conserve data. */
