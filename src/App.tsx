@@ -19,6 +19,7 @@ const OnboardingTour = lazy(() => import('./components/OnboardingTour').then(m =
 const UrlLoaderModal = lazy(() => import('./components/UrlLoaderModal').then(m => ({ default: m.UrlLoaderModal })));
 const StatisticsPanel = lazy(() => import('./components/StatisticsPanel').then(m => ({ default: m.StatisticsPanel })));
 const AdminPanel = lazy(() => import('./components/AdminPanel').then(m => ({ default: m.AdminPanel })));
+const SubtitleStudio = lazy(() => import('./components/SubtitleStudio').then(m => ({ default: m.SubtitleStudio })));
 import { useVideoPlayer } from './hooks/useVideoPlayer';
 import { useAudioTracks } from './hooks/useAudioTracks';
 import { useTheme } from './hooks/useTheme';
@@ -27,7 +28,7 @@ import { useCloudSync } from './hooks/useCloudSync';
 import { useToast } from './components/Toast';
 import { Logo } from './components/Logo';
 import { InfoButton } from './components/HelpPanel';
-import { Sun, Moon, BarChart3, ShieldAlert } from 'lucide-react';
+import { Sun, Moon, BarChart3, ShieldAlert, Captions } from 'lucide-react';
 import { useI18n } from './context/I18nContext';
 import { SubtitleStyle } from './types';
 
@@ -139,6 +140,7 @@ function App() {
 
   // Statistics Panel State
   const [showStatistics, setShowStatistics] = useState(false);
+  const [showSubtitleStudio, setShowSubtitleStudio] = useState(false);
 
   // YouTube Video State
   const [youtubeVideoId, setYoutubeVideoId] = useState<string | null>(null);
@@ -436,6 +438,8 @@ function App() {
   const closeUrlLoader = useCallback(() => setShowUrlLoader(false), []);
   const openStatistics = useCallback(() => setShowStatistics(true), []);
   const closeStatistics = useCallback(() => setShowStatistics(false), []);
+  const openSubtitleStudio = useCallback(() => setShowSubtitleStudio(true), []);
+  const closeSubtitleStudio = useCallback(() => setShowSubtitleStudio(false), []);
 
   return (
     <div
@@ -474,6 +478,13 @@ function App() {
           <h1 className="text-xl font-extrabold tracking-tight text-gray-900 dark:text-white">SynCinema</h1>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={openSubtitleStudio}
+            className="p-2 rounded-lg bg-gradient-to-br from-primary-500/20 to-secondary-500/20 border border-primary-500/30 text-primary-400 hover:text-primary-300 transition-colors"
+            title={t.subtitleStudio?.title ?? 'Subtitle Studio'}
+          >
+            <Captions size={18} />
+          </button>
           <button
             onClick={openStatistics}
             className="p-2 rounded-lg bg-gradient-to-br from-primary-500/20 to-secondary-500/20 border border-primary-500/30 text-primary-400 hover:text-primary-300 transition-colors"
@@ -572,6 +583,7 @@ function App() {
         onUrlLoaderOpen={openUrlLoader}
         onAudioUrlLoad={handleAudioFromUrl}
         onStatisticsOpen={openStatistics}
+        onSubtitleStudioOpen={openSubtitleStudio}
 
         onTrackEvent={trackEvent as (event: string) => void}
         onShareSync={handleShareSync}
@@ -611,6 +623,15 @@ function App() {
               trackEvent('videosLoaded');
               setShowUrlLoader(false);
             }}
+          />
+        )}
+
+        {/* Subtitle Studio - generates .srt from audio via Gemini, in the browser */}
+        {showSubtitleStudio && (
+          <SubtitleStudio
+            isOpen={showSubtitleStudio}
+            onClose={closeSubtitleStudio}
+            onUseInPlayer={loadSubtitles}
           />
         )}
 

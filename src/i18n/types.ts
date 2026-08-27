@@ -230,6 +230,60 @@ export interface Translations {
 
 
 
+    // Subtitle Studio - optional so a locale can fall back to English
+    subtitleStudio?: {
+        title: string;
+        subtitle: string;
+        open: string;
+        apiKeyLabel: string;
+        apiKeyPlaceholder: string;
+        apiKeyHelp: string;
+        apiKeyGet: string;
+        apiKeyShow: string;
+        apiKeyHide: string;
+        apiKeyMissing: string;
+        apiKeySaved: string;
+        fileDrop: string;
+        fileBrowse: string;
+        fileDuration: string;
+        fileVideoTooBig: string;
+        fileVideoHint: string;
+        languageLabel: string;
+        languageAuto: string;
+        vocabularyLabel: string;
+        vocabularyPlaceholder: string;
+        vocabularyHelp: string;
+        readabilityTitle: string;
+        maxCharsLabel: string;
+        minDurLabel: string;
+        sentenceOnlyLabel: string;
+        formatsTitle: string;
+        generate: string;
+        cancel: string;
+        download: string;
+        copy: string;
+        copied: string;
+        share: string;
+        useInPlayer: string;
+        startOver: string;
+        phasePrepare: string;
+        phaseUpload: string;
+        phaseTranscribe: string;
+        chunkProgress: string;
+        retrying: string;
+        longFileWarning: string;
+        resultTitle: string;
+        resultBlocks: string;
+        resultEmpty: string;
+        errorInvalidKey: string;
+        errorRateLimit: string;
+        errorQuota: string;
+        errorServer: string;
+        errorNetwork: string;
+        errorUnknown: string;
+        errorNoAudio: string;
+    };
+
     // Help panel - expanded for all sections
     help: {
         title: string;

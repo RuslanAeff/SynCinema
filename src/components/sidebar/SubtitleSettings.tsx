@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Upload, Type, Palette, ChevronDown, MoveVertical, Square } from 'lucide-react';
+import { Upload, Type, Palette, ChevronDown, MoveVertical, Square, Sparkles } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext';
 import { SubtitleStyle } from '../../types';
 
@@ -11,6 +11,8 @@ interface SubtitleSettingsProps {
     onSubtitleStyleChange: (style: SubtitleStyle) => void;
     subtitleInputRef: React.RefObject<HTMLInputElement | null>;
     handleSubtitleLoad: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    /** Opens the Subtitle Studio; absent when the feature is not wired up. */
+    onGenerateSubtitles?: () => void;
 }
 
 const SubtitleSettingsComponent: React.FC<SubtitleSettingsProps> = ({
@@ -21,6 +23,7 @@ const SubtitleSettingsComponent: React.FC<SubtitleSettingsProps> = ({
     onSubtitleStyleChange,
     subtitleInputRef,
     handleSubtitleLoad,
+    onGenerateSubtitles,
 }) => {
     const { t } = useI18n();
     const [isSettingsCollapsed, setIsSettingsCollapsed] = useState(false);
@@ -76,9 +79,20 @@ const SubtitleSettingsComponent: React.FC<SubtitleSettingsProps> = ({
                     )}
                 </button>
                 {!hasSubtitles ? (
-                    <button onClick={() => subtitleInputRef.current?.click()} className="text-xs text-primary-400 hover:text-primary-300 flex items-center gap-1">
-                        <Upload size={12} /> {t.sidebar.load}
-                    </button>
+                    <div className="flex items-center gap-3">
+                        {onGenerateSubtitles && (
+                            <button
+                                onClick={onGenerateSubtitles}
+                                className="text-xs text-primary-400 hover:text-primary-300 flex items-center gap-1"
+                                title={t.subtitleStudio?.title ?? 'Subtitle Studio'}
+                            >
+                                <Sparkles size={12} /> {t.subtitleStudio?.generate ?? 'Generate'}
+                            </button>
+                        )}
+                        <button onClick={() => subtitleInputRef.current?.click()} className="text-xs text-primary-400 hover:text-primary-300 flex items-center gap-1">
+                            <Upload size={12} /> {t.sidebar.load}
+                        </button>
+                    </div>
                 ) : (
                     <div className="flex items-center gap-3">
                         <span className="text-[10px] text-gray-400">Offset:</span>

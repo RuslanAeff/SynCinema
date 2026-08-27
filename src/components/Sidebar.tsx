@@ -59,6 +59,8 @@ interface SidebarProps {
     onUrlLoaderOpen: () => void;
     onAudioUrlLoad: (url: string, filename: string) => void;
     onStatisticsOpen: () => void;
+    /** Opens the Subtitle Studio from the subtitle section. */
+    onSubtitleStudioOpen?: () => void;
     onTrackEvent?: (event: string) => void;
     onShareSync?: (trackId: string, offset: number) => void;
 }
@@ -101,6 +103,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     onUrlLoaderOpen,
     onAudioUrlLoad,
     onStatisticsOpen,
+    onSubtitleStudioOpen,
     onTrackEvent,
     onShareSync,
 }) => {
@@ -168,6 +171,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         onSubtitleStyleChange={onSubtitleStyleChange}
                         subtitleInputRef={subtitleInputRef}
                         handleSubtitleLoad={handleSubtitleLoad}
+                        onGenerateSubtitles={onSubtitleStudioOpen}
                     />
                 </div>
 
