@@ -222,6 +222,7 @@ export const en: Translations = {
         errorNetwork: 'Connection problem. Check your internet and try again.',
         errorUnknown: 'Something went wrong. Try again.',
         errorNoAudio: 'Could not read this file. Try a different audio file.',
+        errorDetails: 'Technical details',
     },
 
     urlLoader: {

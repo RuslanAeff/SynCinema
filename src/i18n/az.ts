@@ -221,6 +221,7 @@ export const az: Translations = {
         errorNetwork: 'Bağlantı problemi. İnternetini yoxlayıb yenidən cəhd et.',
         errorUnknown: 'Nəsə səhv getdi. Yenidən cəhd et.',
         errorNoAudio: 'Bu fayl oxuna bilmədi. Başqa səs faylı sına.',
+        errorDetails: 'Texniki təfərrüat',
     },
 
     urlLoader: {

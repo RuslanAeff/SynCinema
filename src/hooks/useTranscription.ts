@@ -36,6 +36,8 @@ export interface TranscriptionState {
     chunkIndex: number;
     chunkCount: number;
     errorCode: TranscribeErrorCode | null;
+    /** Raw API message, shown behind a disclosure so a failure can be diagnosed. */
+    errorDetail: string | null;
     /** Set while waiting out a rate-limit backoff, so the UI can explain the pause. */
     retryingInSeconds: number | null;
     words: Word[];
@@ -49,6 +51,7 @@ const INITIAL_STATE: TranscriptionState = {
     chunkIndex: 0,
     chunkCount: 0,
     errorCode: null,
+    errorDetail: null,
     retryingInSeconds: null,
     words: [],
     durationSeconds: 0,
@@ -186,12 +189,21 @@ export const useTranscription = () => {
                 ? error.code
                 : 'unknown';
 
+            const detail = error instanceof TranscribeError
+                ? [error.status ? `HTTP ${error.status}` : null, error.detail]
+                    .filter(Boolean).join(' - ')
+                : (error instanceof Error ? error.message : String(error));
+
             setState((previous) => ({
                 ...previous,
                 status: code === 'cancelled' ? 'cancelled' : 'error',
                 phase: null,
                 retryingInSeconds: null,
                 errorCode: code === 'cancelled' ? null : code,
+                // Keep the phase that failed: upload and transcribe fail very differently.
+                errorDetail: code === 'cancelled'
+                    ? null
+                    : [previous.phase, detail].filter(Boolean).join(' | ') || null,
             }));
         }
     }, [cleanupUploads]);

@@ -233,54 +233,23 @@ const readErrorBody = async (response: Response): Promise<string> => {
     }
 };
 
-/**
- * Start a resumable upload and push the bytes.
- *
- * XHR rather than fetch for the byte transfer: it is the only way to report
- * upload progress, which matters when the file is a podcast over a phone link.
- */
-export const uploadAudio = async (
-    apiKey: string,
+/** Push bytes with XHR so upload progress can be reported on slow phone links. */
+const sendBytes = (
+    url: string,
+    headers: Record<string, string>,
     blob: Blob,
-    mimeType: string,
-    displayName: string,
     signal?: AbortSignal,
     onProgress?: (fraction: number) => void,
-): Promise<UploadedFile> => {
-    const startResponse = await fetch(UPLOAD_URL, {
-        method: 'POST',
-        headers: {
-            'x-goog-api-key': apiKey,
-            'x-goog-upload-protocol': 'resumable',
-            'x-goog-upload-command': 'start',
-            'x-goog-upload-header-content-length': String(blob.size),
-            'x-goog-upload-header-content-type': mimeType,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ file: { display_name: displayName } }),
-        signal,
-    });
-
-    if (!startResponse.ok) {
-        throw classifyResponse(startResponse.status, await readErrorBody(startResponse));
-    }
-
-    const uploadUrl = startResponse.headers.get('x-goog-upload-url');
-    if (!uploadUrl) {
-        throw new TranscribeError('unknown', 'Upload session URL missing from response');
-    }
-
-    const uploaded = await new Promise<Record<string, unknown>>((resolve, reject) => {
+): Promise<Record<string, unknown>> =>
+    new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
-        xhr.open('POST', uploadUrl, true);
-        xhr.setRequestHeader('x-goog-api-key', apiKey);
-        xhr.setRequestHeader('x-goog-upload-offset', '0');
-        xhr.setRequestHeader('x-goog-upload-command', 'upload, finalize');
+        xhr.open('POST', url, true);
+        for (const [name, value] of Object.entries(headers)) {
+            xhr.setRequestHeader(name, value);
+        }
 
         xhr.upload.onprogress = (event) => {
-            if (event.lengthComputable && onProgress) {
-                onProgress(event.loaded / event.total);
-            }
+            if (event.lengthComputable && onProgress) onProgress(event.loaded / event.total);
         };
 
         xhr.onload = () => {
@@ -303,6 +272,89 @@ export const uploadAudio = async (
         xhr.send(blob);
     });
 
+/**
+ * Open a resumable session and return its upload URL.
+ *
+ * Returns null when the URL cannot be read. Reading a custom response header from
+ * script requires the server to list it in Access-Control-Expose-Headers, and if
+ * Google does not expose x-goog-upload-url to this origin the whole resumable
+ * protocol is undriveable from a browser — hence the simple-upload fallback.
+ */
+const startResumableSession = async (
+    apiKey: string,
+    blob: Blob,
+    mimeType: string,
+    displayName: string,
+    signal?: AbortSignal,
+): Promise<string | null> => {
+    const response = await fetch(UPLOAD_URL, {
+        method: 'POST',
+        headers: {
+            'x-goog-api-key': apiKey,
+            'x-goog-upload-protocol': 'resumable',
+            'x-goog-upload-command': 'start',
+            'x-goog-upload-header-content-length': String(blob.size),
+            'x-goog-upload-header-content-type': mimeType,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ file: { display_name: displayName } }),
+        signal,
+    });
+
+    if (!response.ok) {
+        throw classifyResponse(response.status, await readErrorBody(response));
+    }
+
+    return response.headers.get('x-goog-upload-url');
+};
+
+/** One-shot upload. Needs no response headers, so CORS cannot get in the way. */
+const simpleUpload = (
+    apiKey: string,
+    blob: Blob,
+    mimeType: string,
+    signal?: AbortSignal,
+    onProgress?: (fraction: number) => void,
+): Promise<Record<string, unknown>> =>
+    sendBytes(
+        `${UPLOAD_URL}?uploadType=media`,
+        { 'x-goog-api-key': apiKey, 'Content-Type': mimeType },
+        blob,
+        signal,
+        onProgress,
+    );
+
+/**
+ * Upload the audio and wait until Gemini can read it.
+ *
+ * Tries the resumable protocol first because it is the documented path for large
+ * files, and falls back to a single-shot upload when the session URL cannot be
+ * read back.
+ */
+export const uploadAudio = async (
+    apiKey: string,
+    blob: Blob,
+    mimeType: string,
+    displayName: string,
+    signal?: AbortSignal,
+    onProgress?: (fraction: number) => void,
+): Promise<UploadedFile> => {
+    const sessionUrl = await startResumableSession(apiKey, blob, mimeType, displayName, signal);
+
+    const uploaded = sessionUrl
+        ? await sendBytes(
+            sessionUrl,
+            {
+                'x-goog-api-key': apiKey,
+                'x-goog-upload-offset': '0',
+                'x-goog-upload-command': 'upload, finalize',
+            },
+            blob,
+            signal,
+            onProgress,
+        )
+        : await simpleUpload(apiKey, blob, mimeType, signal, onProgress);
+
     const file = (uploaded.file ?? uploaded) as Record<string, unknown>;
     const uri = typeof file.uri === 'string' ? file.uri : null;
     const name = typeof file.name === 'string' ? file.name : null;
@@ -311,7 +363,10 @@ export const uploadAudio = async (
         : (typeof file.mime_type === 'string' ? file.mime_type : mimeType);
 
     if (!uri || !name) {
-        throw new TranscribeError('unknown', 'Upload response did not contain a file URI');
+        throw new TranscribeError(
+            'unknown',
+            `Upload response did not contain a file URI: ${JSON.stringify(uploaded).slice(0, 300)}`,
+        );
     }
 
     await waitUntilActive(apiKey, name, file.state, signal);

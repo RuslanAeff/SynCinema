@@ -282,6 +282,7 @@ export interface Translations {
         errorNetwork: string;
         errorUnknown: string;
         errorNoAudio: string;
+        errorDetails: string;
     };
 
     // Help panel - expanded for all sections

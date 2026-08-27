@@ -221,6 +221,7 @@ export const tr: Translations = {
         errorNetwork: 'Bağlantı sorunu. İnternetini kontrol edip tekrar dene.',
         errorUnknown: 'Bir şeyler ters gitti. Tekrar dene.',
         errorNoAudio: 'Bu dosya okunamadı. Farklı bir ses dosyası dene.',
+        errorDetails: 'Teknik ayrıntı',
     },
 
     urlLoader: {

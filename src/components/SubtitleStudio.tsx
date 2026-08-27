@@ -539,7 +539,27 @@ export const SubtitleStudio: React.FC<SubtitleStudioProps> = ({ isOpen, onClose,
                             {errorMessage && (
                                 <div className="flex items-start gap-3 p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
                                     <AlertCircle size={16} className="text-red-500 shrink-0 mt-0.5" />
-                                    <p className="text-sm text-red-700 dark:text-red-300">{errorMessage}</p>
+                                    <div className="min-w-0 flex-1">
+                                        <p className="text-sm text-red-700 dark:text-red-300">{errorMessage}</p>
+                                        {/* The friendly message alone makes a failure impossible to
+                                            diagnose, so the raw one stays available underneath. */}
+                                        {state.errorDetail && (
+                                            <details className="mt-2">
+                                                <summary className="text-xs text-red-600 dark:text-red-400 cursor-pointer select-none">
+                                                    {strings.errorDetails}
+                                                </summary>
+                                                <pre className="mt-2 p-2 rounded-lg bg-red-100/60 dark:bg-red-950/40 text-[11px] leading-relaxed text-red-800 dark:text-red-200 whitespace-pre-wrap break-all max-h-40 overflow-y-auto">
+                                                    {state.errorDetail}
+                                                </pre>
+                                                <button
+                                                    onClick={() => void navigator.clipboard?.writeText(state.errorDetail ?? '')}
+                                                    className="mt-2 inline-flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400 hover:underline"
+                                                >
+                                                    <Copy size={12} />{strings.copy}
+                                                </button>
+                                            </details>
+                                        )}
+                                    </div>
                                 </div>
                             )}
 
