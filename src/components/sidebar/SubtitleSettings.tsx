@@ -206,7 +206,9 @@ const SubtitleSettingsComponent: React.FC<SubtitleSettingsProps> = ({
                                                 <div className="relative h-7 rounded-md mt-1 group shrink-0 shadow-sm">
                                                     {/* Visual Button */}
                                                     <div className="absolute inset-0 rounded-md overflow-hidden border border-gray-600 group-hover:border-primary-400 transition-colors pointer-events-none">
-                                                        <div className="absolute inset-0 bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 opacity-60 group-hover:opacity-100 transition-opacity" />
+                                                        {/* Tailwind's via-* is a single stop, so stacking four of them silently
+                                                            kept only one. A literal gradient is the way to get all five. */}
+                                                        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ef4444,#eab308,#22c55e,#3b82f6,#a855f7)] opacity-60 group-hover:opacity-100 transition-opacity" />
                                                         <div className="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/20 transition-colors">
                                                             <span className="text-[10px] font-bold text-white drop-shadow-md tracking-wider">
                                                                 + MORE COLORS
