@@ -45,10 +45,33 @@ policy and revokes every write privilege from `anon`/`authenticated`, leaving
 SELECT. Nothing in the client breaks: `useCloudSync.ts` and `AdminPanel.tsx`
 only ever `.select('*')`, and all three write paths are SECURITY DEFINER RPCs.
 
-**Still not captured:** the table `safe_increment_vote` writes voter hashes to.
-Those hashes are browser fingerprints (user agent, screen size, language,
-timezone offset — see `useCloudSync.ts`), so that table's own policies deserve
-the same check this one just had.
+## `vote_log` and the admin tables
+
+Recorded live 2026-09-20 alongside `sync_presets`, completing the sweep.
+
+`vote_log` (`id`, `preset_id`, `voter_hash`, `created_at`) is where
+`safe_increment_vote` records who has voted. **It had no SELECT policy, so the
+voter fingerprints were never readable through the API** — worth stating plainly,
+since `voter_hash` is `btoa()` of user agent + screen size + language + timezone
+(see `useCloudSync.ts`), which is base64, not a hash, and therefore reversible.
+
+It did carry `Allow anonymous insert on vote_log` with `WITH CHECK (true)`. That
+turned the dedup check into a weapon: plant a row for a `voter_hash` that has not
+voted yet and the real vote bounces as a duplicate. The fingerprint space is
+small and guessable, so seeding the common ones would have suppressed voting for
+most visitors.
+
+`admin_config`, `login_attempts` and `admin_login_attempts` all had RLS on with
+zero policies, which correctly denies anon everything — except TRUNCATE, which
+Postgres does not subject to RLS. Emptying the two attempt tables would reset the
+brute-force throttle and lockout; emptying `admin_config` would drop
+`admin_password_hash` and lock the admin out for good.
+
+`supabase/migrations/0004_internal_tables_least_privilege.sql` drops that insert
+policy and revokes every privilege on all four tables from `anon` and
+`authenticated`. Nothing in the client names any of them — only the SECURITY
+DEFINER functions touch them, and those run as the owner.
+
 
 ## Admin brute-force protection: server-side lockout designed, not yet live
 
