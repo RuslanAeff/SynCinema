@@ -20,6 +20,36 @@ applied live, so the baseline reflects pre-fix reality. Only real secrets belong
 `.gitignore` — the function bodies do not (`.gitignore` now allows
 `supabase/migrations/*.sql` specifically).
 
+## `sync_presets` row-level security: captured and tightened
+
+Recorded live 2026-09-20, closing the follow-up this file and Planing-Ledger.md
+Section 8 both listed as never captured.
+
+**As found:** RLS was on (`forced = false`, correctly — the SECURITY DEFINER
+functions run as the owner and must bypass it), with two policies —
+`Allow anonymous read` (SELECT, `USING (true)`) and `Allow anonymous insert`
+(INSERT, `WITH CHECK (true)`). `anon` and `authenticated` each held INSERT,
+SELECT, UPDATE, DELETE, TRUNCATE, REFERENCES and TRIGGER. The table held no
+identifying columns (`id`, `video_id`, `audio_id`, `offset_ms`, `votes`,
+`created_at`) and was empty.
+
+**The hole:** the insert policy let anyone POST straight to
+`/rest/v1/sync_presets` with the public anon key, skipping
+`safe_insert_preset`'s server-side rate limiting entirely. UPDATE and DELETE
+were already neutralised by RLS (no policy covers them), but only by that one
+layer — and TRUNCATE is not subject to RLS at all, so there the grant was the
+only barrier.
+
+`supabase/migrations/0003_sync_presets_least_privilege.sql` drops the insert
+policy and revokes every write privilege from `anon`/`authenticated`, leaving
+SELECT. Nothing in the client breaks: `useCloudSync.ts` and `AdminPanel.tsx`
+only ever `.select('*')`, and all three write paths are SECURITY DEFINER RPCs.
+
+**Still not captured:** the table `safe_increment_vote` writes voter hashes to.
+Those hashes are browser fingerprints (user agent, screen size, language,
+timezone offset — see `useCloudSync.ts`), so that table's own policies deserve
+the same check this one just had.
+
 ## Admin brute-force protection: server-side lockout designed, not yet live
 
 `AdminPanel.tsx` counts failed attempts and locks the form for 30 seconds, but that
