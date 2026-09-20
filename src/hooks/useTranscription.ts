@@ -18,6 +18,7 @@ import {
     deleteUploadedFile,
     enforceMonotonicWords,
     offsetWords,
+    redactSecrets,
     transcribeFile,
     uploadAudio,
 } from '../lib/geminiTranscribe';
@@ -189,10 +190,13 @@ export const useTranscription = () => {
                 ? error.code
                 : 'unknown';
 
-            const detail = error instanceof TranscribeError
+            const rawDetail = error instanceof TranscribeError
                 ? [error.status ? `HTTP ${error.status}` : null, error.detail]
                     .filter(Boolean).join(' - ')
                 : (error instanceof Error ? error.message : String(error));
+
+            // This text is built to be copied and shared, so the key never enters it.
+            const detail = redactSecrets(rawDetail, apiKey);
 
             setState((previous) => ({
                 ...previous,

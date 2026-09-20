@@ -225,6 +225,23 @@ export const enforceMonotonicWords = (words: Word[]): Word[] => {
     return ordered;
 };
 
+/**
+ * Strip credentials out of text that is headed for the screen.
+ *
+ * The error disclosure exists to be copied and pasted to whoever is helping, so a
+ * key echoed back inside an API error body would travel with it. `secret` is
+ * matched literally rather than as a pattern, so no escaping is needed.
+ */
+export const redactSecrets = (text: string, secret?: string): string => {
+    const withoutOwnKey = secret && secret.length >= 8
+        ? text.split(secret).join('[redacted]')
+        : text;
+
+    // Google keys are AIza followed by 35 characters — catch any that slipped in
+    // from elsewhere, not just the caller's own.
+    return withoutOwnKey.replace(/AIza[0-9A-Za-z_-]{10,}/g, '[redacted]');
+};
+
 const readErrorBody = async (response: Response): Promise<string> => {
     try {
         return (await response.text()).slice(0, 500);

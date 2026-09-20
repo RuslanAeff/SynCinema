@@ -7,6 +7,7 @@ import {
     extractWords,
     offsetWords,
     parseOffsetSeconds,
+    redactSecrets,
 } from './geminiTranscribe';
 
 /** Wrap annotations in the interaction envelope Gemini replies with. */
@@ -169,5 +170,41 @@ describe('buildTranscriptionRequest', () => {
         const config = (body.generation_config as Record<string, Record<string, unknown>>).transcription_config;
 
         expect(config.custom_vocabulary).toHaveLength(MAX_VOCABULARY_TERMS);
+    });
+});
+
+describe('redactSecrets', () => {
+    it('removes the key belonging to this caller wherever it appears', () => {
+        const key = 'AIzaSyEXAMPLE0000000000000000000000000';
+        expect(redactSecrets(`bad key: ${key} at end`, key))
+            .toBe('bad key: [redacted] at end');
+    });
+
+    it('removes every occurrence, not just the first', () => {
+        const key = 'supersecretvalue';
+        expect(redactSecrets(`${key} and ${key}`, key)).toBe('[redacted] and [redacted]');
+    });
+
+    it('catches a Google-shaped key belonging to someone else', () => {
+        expect(redactSecrets('leaked AIzaSyOTHER000000000000000000000000000 here'))
+            .toBe('leaked [redacted] here');
+    });
+
+    it('treats the secret literally, so regex characters cannot break it', () => {
+        const key = 'a.b*c+d(e)';
+        expect(redactSecrets(`key=${key}`, key)).toBe('key=[redacted]');
+    });
+
+    it('leaves ordinary error text alone', () => {
+        const message = 'HTTP 400 - Invalid request payload';
+        expect(redactSecrets(message, 'AIzaSyEXAMPLE0000000000000000000000000')).toBe(message);
+    });
+
+    it('ignores a secret too short to be a credential', () => {
+        expect(redactSecrets('the value is abc', 'abc')).toBe('the value is abc');
+    });
+
+    it('is a no-op when no secret is supplied', () => {
+        expect(redactSecrets('nothing to hide')).toBe('nothing to hide');
     });
 });
