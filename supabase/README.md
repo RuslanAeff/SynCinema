@@ -77,6 +77,11 @@ DEFINER functions touch them, and those run as the owner.
 Both `0003` and `0004` were executed against the live database on 2026-09-21,
 following the same manual SQL-editor route as `0001`/`0002`.
 
+The admin password was rotated on 2026-09-21, using `crypt()` with
+`gen_salt('bf', 12)`, after it was found to have been lost. The stored value is a
+bcrypt hash and cannot be read back, so rotation is the only recovery route. Login
+and preset listing were confirmed working afterwards.
+
 State was captured immediately before and after. Before: 73 rows — all seven
 privileges on all five tables for both `anon` and `authenticated`, plus the two
 anonymous-insert policies. After: 3 rows — `SELECT` on `sync_presets` for both

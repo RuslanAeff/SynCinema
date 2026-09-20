@@ -176,7 +176,7 @@ afterwards. Recording the reversal here rather than quietly promoting it.
 | V-04 | Manual microphone-gate protocol, four steps, on a permission-cleared profile | performed 2026-09-20, reported 2026-09-21 | deployed build; exact commit not recorded by the observer | Chrome 153.0.8010.53 (64-bit); Windows 11 and macOS 26.6.2 | All four steps matched their expected outcome (no prompt on load → warning + button present → prompt on press → devices populate) | **Self-reported by the author**, who is the developer under study. No screenshot or recording retained. The deployed commit under test was not recorded, so the observation is tied to a date, not to a revision. |
 | V-05 | Review of CI run history in the platform's web UI | 2026-09-21, via author-supplied screenshots | covers runs at `5c0768f`, `2b5eeee`, `7696a7c`, `f4cc9e4`, `3145ffa`, `710ea56`, `73d62dc`, `605993a` | — | **8 runs, 8 green, 0 failed.** Earliest run #1 at `5c0768f`, 2026-07-22 03:28 GMT+2, 35s. One run detail page shows Vitest 7 files / 56 tests passing. | Screenshots were not independently fetched. Only what is legible on screen is recorded; anything further is marked as inference below. |
 
-| V-06 | Post-migration functional check of all three SECURITY DEFINER write paths, against the deployed app and the live database | 2026-09-20/21 (DB timestamps in UTC) | migrations `0003`+`0004` applied; app at `605993a` | Chrome, deployed build | **All three paths work with `anon` holding zero privileges on the tables they write to.** (a) Insert: a preset row exists — `offset_ms` 700, matching the 0.7s set in the UI, created 2026-09-20 22:43:49 UTC. (b) Vote: `vote_log` holds exactly 1 row after two attempts, and the preset's `votes` reads 2 — the second vote was refused by the dedup, which is correct. (c) Admin: a `login_attempts` row was written at 2026-09-20 22:52:53 UTC, the moment of the attempt, so `verify_admin_password` executed and wrote despite `REVOKE ALL`. | The admin attempt returned false. That alone is ambiguous — the function returns false both for a wrong password and for an unreadable hash — so it was resolved separately: the hash row is intact (60 chars, `$2a$` bcrypt) and the attempt was recorded. Password correctness itself remains unverified and is not in scope. Preset identifiers are deliberately not reproduced here. |
+| V-06 | Post-migration functional check of all three SECURITY DEFINER write paths, against the deployed app and the live database | 2026-09-20/21 (DB timestamps in UTC) | migrations `0003`+`0004` applied; app at `605993a` | Chrome, deployed build | **All three paths work with `anon` holding zero privileges on the tables they write to.** (a) Insert: a preset row exists — `offset_ms` 700, matching the 0.7s set in the UI, created 2026-09-20 22:43:49 UTC. (b) Vote: `vote_log` holds exactly 1 row after two attempts, and the preset's `votes` reads 2 — the second vote was refused by the dedup, which is correct. (c) Admin: after the password was rotated on 2026-09-21, login succeeded and the panel loaded the preset list, showing the same `+700ms` and `2` votes the SQL query returned — the same record confirmed a third time, by a third route. | The admin path took two passes. The first attempt returned false, which is ambiguous — the function returns false both for a wrong password and for an unreadable hash. It was resolved by confirming the hash row was intact (60 chars, `$2a$`) and that a `login_attempts` row had been written at 2026-09-20 22:52:53 UTC, proving the function ran despite `REVOKE ALL`. The password had simply been lost; after rotation the full path was exercised end to end. Preset identifiers are deliberately not reproduced here. |
 
 ### What V-06 settles
 
@@ -190,7 +190,13 @@ This is the review's strongest evidence of any kind — a change applied to a li
 system, with state captured before and after, and every affected path exercised
 afterwards. It is also the one place where an ambiguous result was pursued instead
 of accepted: "wrong password" was not treated as a verdict until the attempt log
-showed the function had actually run.
+showed the function had actually run, and the path was only closed once a rotated
+password let the panel load real data.
+
+The preset record was ultimately confirmed three times by three independent
+routes — a direct SQL query, the `vote_log` row count, and the admin panel's own
+listing — all agreeing on 700 ms and 2 votes. Agreement across routes is what
+makes this stronger than any single observation.
 
 ### What V-05 corroborates
 

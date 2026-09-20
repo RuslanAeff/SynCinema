@@ -160,15 +160,24 @@ the admin attempt. The three numbers cross-check.
 
 The admin attempt itself returned false. That was **not** accepted as a verdict:
 the function returns false both for a wrong password and for an unreadable hash.
-It was separated by checking that the hash row is intact (60 chars, `$2a$`) and
-that the attempt was logged — so the function ran. The password is simply not
-known to the author, most likely because the stored bcrypt hash was mistaken for
-the password. Password correctness stays unverified and out of scope.
+It was separated by checking that the hash row was intact (60 chars, `$2a$`) and
+that the attempt had been logged — so the function ran. The password had simply
+been lost, most likely because the stored bcrypt hash was mistaken for the
+password itself.
+
+The password was then rotated, and the admin path was exercised end to end: login
+succeeded and the panel listed the preset created earlier, showing the same
+`+700ms` and `2` votes the SQL query had returned. That record is now confirmed by
+three independent routes — direct query, `vote_log` count, and the admin UI — all
+agreeing. Agreement across routes is what makes this stronger than any single
+observation, and it closes the last verification gap in this repository.
 
 **Next concrete step**
 
-Nothing is outstanding in this repository. The remaining work is hub-side and was
-already open before this session: classification criteria, the independent-rater
-arrangement, and scope — none of which are decided here. Separately, the author
-may want to reset the admin password, which is a maintenance task rather than
-research.
+Nothing is outstanding here. The remaining work is hub-side and predates this
+session: classification criteria for the four terms the supervisor asked about,
+the independent-rater arrangement, and scope. None are decided in this repository.
+
+Two questions also belong to the hub rather than here: whether transcript-only
+evidence is admissible at all — it affects `SYN-C02`, `SYN-C04` and `SYN-C05` —
+and whether an AutoSRT pass is commissioned.
