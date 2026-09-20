@@ -95,3 +95,80 @@ levelled honestly, and neither can be obtained from the repository:
 
 Until answered, SYN-C01 stays at E1 with E3 recorded as NOT_OBSERVED, and the
 CI claim stays E0.
+
+---
+
+## 2026-09-21 — Session 2: two open questions answered
+
+Both manual checks left open by Session 1 were carried out by the author and
+reported back. No repository file other than this research folder was touched.
+
+**Microphone gate (question 1) — answered, E3 obtained.**
+The four-step protocol was run on a permission-cleared profile: no prompt on
+load, warning and "İzin Ver" button present, prompt only after pressing it,
+devices populate after granting. Chrome 153.0.8010.53 (64-bit), on Windows 11 and
+macOS 26.6.2, performed 2026-09-20.
+
+`SYN-C01` moves from `E3: NOT_OBSERVED` to E3 obtained. Two limits stay attached
+and must travel with the claim: the observer is the thesis author, who is also the
+developer under study, and no screenshot or recording was kept. The observation
+also came roughly two months after the change it validates — the gap between a
+sub-plan being marked `verified` and anyone actually looking is itself a finding.
+
+**CI history (question 2) — answered, and it corroborates the ledger.**
+Eight runs, all green, none failed. Earliest is run #1 at commit `5c0768f`,
+2026-07-22 03:28 GMT+2, 35s.
+
+`Planing-Ledger.md` had claimed exactly that: "confirmed live 2026-07-22 … commit
+`5c0768f`, green check, 35s". Commit, date, duration and outcome all match. This
+is the first claim in this review where the AI-assisted ledger is confirmed by a
+record held outside the repository and outside the process that wrote it.
+
+Two consistent-but-not-conclusive observations were recorded as inference: a run
+detail page shows 56 passing tests where the ledger claims 56/56 at the phase5-6
+commit; and 108 commits produced only 8 runs, with no run for the four commits the
+ledger says were never pushed at the time.
+
+**Unchanged by this session**
+
+- The circularity problem is reduced, not removed. One claim was corroborated
+  externally; the rest of the ledger remains self-reported.
+- `SYN-C02`'s failed first attempt still has no artefact.
+- `SYN-C03`'s browser-path claim is still unobserved.
+- Hub remains NOT_ACCESSIBLE.
+
+**Supabase hardening captured, applied and verified (same session)**
+
+Carried out in the intended order, so the evidence survived the fix.
+
+*Before* (S-15): 73 rows. All seven privileges on all five tables, for both `anon`
+and `authenticated`, plus two anonymous-insert policies. The author exported this
+to CSV. Until this capture, the finding existed only as chat narrative; it is now
+recorded.
+
+*Applied*: migrations `0003` and `0004`, via the SQL editor, the same manual route
+used for `0001`/`0002`. Recorded in `supabase/README.md`.
+
+*After* (S-16): 3 rows. `SELECT` on `sync_presets` for both roles, plus the
+`Allow anonymous read` policy. Nothing else.
+
+*Functional check* (V-06): all three `SECURITY DEFINER` write paths still work with
+`anon` holding nothing. One preset at `offset_ms` 700 matching the 0.7s set in the
+UI; `vote_log` at exactly 1 row after two vote attempts, with `votes` = 2, the
+second refused by the dedup; and a `login_attempts` row written at the moment of
+the admin attempt. The three numbers cross-check.
+
+The admin attempt itself returned false. That was **not** accepted as a verdict:
+the function returns false both for a wrong password and for an unreadable hash.
+It was separated by checking that the hash row is intact (60 chars, `$2a$`) and
+that the attempt was logged — so the function ran. The password is simply not
+known to the author, most likely because the stored bcrypt hash was mistaken for
+the password. Password correctness stays unverified and out of scope.
+
+**Next concrete step**
+
+Nothing is outstanding in this repository. The remaining work is hub-side and was
+already open before this session: classification criteria, the independent-rater
+arrangement, and scope — none of which are decided here. Separately, the author
+may want to reset the admin password, which is a maintenance task rather than
+research.

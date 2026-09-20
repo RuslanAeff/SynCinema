@@ -72,6 +72,18 @@ policy and revokes every privilege on all four tables from `anon` and
 `authenticated`. Nothing in the client names any of them — only the SECURITY
 DEFINER functions touch them, and those run as the owner.
 
+### Applied live 2026-09-21
+
+Both `0003` and `0004` were executed against the live database on 2026-09-21,
+following the same manual SQL-editor route as `0001`/`0002`.
+
+State was captured immediately before and after. Before: 73 rows — all seven
+privileges on all five tables for both `anon` and `authenticated`, plus the two
+anonymous-insert policies. After: 3 rows — `SELECT` on `sync_presets` for both
+roles and the `Allow anonymous read` policy, nothing else. The before-capture was
+exported to CSV and is held by the author; both captures are recorded in
+`docs/thesis/research/EVIDENCE_INDEX.md` (S-15, S-16).
+
 
 ## Admin brute-force protection: server-side lockout designed, not yet live
 

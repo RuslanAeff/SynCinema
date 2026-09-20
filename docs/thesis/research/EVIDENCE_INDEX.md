@@ -24,18 +24,22 @@ claim, not aggregated into a score. The scheme itself is not settled.
 | S-04 | `Planner-docs/Main-Planing.md`, `Sub-Planing-Index.md`, `Sub-Planing-Audit.md`, `Project-Ontology.md`, `Faz-1..7-Plans/` | Planning corpus | Added 2026-07-22 | 2026-09-20 (index level; **not read in full**) | Existence and shape of a structured AI planning workflow | Contents not exhaustively read. Treat as partially examined. |
 | S-05 | Git history, 108 commits, 2025-12-25 → 2026-09-20 | Primary VCS record | spans | 2026-09-20 | Dates, diffs, commit messages, before/after states | All 108 commits have a single author identity, so authorship alone never separates AI-assisted from hand-written work. |
 | S-06 | Git trailers: 16 commits carry `Co-Authored-By` | Primary VCS record | 2026-05-30 (4), 2026-07-22 (11), 2026-09-20 (3, this session) | 2026-09-20 | The only machine-readable AI attribution in the repo | Covers 16 of 108 commits. Absence of a trailer is **not** evidence of absence of AI involvement. |
-| S-07 | `.github/workflows/ci.yml` | CI configuration | in tree at review | 2026-09-20 | That CI is configured to run `typecheck` → `lint` → `test` → `build` on push to `main` and on PRs | Whether any run ever passed. No run history was accessible this session (see V-02). |
+| S-07 | `.github/workflows/ci.yml` | CI configuration | in tree at review | 2026-09-20 | That CI is configured to run `typecheck` → `lint` → `test` → `build` on push to `main` and on PRs | Whether any run ever passed — answered separately by S-13, not by this file. Configuration is not execution. |
 | S-08 | `vite.config.ts` lines 2–3 | Config | current | 2026-09-20 | The import split (`loadEnv` from `vite`, `defineConfig` from `vitest/config`) that S-01 says was reached after a failed first attempt | The failed first attempt itself. No artifact of it survives in git. |
 | S-09 | `src/utils/fileFingerprint.test.ts` lines 5–14 vs `src/utils/fileFingerprint.ts` lines 52, 88 | Source + test | test added 2026-07-22 (`d0e642e`) | 2026-09-20 | That a `window` stub was placed in the **test**, and the source still calls `window.location.origin` — the workaround was not applied to the source | That the underlying browser-path behaviour was ever checked in a browser. |
 | S-10 | `src/hooks/useAudioTracks.ts` lines 43–52 | Source | changed 2026-07-22 (`75d06fc`) | 2026-09-20 | That the mount-time `refreshDevices()` call was removed and replaced by an explanatory comment | Runtime behaviour of the permission prompt. |
-| S-11 | `supabase/README.md`, `supabase/migrations/0000`–`0004` | Server-side definitions + captured state | 0000–0002 added 2026-07-22; 0003–0004 added 2026-09-20 | 2026-09-20 | Captured DB state and the reasoning for each change | 0003/0004 were authored from **SQL output pasted into a chat session**, not from a repo artifact or a live connection this session. The captured values are unverified from inside this repo. |
+| S-11 | `supabase/README.md`, `supabase/migrations/0000`–`0004` | Server-side definitions + captured state | 0000–0002 added 2026-07-22; 0003–0004 added 2026-09-20 | 2026-09-20 | Captured DB state and the reasoning for each change | 0003/0004 were authored from SQL output pasted into a chat session. Their state descriptions were **subsequently confirmed by the fuller capture in S-15**, which matches them. Still unverifiable from inside this repository alone. |
+| S-13 | CI run history, repository Actions tab (`workflows/ci.yml`) | Platform-held execution record, external to the repo | runs dated 2026-07-22 (x4), 2026-08-26 (x2), 2026-09-20 (x2) | 2026-09-21, via author-supplied screenshots | That CI has executed and passed: **8 runs, 8 green, 0 failed**. Earliest: run #1, commit `5c0768f`, 2026-07-22 03:28 GMT+2, 35s. A run detail page shows a Vitest report of 7 files / 56 tests, all passing. | Screenshots are author-supplied, not fetched independently this session. Run-to-commit mapping beyond what is printed on screen is inference. Annotation panel showed 11 warnings, which GitHub truncates, so it does not contradict S-01's "22 warnings". |
+| S-14 | Author's manual browser check of the microphone gate | Real-time observation, reported by the author | performed 2026-09-20 | 2026-09-21, as reported | That the four-step protocol produced its expected outcome: no prompt on load; warning and "İzin Ver" button present; prompt appears only on button press; devices populate after granting. Chrome 153.0.8010.53 (64-bit), Windows 11 and macOS 26.6.2. | **Self-reported by the thesis author**, who is also the developer under study. Not independently witnessed, no artefact (screenshot/recording) retained. Ran ~2 months after the change it validates. |
+| S-15 | Live capture of `pg_policy` + `information_schema.role_table_grants` for the five project tables, taken **before** any hardening was applied | Point-in-time state of the running database | captured 2026-09-21; state unchanged since the ad-hoc queries of 2026-09-20 | 2026-09-21 | The pre-fix state, in full: **73 rows — 70 grants and 3 policies**. Grants are uniform: each of `sync_presets`, `vote_log`, `admin_config`, `login_attempts`, `admin_login_attempts` carries all seven privileges (SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER) for **both** `anon` and `authenticated`. Policies: `sync_presets \| Allow anonymous insert \| cmd=a`, `sync_presets \| Allow anonymous read \| cmd=r`, `vote_log \| Allow anonymous insert on vote_log \| cmd=a`. | Query output supplied by the author; the reviewer holds no database access and did not run it. The author retained a CSV export. No server-side log corroborates the capture time. |
+| S-16 | Same capture query re-run **after** applying migrations `0003` and `0004` | Point-in-time state of the running database | captured 2026-09-21, immediately after the apply | 2026-09-21 | The post-fix state: **3 rows.** `sync_presets \| anon \| SELECT`, `sync_presets \| authenticated \| SELECT`, and the single policy `sync_presets \| Allow anonymous read \| cmd=r`. Both anonymous-insert policies are gone; every write grant on all five tables is gone. Read access to community presets — the feature — is retained. | Supplied by the author, as with S-15. Proves the permission state changed; does **not** by itself prove the application still works, which is a separate check. |
 | S-12 | `docs/WHITEPAPER.md`, `docs/WHITEPAPER_TR.md` | Project narrative | added before review | 2026-09-20 (existence only; **not read**) | — | Not examined. Listed so the gap is explicit. |
 
 ### Searched and not found
 
 - `AGENTS.md`, `CLAUDE.md` at the SynCinema repo root: **absent** at `73d62dc`. (A `CLAUDE.md` exists in sibling project folders, so its absence here is specific to this repo.)
 - Any per-session AI transcript stored inside this repository: **none found**. Private chat stores were deliberately not scanned.
-- CI run history: not obtainable this session; `gh` CLI unavailable or unauthenticated.
+- CI run history: not obtainable from this machine (`gh` CLI unavailable or unauthenticated). Supplied instead by the author as screenshots on 2026-09-21 — see S-13.
 
 ### Hub access
 
@@ -65,11 +69,11 @@ implementation → correction → verification arc, not a single commit.
 | Before → after | `useAudioTracks.ts`: `refreshDevices();` removed from the mount `useEffect`, replaced by a comment; `devicechange` listener kept (S-10, commit `75d06fc`). |
 | Attempts / corrections | Sub-plan step F2.4-03 records that no new wiring was needed — an already-wired "Grant Permission" button existed and had been made redundant by the mount-time call. |
 | Automated test | NONE targets this behaviour. S-01 itself states unit tests cannot replace a real prompt check. |
-| Runtime observation | **NOT_OBSERVED.** S-01a records a code trace substituted for the browser test, "pending live browser confirmation by the user". |
-| Human acceptance | UNKNOWN whether the pending live confirmation was ever performed. |
-| Missing evidence | Any E3 observation. Whether a first-time visitor now sees no prompt has never been recorded as observed. |
+| Runtime observation | **E3, obtained 2026-09-20** (S-14). Four-step protocol on a permission-cleared profile: no prompt on load; warning + button shown; prompt only on button press; devices populate after granting. Chrome 153.0.8010.53, Windows 11 and macOS 26.6.2. Self-reported, no artefact retained. |
+| Human acceptance | The pending live confirmation named in S-01a was performed on 2026-09-20 — roughly two months after the 2026-07-22 change it validates. |
+| Missing evidence | No independent witness or retained artefact for the E3 check; the observer is the author. The two-month gap between change and observation is itself unexplained by any source. |
 | Alternative explanations | The button may have been reachable before the change in some flows; the ledger says it was redundant, not absent. |
-| Value for SPARK comparison | A clean case where the top-level status word (`verified`) and the actual evidence level (code trace, E1) diverge — useful for testing whether classification rules catch that. |
+| Value for SPARK comparison | A clean case where the top-level status word (`verified`) and the actual evidence level diverged — and where the gap was later closed by a real observation, two months on. Useful both for testing whether classification rules catch such a divergence and for measuring how long one can persist unnoticed. |
 | Keep? | **Keep.** Strongest documented request→change→acknowledged-gap arc in the repo. |
 
 ### SYN-C02 — Test runner bootstrap, with a first attempt that failed
@@ -126,13 +130,35 @@ implementation → correction → verification arc, not a single commit.
 | Value for SPARK comparison | Rare: a *recorded wrong turn*. Most histories hide these. Useful for "documented error" vs "missing instruction" criteria. |
 | Keep? | **Keep.** |
 
+### SYN-C05 — A live misconfiguration found, captured, fixed and re-checked
+
+Added on 2026-09-21. This was **held back on 2026-09-20** on the grounds that its
+evidence existed only as chat narrative. That reason no longer holds: the state
+was captured before and after the change, and every affected path was exercised
+afterwards. Recording the reversal here rather than quietly promoting it.
+
+| Field | Content |
+|---|---|
+| Scope | Database permissions on the five project tables; excludes the application-side security work in the same session. |
+| First stated need | A security review requested by the author. The request itself lives in a session transcript, **not** in the repository. |
+| Proven AI authorship | Migrations `0003`/`0004` carry `Co-Authored-By` trailers. The SQL is short enough that authorship is not really in question; the analysis behind it is the AI contribution. |
+| Human decision | The author declined one proposed change outright before it was applied, then chose among stated options. Recorded only in the transcript. The author also ran every database statement personally — nothing was applied by the AI. |
+| Before → after | S-15 (73 rows: all seven privileges on five tables for two roles, plus two anonymous-insert policies) → S-16 (3 rows: `SELECT` on `sync_presets` for both roles, and the read policy). |
+| Attempts / corrections | The order was chosen so the evidence would survive: capture, then apply, then re-capture. An earlier finding in the same session was diagnosed wrongly first (see `SYN-C04`), which is why the capture-first order was insisted on here. |
+| Automated test | Not applicable — the suite does not reach database permissions. |
+| Runtime observation | **E3, V-06.** All three `SECURITY DEFINER` write paths exercised against the deployed app after the change; three cross-checking numbers agree. |
+| Human acceptance | The author applied the migrations to their own production database and confirmed the application still works. Scope of acceptance: functional, not a security sign-off. |
+| Missing evidence | The originating request and the decision points are transcript-only. Password correctness for the admin path was never established and is out of scope. No independent party reviewed the finding. |
+| Alternative explanations | The insert policy may have been deliberate at the time it was created; nothing records why it existed. "Over-permissive" is the reviewer's reading, not a documented intent. |
+| Value for SPARK comparison | The best-evidenced arc in this repository, and the only one with a genuine before/after on a live system. Also a test case for whether the scheme can handle an event whose *trigger* is transcript-only but whose *outcome* is fully documented. |
+| Keep? | **Keep.** |
+
 ### Considered and not proposed
 
-- **Database permission findings (2026-09-20).** Real and consequential, but the
-  underlying evidence arrived as SQL output pasted into a chat session. Only the
-  resulting migrations and README text live in the repo; the captured state
-  cannot be re-derived from this repository. Held back rather than presented as
-  repo-sourced.
+- Nothing further at this time. Feature work generally (mobile overhaul, subtitle
+  studio, player quality) remains large and well-committed, but without a stated
+  need recorded separately from the commit message, the request→implementation arc
+  cannot be reconstructed from the repository alone.
 - **Feature work generally** (mobile overhaul, subtitle studio, player quality).
   Large and well-committed, but without a stated-need source separate from the
   commit message, the request→implementation arc cannot be reconstructed from the
@@ -145,8 +171,49 @@ implementation → correction → verification arc, not a single commit.
 | ID | Command | Date (UTC) | Commit | Environment | Result | Limit |
 |---|---|---|---|---|---|---|
 | V-01 | `npm test` | 2026-09-20 21:21 | `73d62dc`, tree clean | Windows 11 (win32, MINGW64_NT-10.0-22621), Node v24.12.0, npm 11.13.0 | 11 files, 146 tests, all passed (Vitest 4.1.10) | Proves the suite passes **today at this commit only**. Says nothing about any past state, and nothing about untested behaviour (notably SYN-C01). |
-| V-02 | `gh run list` (attempted) | 2026-09-20 21:20 | `73d62dc` | as above | **NOT_RUN** — `gh` unavailable or unauthenticated | CI run history could not be checked. S-01's claim of a live green run on 2026-07-22 stays E0 from this session's standpoint. |
-| V-03 | Application runtime behaviour | — | — | — | **NOT_OBSERVED** | No application was launched in this review. No E3 evidence was produced here. |
+| V-02 | `gh run list` (attempted) | 2026-09-20 21:20 | `73d62dc` | as above | **NOT_RUN** — `gh` unavailable or unauthenticated | Superseded by V-05, which used author-supplied screenshots instead. |
+| V-03 | Application runtime behaviour, by this reviewer | — | — | — | **NOT_OBSERVED** | No application was launched by the reviewer. The E3 evidence in V-04 was produced by the author, not here. |
+| V-04 | Manual microphone-gate protocol, four steps, on a permission-cleared profile | performed 2026-09-20, reported 2026-09-21 | deployed build; exact commit not recorded by the observer | Chrome 153.0.8010.53 (64-bit); Windows 11 and macOS 26.6.2 | All four steps matched their expected outcome (no prompt on load → warning + button present → prompt on press → devices populate) | **Self-reported by the author**, who is the developer under study. No screenshot or recording retained. The deployed commit under test was not recorded, so the observation is tied to a date, not to a revision. |
+| V-05 | Review of CI run history in the platform's web UI | 2026-09-21, via author-supplied screenshots | covers runs at `5c0768f`, `2b5eeee`, `7696a7c`, `f4cc9e4`, `3145ffa`, `710ea56`, `73d62dc`, `605993a` | — | **8 runs, 8 green, 0 failed.** Earliest run #1 at `5c0768f`, 2026-07-22 03:28 GMT+2, 35s. One run detail page shows Vitest 7 files / 56 tests passing. | Screenshots were not independently fetched. Only what is legible on screen is recorded; anything further is marked as inference below. |
+
+| V-06 | Post-migration functional check of all three SECURITY DEFINER write paths, against the deployed app and the live database | 2026-09-20/21 (DB timestamps in UTC) | migrations `0003`+`0004` applied; app at `605993a` | Chrome, deployed build | **All three paths work with `anon` holding zero privileges on the tables they write to.** (a) Insert: a preset row exists — `offset_ms` 700, matching the 0.7s set in the UI, created 2026-09-20 22:43:49 UTC. (b) Vote: `vote_log` holds exactly 1 row after two attempts, and the preset's `votes` reads 2 — the second vote was refused by the dedup, which is correct. (c) Admin: a `login_attempts` row was written at 2026-09-20 22:52:53 UTC, the moment of the attempt, so `verify_admin_password` executed and wrote despite `REVOKE ALL`. | The admin attempt returned false. That alone is ambiguous — the function returns false both for a wrong password and for an unreadable hash — so it was resolved separately: the hash row is intact (60 chars, `$2a$` bcrypt) and the attempt was recorded. Password correctness itself remains unverified and is not in scope. Preset identifiers are deliberately not reproduced here. |
+
+### What V-06 settles
+
+Revoking every write privilege from `anon` and `authenticated` on all five tables
+broke nothing. Each write still lands, because each goes through a
+`SECURITY DEFINER` function that runs as the table owner. The three numbers
+cross-check: one preset at 700 ms, `votes` = 2, one `vote_log` row. An inconsistent
+set would have shown a path silently failing; these agree.
+
+This is the review's strongest evidence of any kind — a change applied to a live
+system, with state captured before and after, and every affected path exercised
+afterwards. It is also the one place where an ambiguous result was pursued instead
+of accepted: "wrong password" was not treated as a verdict until the attempt log
+showed the function had actually run.
+
+### What V-05 corroborates
+
+S-01's Faz4.1 row claims live CI verification "confirmed live 2026-07-22 … commit
+`5c0768f`, green check, 35s". The run list shows commit `5c0768f`, 2026-07-22,
+green, 35s. **Commit, date, duration and outcome all match.** This is the first
+case in this review where a self-reported claim from the AI-assisted ledger is
+confirmed by a record held outside the repository and outside the process that
+wrote it. It raises confidence in S-01 generally without making S-01
+self-verifying.
+
+Two further observations, marked as inference rather than fact:
+
+- A run detail page shows 56 tests passing, and S-01's Faz6.1 row claims "test
+  (56/56, +3 new)" at the phase5-6 commit. Consistent, though the screenshot does
+  not print which run number it belongs to.
+- 108 commits produced only 8 runs, and no run exists for `633c9b4`, `75d06fc`,
+  `5d496a1` or `d0e642e`. S-01 states those four were committed locally and never
+  pushed at the time. A push carries one run for its head commit, so the absence
+  of runs for exactly those four commits fits S-01's account. Fits is not proves.
+
+**No CI run has ever failed.** Whether that reflects effective local gating before
+push, or simply that little was pushed, is not settled by the run history alone.
 
 Commands were read-only except `npm test`, which writes nothing tracked. No
 application code, dependency, lockfile or user data was modified.
